@@ -22,5 +22,6 @@
 #include <moai-box2d/MOAIBox2DWeldJoint.h>
 #include <moai-box2d/MOAIBox2DWheelJoint.h>
 #include <moai-box2d/MOAIBox2DWorld.h>
+#include <moai-box2d>
 
 #endif
