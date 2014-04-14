@@ -406,7 +406,7 @@ int MOAIBox2DParticleSystem::_getRadius ( lua_State* L ) {
 		return 0;
 	}
 
-	state.Push ( self->mParticleSystem->GetRadius () );
+	state.Push ( self->mParticleSystem->GetRadius () / self->GetUnitsToMeters () );
 	return 1;
 }
 
@@ -627,14 +627,14 @@ int MOAIBox2DParticleSystem::_setPaused ( lua_State* L ) {
 */
 int MOAIBox2DParticleSystem::_setRadius ( lua_State* L ) {
 	MOAI_LUA_SETUP ( MOAIBox2DParticleSystem, "U" )
-
-	if ( !self->mParticleSystem ) {
+    
+    if ( !self->mParticleSystem ) {
 		MOAILog ( state, MOAILogMessages::MOAIBox2DParticleSystem_MissingInstance );
 		return 0;
 	}
-
+    
 	float radius = state.GetValue < float >( 2, self->mParticleSystem->GetRadius() );
-	self->mParticleSystem->SetRadius ( radius );
+	self->mParticleSystem->SetRadius ( radius * self->GetUnitsToMeters () );
 	return 0;
 }
 
@@ -711,7 +711,7 @@ MOAIBox2DParticleSystem::MOAIBox2DParticleSystem () :
 	mParticleSystem ( 0 ) {
 	
 	RTTI_BEGIN
-		// RTTI_EXTEND (  )
+		RTTI_EXTEND ( MOAILuaObject )
 	RTTI_END
 }
 
@@ -724,24 +724,24 @@ MOAIBox2DParticleSystem::~MOAIBox2DParticleSystem () {
 //----------------------------------------------------------------//
 void MOAIBox2DParticleSystem::RegisterLuaClass ( MOAILuaState& state ) {
 
-	state.SetField ( -1, "WATER_PARTICLE", 						( u32 )WATER_PARTICLE );
-	state.SetField ( -1, "ZOMBIE_PARTICLE", 					( u32 )ZOMBIE_PARTICLE );
-	state.SetField ( -1, "WALL_PARTICLE", 						( u32 )WALL_PARTICLE );
-	state.SetField ( -1, "SPRING_PARTICLE", 					( u32 )SPRING_PARTICLE );
-	state.SetField ( -1, "ELASTIC_PARTICLE", 					( u32 )ELASTIC_PARTICLE );
-	state.SetField ( -1, "VISCOUS_PARTICLE", 					( u32 )VISCOUS_PARTICLE );
-	state.SetField ( -1, "POWDER_PARTICLE", 					( u32 )POWDER_PARTICLE );
-	state.SetField ( -1, "TENSILE_PARTICLE", 					( u32 )TENSILE_PARTICLE );
-	state.SetField ( -1, "COLOR_MIXING_PARTICLE", 				( u32 )COLOR_MIXING_PARTICLE );
-	state.SetField ( -1, "DESTRUCTION_LISTENER_PARTICLE", 		( u32 )DESTRUCTION_LISTENER_PARTICLE );
-	state.SetField ( -1, "BARRIER_PARTICLE", 					( u32 )BARRIER_PARTICLE );
-	state.SetField ( -1, "STATIC_PRESSURE_PARTICLE", 			( u32 )STATIC_PRESSURE_PARTICLE );
-	state.SetField ( -1, "REACTIVE_PARTICLE", 					( u32 )REACTIVE_PARTICLE );
-	state.SetField ( -1, "REPULSIVE_PARTICLE", 					( u32 )REPULSIVE_PARTICLE );
-	state.SetField ( -1, "FIXTURE_CONTACT_LISTENER_PARTICLE", 	( u32 )FIXTURE_CONTACT_LISTENER_PARTICLE );
-	state.SetField ( -1, "PARTICLE_CONTACT_LISTENER_PARTICLE", 	( u32 )PARTICLE_CONTACT_LISTENER_PARTICLE );
-	state.SetField ( -1, "FIXTURE_CONTACT_FILTER_PARTICLE", 	( u32 )FIXTURE_CONTACT_FILTER_PARTICLE );
-	state.SetField ( -1, "PARTICLE_CONTACT_FILTER_PARTICLE", 	( u32 )PARTICLE_CONTACT_FILTER_PARTICLE );
+	state.SetField ( -1, "WATER", 						( u32 )WATER );
+	state.SetField ( -1, "ZOMBIE", 						( u32 )ZOMBIE );
+	state.SetField ( -1, "WALL", 						( u32 )WALL );
+	state.SetField ( -1, "SPRING", 						( u32 )SPRING );
+	state.SetField ( -1, "ELASTIC", 					( u32 )ELASTIC );
+	state.SetField ( -1, "VISCOUS", 					( u32 )VISCOUS );
+	state.SetField ( -1, "POWDER", 						( u32 )POWDER );
+	state.SetField ( -1, "TENSILE", 					( u32 )TENSILE );
+	state.SetField ( -1, "COLOR_MIXING", 				( u32 )COLOR_MIXING );
+	state.SetField ( -1, "DESTRUCTION_LISTENER", 		( u32 )DESTRUCTION_LISTENER );
+	state.SetField ( -1, "BARRIER", 					( u32 )BARRIER );
+	state.SetField ( -1, "STATIC_PRESSURE", 			( u32 )STATIC_PRESSURE );
+	state.SetField ( -1, "REACTIVE", 					( u32 )REACTIVE );
+	state.SetField ( -1, "REPULSIVE", 					( u32 )REPULSIVE );
+	state.SetField ( -1, "FIXTURE_CONTACT_LISTENER", 	( u32 )FIXTURE_CONTACT_LISTENER );
+	state.SetField ( -1, "PARTICLE_CONTACT_LISTENER", 	( u32 )PARTICLE_CONTACT_LISTENER );
+	state.SetField ( -1, "FIXTURE_CONTACT_FILTER", 		( u32 )FIXTURE_CONTACT_FILTER );
+	state.SetField ( -1, "PARTICLE_CONTACT_FILTER", 	( u32 )PARTICLE_CONTACT_FILTER );
 
 }
 
@@ -749,46 +749,46 @@ void MOAIBox2DParticleSystem::RegisterLuaClass ( MOAILuaState& state ) {
 void MOAIBox2DParticleSystem::RegisterLuaFuncs ( MOAILuaState& state ) {
 
 	luaL_Reg regTable [] = {
-		{ "_applyForce",					_applyForce 					},
-		{ "_applyLinearImpulse",			_applyLinearImpulse 			},
-		{ "_computeAABB",					_computeAABB 					},
-		{ "_computeCollisionEnergy",		_computeCollisionEnergy 		},
-		{ "_createParticle",				_createParticle 				},
-		{ "_createParticleGroup",			_createParticleGroup 			},
-		{ "_destroy",						_destroy 						},
-		{ "_destroyOldestParticle",			_destroyOldestParticle 			},
-		{ "_destroyParticle",				_destroyParticle 				},
-		{ "_destroyParticlesInShape",		_destroyParticlesInShape 		},
-		{ "_getDamping",					_getDamping 					},
-		{ "_getDensity",					_getDensity 					},
-		{ "_getDestructionByAge",			_getDestructionByAge 			},
-		{ "_getGravityScale",				_getGravityScale 				},
-		{ "_getMaxParticleCount",			_getMaxParticleCount 			},
-		{ "_getParticleCount",				_getParticleCount 				},
-		{ "_getParticleFlags",				_getParticleFlags 				},
-		{ "_getParticleGroupCount",			_getParticleGroupCount 			},
-		{ "_getParticleGroupList",			_getParticleGroupList 			},
-		{ "_getParticleLifetime",			_getParticleLifetime 			},
-		{ "_getPaused",						_getPaused 						},
-		{ "_getRadius",						_getRadius 						},
-		{ "_getStaticPressureIterations",	_getStaticPressureIterations 	},
-		{ "_getStrictContactCheck",			_getStrictContactCheck 			},
-		{ "_getStuckCandidates",			_getStuckCandidates 			},
-		{ "_joinParticleGroups",			_joinParticleGroups 			},
-		{ "_queryAABB",						_queryAABB 						},
-		{ "_rayCast",						_rayCast 						},
-		{ "_setDamping",					_setDamping 					},
-		{ "_setDensity",					_setDensity 					},
-		{ "_setDestructionByAge",			_setDestructionByAge 			},
-		{ "_setGravityScale",				_setGravityScale 				},
-		{ "_setMaxParticleCount",			_setMaxParticleCount 			},
-		{ "_setParticleFlags",				_setParticleFlags 				},
-		{ "_setParticleLifetime",			_setParticleLifetime 			},
-		{ "_setPaused",						_setPaused 						},
-		{ "_setRadius",						_setRadius 						},
-		{ "_setStaticPressureIterations",	_setStaticPressureIterations 	},
-		{ "_setStrictContactCheck",			_setStrictContactCheck 			},
-		{ "_setStuckThreshold",				_setStuckThreshold 				},
+		{ "applyForce",						_applyForce 					},
+		{ "applyLinearImpulse",				_applyLinearImpulse 			},
+		{ "computeAABB",					_computeAABB 					},
+		{ "computeCollisionEnergy",			_computeCollisionEnergy 		},
+		{ "createParticle",					_createParticle 				},
+		{ "createParticleGroup",			_createParticleGroup 			},
+		{ "destroy",						_destroy 						},
+		{ "destroyOldestParticle",			_destroyOldestParticle 			},
+		{ "destroyParticle",				_destroyParticle 				},
+		{ "destroyParticlesInShape",		_destroyParticlesInShape 		},
+		{ "getDamping",						_getDamping 					},
+		{ "getDensity",						_getDensity 					},
+		{ "getDestructionByAge",			_getDestructionByAge 			},
+		{ "getGravityScale",				_getGravityScale 				},
+		{ "getMaxParticleCount",			_getMaxParticleCount 			},
+		{ "getParticleCount",				_getParticleCount 				},
+		{ "getParticleFlags",				_getParticleFlags 				},
+		{ "getParticleGroupCount",			_getParticleGroupCount 			},
+		{ "getParticleGroupList",			_getParticleGroupList 			},
+		{ "getParticleLifetime",			_getParticleLifetime 			},
+		{ "getPaused",						_getPaused 						},
+		{ "getRadius",						_getRadius 						},
+		{ "getStaticPressureIterations",	_getStaticPressureIterations 	},
+		{ "getStrictContactCheck",			_getStrictContactCheck 			},
+		{ "getStuckCandidates",				_getStuckCandidates 			},
+		{ "joinParticleGroups",				_joinParticleGroups 			},
+		{ "queryAABB",						_queryAABB 						},
+		{ "rayCast",						_rayCast 						},
+		{ "setDamping",						_setDamping 					},
+		{ "setDensity",						_setDensity 					},
+		{ "setDestructionByAge",			_setDestructionByAge 			},
+		{ "setGravityScale",				_setGravityScale 				},
+		{ "setMaxParticleCount",			_setMaxParticleCount 			},
+		{ "setParticleFlags",				_setParticleFlags 				},
+		{ "setParticleLifetime",			_setParticleLifetime 			},
+		{ "setPaused",						_setPaused 						},
+		{ "setRadius",						_setRadius 						},
+		{ "setStaticPressureIterations",	_setStaticPressureIterations 	},
+		{ "setStrictContactCheck",			_setStrictContactCheck 			},
+		{ "setStuckThreshold",				_setStuckThreshold 				},
 		{ NULL, NULL }
 	};
 	

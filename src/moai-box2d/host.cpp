@@ -27,6 +27,7 @@ void AKUBox2DContextInitialize () {
 	REGISTER_LUA_CLASS ( MOAIBox2DFrictionJoint )
 	REGISTER_LUA_CLASS ( MOAIBox2DGearJoint )
 	REGISTER_LUA_CLASS ( MOAIBox2DMouseJoint )
+    REGISTER_LUA_CLASS ( MOAIBox2DParticleSystem )
 	REGISTER_LUA_CLASS ( MOAIBox2DPrismaticJoint )
 	REGISTER_LUA_CLASS ( MOAIBox2DPulleyJoint )
 	REGISTER_LUA_CLASS ( MOAIBox2DRopeJoint )

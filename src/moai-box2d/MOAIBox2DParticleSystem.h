@@ -89,24 +89,24 @@ public:
 	DECL_LUA_FACTORY ( MOAIBox2DParticleSystem )
 		
 	enum {
-		WATER_PARTICLE						= b2_waterParticle,
-		ZOMBIE_PARTICLE						= b2_zombieParticle,
-		WALL_PARTICLE						= b2_wallParticle,
-		SPRING_PARTICLE						= b2_springParticle,
-		ELASTIC_PARTICLE					= b2_elasticParticle,
-		VISCOUS_PARTICLE					= b2_viscousParticle,
-		POWDER_PARTICLE						= b2_powderParticle,
-		TENSILE_PARTICLE					= b2_tensileParticle,
-		COLOR_MIXING_PARTICLE				= b2_colorMixingParticle,
-		DESTRUCTION_LISTENER_PARTICLE		= b2_destructionListenerParticle,
-		BARRIER_PARTICLE					= b2_barrierParticle,
-		STATIC_PRESSURE_PARTICLE			= b2_staticPressureParticle,
-		REACTIVE_PARTICLE					= b2_reactiveParticle,
-		REPULSIVE_PARTICLE					= b2_repulsiveParticle,
-		FIXTURE_CONTACT_LISTENER_PARTICLE	= b2_fixtureContactListenerParticle,
-		PARTICLE_CONTACT_LISTENER_PARTICLE	= b2_particleContactListenerParticle,
-		FIXTURE_CONTACT_FILTER_PARTICLE		= b2_fixtureContactFilterParticle,
-		PARTICLE_CONTACT_FILTER_PARTICLE	= b2_particleContactFilterParticle
+		WATER						= b2_waterParticle,
+		ZOMBIE						= b2_zombieParticle,
+		WALL						= b2_wallParticle,
+		SPRING						= b2_springParticle,
+		ELASTIC						= b2_elasticParticle,
+		VISCOUS						= b2_viscousParticle,
+		POWDER						= b2_powderParticle,
+		TENSILE						= b2_tensileParticle,
+		COLOR_MIXING				= b2_colorMixingParticle,
+		DESTRUCTION_LISTENER		= b2_destructionListenerParticle,
+		BARRIER						= b2_barrierParticle,
+		STATIC_PRESSURE				= b2_staticPressureParticle,
+		REACTIVE					= b2_reactiveParticle,
+		REPULSIVE					= b2_repulsiveParticle,
+		FIXTURE_CONTACT_LISTENER	= b2_fixtureContactListenerParticle,
+		PARTICLE_CONTACT_LISTENER	= b2_particleContactListenerParticle,
+		FIXTURE_CONTACT_FILTER		= b2_fixtureContactFilterParticle,
+		PARTICLE_CONTACT_FILTER		= b2_particleContactFilterParticle
 	};
 	
 	//----------------------------------------------------------------//

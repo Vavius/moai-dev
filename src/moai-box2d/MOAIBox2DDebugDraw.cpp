@@ -185,9 +185,21 @@ void MOAIBox2DDebugDraw::DrawPoint ( const b2Vec2& p, float32 size, const b2Colo
 //----------------------------------------------------------------//
 void MOAIBox2DDebugDraw::DrawParticles( const b2Vec2* centers, float32 radius, const b2ParticleColor* colors, int32 count ) {
     
-	for( int32 i = 0; i < count; ++ i ) {
-		DrawPoint( centers[ i ], radius, colors[ i ].GetColor() );
-	}
+    MOAIGfxDevice& gfxDevice = MOAIGfxDevice::Get ();
+    
+	gfxDevice.SetPointSize ( radius );
+	gfxDevice.BeginPrim(ZGL_PRIM_POINTS);
+	
+    for ( int32 i = 0; i < count; i++ ) {
+        b2Color c = colors [ i ].GetColor ();
+        b2Vec2 p = centers [ i ];
+        
+        gfxDevice.SetPenColor(c.r, c.g, c.b, 1.0f);
+        this->WriteVtx(gfxDevice, p.x, p.y);
+    }
+	
+    gfxDevice.EndPrim();
+	gfxDevice.SetPointSize(1.0f);
 }
 
 //----------------------------------------------------------------//
