@@ -34,6 +34,7 @@ public:
 		MOAIBox2DBody_MissingInstance,
 		MOAIBox2DFixture_MissingInstance,
 		MOAIBox2DJoint_MissingInstance,
+        MOAIBox2DParticleSystem_MissingInstance,
 		MOAIBox2DWorld_IsLocked,
 		MOAIGfxDevice_OpenGLError_S,
 		MOAIGfxResource_MissingDevice,

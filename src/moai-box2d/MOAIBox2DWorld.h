@@ -12,6 +12,7 @@ class MOAIBox2DBody;
 class MOAIBox2DDebugDraw;
 class MOAIBox2DFixture;
 class MOAIBox2DJoint;
+class MOAIBox2DParticleSystem;
 class MOAIBox2DWorld;
 class MOAIBox2DRayCastCallback;
 
@@ -58,6 +59,7 @@ public:
 	@const DEBUG_DRAW_PAIRS
 	@const DEBUG_DRAW_CENTERS
 	@const DEBUG_DRAW_DEFAULT
+	@const DEBUG_DRAW_PARTICLES
 */
 class MOAIBox2DWorld :
 	public MOAIAction,
@@ -73,12 +75,14 @@ private:
 
 	u32		mVelocityIterations;
 	u32		mPositionIterations;
+	u32		mParticleIterations;
 	
 	float	mUnitsToMeters; // maps world space units to meters
 
 	MOAIBox2DPrim*		mDestroyBodies;
 	MOAIBox2DPrim*		mDestroyFixtures;
 	MOAIBox2DPrim*		mDestroyJoints;
+	MOAIBox2DPrim*		mDestroyParticleSystems;
 
 	//----------------------------------------------------------------//
 	static int		_addBody					( lua_State* L );
@@ -87,12 +91,14 @@ private:
 	static int		_addGearJoint				( lua_State* L );
 	static int 		_addMotorJoint				( lua_State* L );
 	static int		_addMouseJoint				( lua_State* L );
+	static int 		_addParticleSystem 			( lua_State* L );
 	static int		_addPrismaticJoint			( lua_State* L );
 	static int		_addPulleyJoint				( lua_State* L );
 	static int		_addRevoluteJoint			( lua_State* L );
 	static int		_addRopeJoint				( lua_State* L );
 	static int		_addWeldJoint				( lua_State* L );
 	static int		_addWheelJoint				( lua_State* L );
+	static int 		_calculateParticleIterations( lua_State* L );
 	static int		_getAngularSleepTolerance	( lua_State* L );
 	static int		_getAutoClearForces			( lua_State* L );
 	static int		_getGravity					( lua_State* L );
@@ -107,7 +113,7 @@ private:
 	static int		_setLinearSleepTolerance	( lua_State* L );
 	static int		_setTimeToSleep				( lua_State* L );
 	static int		_setUnitsToMeters			( lua_State* L );
-	static int		_getRayCast				( lua_State* L );
+	static int		_getRayCast					( lua_State* L );
 	
 	//----------------------------------------------------------------//
 	void			Destroy					();
@@ -116,12 +122,14 @@ private:
 	void			ScheduleDestruction		( MOAIBox2DBody& body );
 	void			ScheduleDestruction		( MOAIBox2DFixture& fixture );
 	void			ScheduleDestruction		( MOAIBox2DJoint& joint );
+	void			ScheduleDestruction		( MOAIBox2DParticleSystem& particleSystem );
 
 public:
 	
 	friend class MOAIBox2DBody;
 	friend class MOAIBox2DFixture;
 	friend class MOAIBox2DJoint;
+    friend class MOAIBox2DParticleSystem;
 	
 	DECL_LUA_FACTORY ( MOAIBox2DWorld )
 	
@@ -134,8 +142,9 @@ public:
 	static const u32 DEBUG_DRAW_BOUNDS		= b2Draw::e_aabbBit;
 	static const u32 DEBUG_DRAW_PAIRS		= b2Draw::e_pairBit;
 	static const u32 DEBUG_DRAW_CENTERS		= b2Draw::e_centerOfMassBit;
+    static const u32 DEBUG_DRAW_PARTICLES   = b2Draw::e_particleBit;
 	
-	static const u32 DEBUG_DRAW_DEFAULT = DEBUG_DRAW_SHAPES | DEBUG_DRAW_JOINTS | DEBUG_DRAW_CENTERS;
+	static const u32 DEBUG_DRAW_DEFAULT = DEBUG_DRAW_SHAPES | DEBUG_DRAW_JOINTS | DEBUG_DRAW_CENTERS | DEBUG_DRAW_PARTICLES;
 	
 	//----------------------------------------------------------------//
 	void			DrawDebug				();

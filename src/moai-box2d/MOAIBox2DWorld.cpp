@@ -14,6 +14,7 @@
 #include <moai-box2d/MOAIBox2DJoint.h>
 #include <moai-box2d/MOAIBox2DMotorJoint.h>
 #include <moai-box2d/MOAIBox2DMouseJoint.h>
+#include <moai-box2d/MOAIBox2DParticleSystem.h>
 #include <moai-box2d/MOAIBox2DPrismaticJoint.h>
 #include <moai-box2d/MOAIBox2DPulleyJoint.h>
 #include <moai-box2d/MOAIBox2DRevoluteJoint.h>
@@ -312,6 +313,71 @@ int	MOAIBox2DWorld::_addMouseJoint ( lua_State* L ) {
 	self->LuaRetain ( joint );
 	
 	joint->PushLuaUserdata ( state );
+	return 1;
+}
+
+//----------------------------------------------------------------//
+/**	@name	addParticleSystem
+	@text	Create and add particle system to the world. See LiquidFun documentation.
+			Parameters are passed in table. All params are optional and use meters not units:
+				radius = 1.0f
+				pressureStrength = 0.05f
+				dampingStrength = 1.0f
+				elasticStrength = 0.25f
+				springStrength = 0.25f
+				viscousStrength = 0.25f
+				surfaceTensionPressureStrength = 0.2f
+				surfaceTensionNormalStrength = 0.2f
+				repulsiveStrength = 1.0f
+				powderStrength = 0.5f
+				ejectionStrength = 0.5f
+				staticPressureStrength = 0.2f
+				staticPressureRelaxation = 0.2f
+				staticPressureIterations = 8
+				colorMixingStrength = 0.5f
+				destroyByAge = true
+				lifetimeGranularity = 1.0f / 60.0f
+
+	@in		MOAIBox2DWorld 	self
+	@opt 	table 			parameters
+	@out	MOAIBox2DJoint 	joint
+*/
+int	MOAIBox2DWorld::_addParticleSystem ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIBox2DWorld, "U" )
+	
+	if ( self->IsLocked ()) {
+		MOAILog ( state, MOAILogMessages::MOAIBox2DWorld_IsLocked );
+		return 0;
+	}
+	
+	b2ParticleSystemDef def;
+
+	if ( state.IsType ( 2, LUA_TTABLE )) {
+		def.radius 							= state.GetField < float >( 2, "radius", 1.0f );
+		def.pressureStrength 				= state.GetField < float >( 2, "pressureStrength", 0.05f );
+		def.dampingStrength 				= state.GetField < float >( 2, "dampingStrength", 1.0f );
+		def.elasticStrength 				= state.GetField < float >( 2, "elasticStrength", 0.25f );
+		def.springStrength 					= state.GetField < float >( 2, "springStrength", 0.25f );
+		def.viscousStrength 				= state.GetField < float >( 2, "viscousStrength", 0.25f );
+		def.surfaceTensionPressureStrength 	= state.GetField < float >( 2, "surfaceTensionPressureStrength", 0.2f );
+		def.surfaceTensionNormalStrength 	= state.GetField < float >( 2, "surfaceTensionNormalStrength", 0.2f );
+		def.repulsiveStrength 				= state.GetField < float >( 2, "repulsiveStrength", 1.0f );
+		def.powderStrength 					= state.GetField < float >( 2, "powderStrength", 0.5f );
+		def.ejectionStrength 				= state.GetField < float >( 2, "ejectionStrength", 0.5f );
+		def.staticPressureStrength 			= state.GetField < float >( 2, "staticPressureStrength", 0.2f );
+		def.staticPressureRelaxation 		= state.GetField < float >( 2, "staticPressureRelaxation", 0.2f );
+		def.staticPressureIterations 		= state.GetField < float >( 2, "staticPressureIterations", 8 );
+		def.colorMixingStrength 			= state.GetField < float >( 2, "colorMixingStrength", 0.5f );
+		def.lifetimeGranularity 			= state.GetField < float >( 2, "lifetimeGranularity", 1.0f / 60.0f );
+		def.destroyByAge 					= state.GetField < bool >( 2, "destroyByAge", true );
+	}
+
+	MOAIBox2DParticleSystem* ps = new MOAIBox2DParticleSystem ();
+	ps->SetParticleSystem ( self->mWorld->CreateParticleSystem ( &def ) );
+	ps->SetWorld ( self );
+	self->LuaRetain ( ps );
+
+	ps->PushLuaUserdata ( state );
 	return 1;
 }
 
@@ -619,6 +685,31 @@ int	MOAIBox2DWorld::_addWheelJoint ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/**	@name   calculateParticleIterations
+ 
+    @text	Get the estimate particle iterations for particle numerical stability
+            based on particle radius and gravity
+ 
+    @in		MOAIBox2DWorld self
+    @in     number  gravity     in units, converted to m/s^2. Default is 10 m/s^2
+    @in     number  radius      in units, converted to m. Default is 1 m
+    @in     number  timestep    Default is 1/60
+    @out    number  iterations	estimate particleIterations
+*/
+int MOAIBox2DWorld::_calculateParticleIterations ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIBox2DWorld, "U" )
+    
+    float gravity = state.GetValue < float >( 2, 10.0f / self->mUnitsToMeters ) * self->mUnitsToMeters;
+    float radius = state.GetValue < float >( 3, 1.0 / self->mUnitsToMeters ) * self->mUnitsToMeters;
+    float timestep = state.GetValue < float >( 4, 1.0 / 60.f );
+    
+    float iter = b2CalculateParticleIterations ( gravity, radius, timestep );
+
+    state.Push ( iter );
+    return 0;
+}
+
+//----------------------------------------------------------------//
 /**	@name	getAngularSleepTolerance
 	@text	See Box2D documentation.
 	
@@ -811,6 +902,7 @@ int MOAIBox2DWorld::_setGravity ( lua_State* L ) {
 	@in		MOAIBox2DWorld self
 	@opt	number velocityIteratons			Default value is current value of velocity iterations.
 	@opt	number positionIterations			Default value is current value of positions iterations.
+	@opt	number particleIterations			Default value is current value of particle iterations.
 	@out	nil
 */
 int MOAIBox2DWorld::_setIterations ( lua_State* L ) {
@@ -818,7 +910,8 @@ int MOAIBox2DWorld::_setIterations ( lua_State* L ) {
 	
 	self->mVelocityIterations = state.GetValue < u32 >( 2, self->mVelocityIterations );
 	self->mPositionIterations = state.GetValue < u32 >( 3, self->mPositionIterations );
-	
+	self->mParticleIterations = state.GetValue < u32 >( 4, self->mParticleIterations );
+
 	return 0;
 }
 
@@ -945,10 +1038,12 @@ MOAIBox2DWorld::MOAIBox2DWorld () :
 	mLock ( false ),
 	mVelocityIterations ( 10 ),
 	mPositionIterations ( 10 ),
+	mParticleIterations ( 1 ),
 	mUnitsToMeters ( 1.0f ),
 	mDestroyBodies ( 0 ),
 	mDestroyFixtures ( 0 ),
-	mDestroyJoints ( 0 ) {
+	mDestroyJoints ( 0 ),
+	mDestroyParticleSystems ( 0 ) {
 	
 	RTTI_BEGIN
 		RTTI_EXTEND ( MOAIAction )
@@ -991,7 +1086,7 @@ MOAIBox2DWorld::~MOAIBox2DWorld () {
 void MOAIBox2DWorld::OnUpdate ( float step ) {
 	
 	this->mLock = true;
-	this->mWorld->Step ( step, this->mVelocityIterations, this->mPositionIterations );
+	this->mWorld->Step ( step, this->mVelocityIterations, this->mPositionIterations, this->mParticleIterations );
 	this->mLock = false;
 	
 	this->Destroy ();
@@ -1015,6 +1110,7 @@ void MOAIBox2DWorld::RegisterLuaClass ( MOAILuaState& state ) {
 	state.SetField ( -1, "DEBUG_DRAW_BOUNDS", ( u32 )DEBUG_DRAW_BOUNDS );
 	state.SetField ( -1, "DEBUG_DRAW_PAIRS", ( u32 )DEBUG_DRAW_PAIRS );
 	state.SetField ( -1, "DEBUG_DRAW_CENTERS", ( u32 )DEBUG_DRAW_CENTERS );
+	state.SetField ( -1, "DEBUG_DRAW_PARTICLES", ( u32 )DEBUG_DRAW_PARTICLES );
 	
 	state.SetField ( -1, "DEBUG_DRAW_DEFAULT", ( u32 )DEBUG_DRAW_DEFAULT );
 }
@@ -1031,12 +1127,14 @@ void MOAIBox2DWorld::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "addGearJoint",				_addGearJoint },
 		{ "addMotorJoint", 				_addMotorJoint },
 		{ "addMouseJoint",				_addMouseJoint },
+		{ "addParticleSystem",			_addParticleSystem },
 		{ "addPrismaticJoint",			_addPrismaticJoint },
 		{ "addPulleyJoint",				_addPulleyJoint },
 		{ "addRevoluteJoint",			_addRevoluteJoint },
 		{ "addRopeJoint",				_addRopeJoint },
 		{ "addWeldJoint",				_addWeldJoint },
 		{ "addWheelJoint",				_addWheelJoint },
+        { "calculateParticleIterations",_calculateParticleIterations},
 		{ "getAngularSleepTolerance",	_getAngularSleepTolerance },
 		{ "getAutoClearForces",			_getAutoClearForces },
 		{ "getGravity",					_getGravity },
@@ -1051,7 +1149,7 @@ void MOAIBox2DWorld::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "setLinearSleepTolerance",	_setLinearSleepTolerance },
 		{ "setTimeToSleep",				_setTimeToSleep },
 		{ "setUnitsToMeters",			_setUnitsToMeters },
-	  	{ "getRayCast",                                 _getRayCast },
+	  	{ "getRayCast",					_getRayCast },
 		{ NULL, NULL }
 	};
 	
@@ -1109,6 +1207,17 @@ void MOAIBox2DWorld::ScheduleDestruction ( MOAIBox2DJoint& joint ) {
 		joint.mDestroyNext = this->mDestroyJoints;
 		this->mDestroyJoints = &joint;
 		joint.mDestroy = true;
+	}
+	this->Destroy ();
+}
+
+//----------------------------------------------------------------//
+void MOAIBox2DWorld::ScheduleDestruction ( MOAIBox2DParticleSystem& particleSystem ) {
+
+	if ( !particleSystem.mDestroy ) {
+		particleSystem.mDestroyNext = this->mDestroyParticleSystems;
+		this->mDestroyParticleSystems = &particleSystem;
+		particleSystem.mDestroy = true;
 	}
 	this->Destroy ();
 }

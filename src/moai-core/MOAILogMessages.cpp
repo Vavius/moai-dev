@@ -93,6 +93,7 @@ void MOAILogMessages::RegisterDefaultLogMessages () {
 		log.RegisterLogMessage ( MOAIBox2DBody_MissingInstance,			MOAILogMgr::LOG_ERROR,		"BOX2D ERROR: Attempt to access missing Box2D body instance" );
 		log.RegisterLogMessage ( MOAIBox2DFixture_MissingInstance,		MOAILogMgr::LOG_ERROR,		"BOX2D ERROR: Attempt to access missing Box2D fixture instance" );
 		log.RegisterLogMessage ( MOAIBox2DJoint_MissingInstance,		MOAILogMgr::LOG_ERROR,		"BOX2D ERROR: Attempt to access missing Box2D joint instance" );
+        log.RegisterLogMessage ( MOAIBox2DParticleSystem_MissingInstance,   MOAILogMgr::LOG_ERROR,		"BOX2D ERROR: Attempt to access missing Box2D particle system instance" );
 		log.RegisterLogMessage ( MOAIBox2DWorld_IsLocked,				MOAILogMgr::LOG_ERROR,		"BOX2D ERROR: Attempt to perform illegal operation during collision update" );
 		log.RegisterLogMessage ( MOAIGfxDevice_OpenGLError_S,			MOAILogMgr::LOG_ERROR,		"OPENGL ERROR: %s" );
 		log.RegisterLogMessage ( MOAIGfxResource_MissingDevice,			MOAILogMgr::LOG_ERROR,		"Unable to bind graphics resource - missing graphics device" );

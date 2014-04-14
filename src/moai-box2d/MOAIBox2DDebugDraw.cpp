@@ -183,6 +183,14 @@ void MOAIBox2DDebugDraw::DrawPoint ( const b2Vec2& p, float32 size, const b2Colo
 }
 
 //----------------------------------------------------------------//
+void MOAIBox2DDebugDraw::DrawParticles( const b2Vec2* centers, float32 radius, const b2ParticleColor* colors, int32 count ) {
+    
+	for( int32 i = 0; i < count; ++ i ) {
+		DrawPoint( centers[ i ], radius, colors[ i ].GetColor() );
+	}
+}
+
+//----------------------------------------------------------------//
 void MOAIBox2DDebugDraw::DrawAABB ( b2AABB* aabb, const b2Color& c ) {
 
 	MOAIGfxDevice& gfxDevice = MOAIGfxDevice::Get ();

@@ -255,6 +255,18 @@ public:
 	/// @warning this should be called outside of a time step.
 	void Dump();
 
+	// MOAI: moved from bsSettings.h
+	void SetTimeToSleep(float timeToSleep);
+	float GetTimeToSleep();
+
+	// MOAI: moved from bsSettings.h
+	void SetLinearSleepTolerance(float linearSleepTolerance);
+	float GetLinearSleepTolerance();
+
+	// MOAI: moved from bsSettings.h
+	void SetAngularSleepTolerance(float angularSleepTolerance);
+	float GetAngularSleepTolerance();
+
 	/// Get API version.
 	const b2Version* GetVersion() const {
 		return m_liquidFunVersion;
@@ -321,6 +333,18 @@ private:
 	bool m_stepComplete;
 
 	b2Profile m_profile;
+
+	// MOAI: moved from bsSettings.h
+	// The time that a body must be still before it will go to sleep.
+	float m_timeToSleep; // 0.5f
+
+	// MOAI: moved from bsSettings.h
+	// A body cannot sleep if its linear velocity is above this tolerance.
+	float m_linearSleepTolerance; // 0.01f
+
+	// MOAI: moved from bsSettings.h
+	// A body cannot sleep if its angular velocity is above this tolerance.
+	float m_angularSleepTolerance; // (2.0f / 180.0f * b2_pi)
 
 	/// Used to reference b2_LiquidFunVersion so that it's not stripped from
 	/// the static library.
@@ -424,6 +448,36 @@ inline const b2ContactManager& b2World::GetContactManager() const
 inline const b2Profile& b2World::GetProfile() const
 {
 	return m_profile;
+}
+
+// MOAI: moved from bsSettings.h
+inline void b2World::SetTimeToSleep(float timeToSleep) {
+	m_timeToSleep = timeToSleep;
+}
+
+// MOAI: moved from bsSettings.h
+inline float b2World::GetTimeToSleep() {
+	return m_timeToSleep;
+}
+
+// MOAI: moved from bsSettings.h
+inline void b2World::SetLinearSleepTolerance(float linearSleepTolerance) {
+	m_linearSleepTolerance = linearSleepTolerance;
+}
+
+// MOAI: moved from bsSettings.h
+inline float b2World::GetLinearSleepTolerance() {
+	return m_linearSleepTolerance;
+}
+
+// MOAI: moved from bsSettings.h
+inline void b2World::SetAngularSleepTolerance(float angularSleepTolerance) {
+	m_angularSleepTolerance = angularSleepTolerance;
+}
+
+// MOAI: moved from bsSettings.h
+inline float b2World::GetAngularSleepTolerance() {
+	return m_angularSleepTolerance;
 }
 
 #endif
