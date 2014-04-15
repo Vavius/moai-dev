@@ -5,7 +5,10 @@
 
 #include <Box2D/Box2D.h>
 
+#include <moai-box2d/MOAIBox2DFixture.h>
+#include <moai-box2d/MOAIBox2DParticleGroup.h>
 #include <moai-box2d/MOAIBox2DParticleSystem.h>
+#include <moai-box2d/MOAIBox2DShape.h>
 
 //----------------------------------------------------------------//
 /** TODO doxygen
@@ -151,13 +154,79 @@ int MOAIBox2DParticleSystem::_createParticle ( lua_State* L ) {
 
 
 //----------------------------------------------------------------//
-/** TODO implement
-
+/** TODO doxygen
+	
 */
 int MOAIBox2DParticleSystem::_createParticleGroup ( lua_State* L ) {
 	MOAI_LUA_SETUP ( MOAIBox2DParticleSystem, "U" )
 
-	return 0;
+	float unitsToMeters = self->GetUnitsToMeters ();
+
+	if ( !self->mParticleSystem ) {
+		MOAILog ( state, MOAILogMessages::MOAIBox2DParticleSystem_MissingInstance );
+		return 0;
+	}
+	
+	b2ParticleGroupDef def;
+    b2Vec2* positionData = 0;
+	if ( state.IsType ( 2, LUA_TTABLE )) {
+		def.flags 				= state.GetField < u32 >( 2, "flags", 0 );
+		def.groupFlags 			= state.GetField < u32 >( 2, "groupFlags", 0 );
+		def.position.x 			= state.GetField < float >( 2, "x", 0.0f );
+		def.position.y 			= state.GetField < float >( 2, "y", 0.0f );
+		def.angle 				= state.GetField < float >( 2, "angle", 0.0f );
+		def.linearVelocity.x 	= state.GetField < float >( 2, "velocityX", 0.0f );
+		def.linearVelocity.y 	= state.GetField < float >( 2, "velocityY", 0.0f );
+		def.angularVelocity 	= state.GetField < float >( 2, "angularVelocity", 0.0f );
+		def.strength 			= state.GetField < float >( 2, "strength", 1.0f );
+		def.stride 				= state.GetField < float >( 2, "stride", 0.0f );
+		def.lifetime 			= state.GetField < float > ( 2, "lifetime", 0.0f );
+		def.particleCount 		= state.GetField < u32 >( 2, "particleCount", 0 );
+
+		if ( state.GetFieldWithType ( 2, "color", LUA_TTABLE ) ) {
+
+			state.Pop ( 1 );
+		}
+
+		if ( state.GetFieldWithType ( 2, "shapes", LUA_TTABLE ) ) {
+
+			u32 totalShapes = lua_objlen ( state, -1 );
+			b2Shape* shapes [ totalShapes ];
+
+			int itr = state.PushTableItr ( -1 );
+			
+			for ( u32 idx = 0; state.TableItrNext ( itr ); ++idx ) {
+				
+				MOAIBox2DShape* moaiShape = state.GetLuaObject < MOAIBox2DShape >( -1, true );
+				shapes [ idx ] = moaiShape->mShape;
+			}
+			state.Pop ( 1 );
+		}
+
+		if ( state.GetFieldWithType ( 2, "positionData", LUA_TTABLE ) ) {
+
+			u32 totalPoints = lua_objlen ( state, -1 );
+			
+			positionData = new b2Vec2 [ totalPoints ];
+            int numPoints = MOAIBox2DFixture::LoadVerts ( state, -1, positionData, totalPoints, unitsToMeters );
+            
+			def.positionData = positionData;
+			def.particleCount = numPoints;
+			state.Pop ( 1 );
+		}
+
+		MOAIBox2DParticleGroup* group = state.GetLuaObject < MOAIBox2DParticleGroup >( 2, "group", true );
+		MOAIBox2DShape* shape = state.GetLuaObject < MOAIBox2DShape >( 2, "shape", true );
+		def.group = group->mParticleGroup;
+		def.shape = shape->mShape;
+	}
+
+	MOAIBox2DParticleGroup* moaiGroup = new MOAIBox2DParticleGroup ();
+	moaiGroup->SetParticleGroup ( self->mParticleSystem->CreateParticleGroup ( def ) );
+	self->LuaRetain ( moaiGroup );
+	
+	moaiGroup->PushLuaUserdata ( state );
+	return 1;
 }
 
 //----------------------------------------------------------------//
@@ -723,25 +792,7 @@ MOAIBox2DParticleSystem::~MOAIBox2DParticleSystem () {
 
 //----------------------------------------------------------------//
 void MOAIBox2DParticleSystem::RegisterLuaClass ( MOAILuaState& state ) {
-
-	state.SetField ( -1, "WATER", 						( u32 )WATER );
-	state.SetField ( -1, "ZOMBIE", 						( u32 )ZOMBIE );
-	state.SetField ( -1, "WALL", 						( u32 )WALL );
-	state.SetField ( -1, "SPRING", 						( u32 )SPRING );
-	state.SetField ( -1, "ELASTIC", 					( u32 )ELASTIC );
-	state.SetField ( -1, "VISCOUS", 					( u32 )VISCOUS );
-	state.SetField ( -1, "POWDER", 						( u32 )POWDER );
-	state.SetField ( -1, "TENSILE", 					( u32 )TENSILE );
-	state.SetField ( -1, "COLOR_MIXING", 				( u32 )COLOR_MIXING );
-	state.SetField ( -1, "DESTRUCTION_LISTENER", 		( u32 )DESTRUCTION_LISTENER );
-	state.SetField ( -1, "BARRIER", 					( u32 )BARRIER );
-	state.SetField ( -1, "STATIC_PRESSURE", 			( u32 )STATIC_PRESSURE );
-	state.SetField ( -1, "REACTIVE", 					( u32 )REACTIVE );
-	state.SetField ( -1, "REPULSIVE", 					( u32 )REPULSIVE );
-	state.SetField ( -1, "FIXTURE_CONTACT_LISTENER", 	( u32 )FIXTURE_CONTACT_LISTENER );
-	state.SetField ( -1, "PARTICLE_CONTACT_LISTENER", 	( u32 )PARTICLE_CONTACT_LISTENER );
-	state.SetField ( -1, "FIXTURE_CONTACT_FILTER", 		( u32 )FIXTURE_CONTACT_FILTER );
-	state.SetField ( -1, "PARTICLE_CONTACT_FILTER", 	( u32 )PARTICLE_CONTACT_FILTER );
+	
 
 }
 

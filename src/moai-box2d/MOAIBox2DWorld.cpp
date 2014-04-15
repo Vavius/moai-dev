@@ -687,26 +687,26 @@ int	MOAIBox2DWorld::_addWheelJoint ( lua_State* L ) {
 //----------------------------------------------------------------//
 /**	@name   calculateParticleIterations
  
-    @text	Get the estimate particle iterations for particle numerical stability
-            based on particle radius and gravity
+	@text	Get the estimate particle iterations for particle numerical stability
+			based on particle radius and gravity
  
-    @in		MOAIBox2DWorld self
-    @in     number  gravity     in units, converted to m/s^2. Default is 10 m/s^2
-    @in     number  radius      in units, converted to m. Default is 1 m
-    @in     number  timestep    Default is 1/60
-    @out    number  iterations	estimate particleIterations
+	@in		MOAIBox2DWorld self
+	@in     number  gravity     in units, converted to m/s^2. Default is 10 m/s^2
+	@in     number  radius      in units, converted to m. Default is 1 m
+	@in     number  timestep    Default is 1/60
+	@out    number  iterations	estimate particleIterations
 */
 int MOAIBox2DWorld::_calculateParticleIterations ( lua_State* L ) {
 	MOAI_LUA_SETUP ( MOAIBox2DWorld, "U" )
-    
-    float gravity = state.GetValue < float >( 2, 10.0f / self->mUnitsToMeters ) * self->mUnitsToMeters;
-    float radius = state.GetValue < float >( 3, 1.0 / self->mUnitsToMeters ) * self->mUnitsToMeters;
-    float timestep = state.GetValue < float >( 4, 1.0 / 60.f );
-    
-    float iter = b2CalculateParticleIterations ( gravity, radius, timestep );
+	
+	float gravity = state.GetValue < float >( 2, 10.0f / self->mUnitsToMeters ) * self->mUnitsToMeters;
+	float radius = state.GetValue < float >( 3, 1.0 / self->mUnitsToMeters ) * self->mUnitsToMeters;
+	float timestep = state.GetValue < float >( 4, 1.0 / 60.f );
+	
+	float iter = b2CalculateParticleIterations ( gravity, radius, timestep );
 
-    state.Push ( iter );
-    return 0;
+	state.Push ( iter );
+	return 0;
 }
 
 //----------------------------------------------------------------//
@@ -997,6 +997,15 @@ void MOAIBox2DWorld::Destroy () {
 		prim->SetWorld ( 0 );
 		this->LuaRelease ( prim );
 	}
+
+	while ( this->mDestroyParticleSystems ) {
+		MOAIBox2DPrim* prim = this->mDestroyParticleSystems;
+		this->mDestroyParticleSystems = this->mDestroyParticleSystems->mDestroyNext;
+		prim->Destroy ();
+		
+		prim->SetWorld ( 0 );
+		this->LuaRelease ( prim );
+	}
 	
 	this->mLock = false;
 }
@@ -1134,7 +1143,7 @@ void MOAIBox2DWorld::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "addRopeJoint",				_addRopeJoint },
 		{ "addWeldJoint",				_addWeldJoint },
 		{ "addWheelJoint",				_addWheelJoint },
-        { "calculateParticleIterations",_calculateParticleIterations},
+		{ "calculateParticleIterations",_calculateParticleIterations},
 		{ "getAngularSleepTolerance",	_getAngularSleepTolerance },
 		{ "getAutoClearForces",			_getAutoClearForces },
 		{ "getGravity",					_getGravity },
@@ -1149,7 +1158,7 @@ void MOAIBox2DWorld::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "setLinearSleepTolerance",	_setLinearSleepTolerance },
 		{ "setTimeToSleep",				_setTimeToSleep },
 		{ "setUnitsToMeters",			_setUnitsToMeters },
-	  	{ "getRayCast",					_getRayCast },
+		{ "getRayCast",					_getRayCast },
 		{ NULL, NULL }
 	};
 	
@@ -1224,17 +1233,17 @@ void MOAIBox2DWorld::ScheduleDestruction ( MOAIBox2DParticleSystem& particleSyst
 
 //----------------------------------------------------------------//
 /**     @name   getRayCast
-        @text   return RayCast 1st point hit
-       
-        @in             MOAIBox2DWorld self
-        @in             number p1x
-        @in             number p1y
-        @in             number p2x
-        @in             number p2y
-        @out    bool	true if hit, false otherwise
+		@text   return RayCast 1st point hit
+	   
+		@in             MOAIBox2DWorld self
+		@in             number p1x
+		@in             number p1y
+		@in             number p2x
+		@in             number p2y
+		@out    bool	true if hit, false otherwise
 		@out	  MOAIBox2DFixture fixture that was hit, or nil
-        @out    number hitpoint.x
-        @out    number hitpoint.y
+		@out    number hitpoint.x
+		@out    number hitpoint.y
 */
 int MOAIBox2DWorld::_getRayCast ( lua_State* L ) {
 	MOAI_LUA_SETUP ( MOAIBox2DWorld, "U" )

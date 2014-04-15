@@ -46,6 +46,7 @@ public:
 	
 	friend class MOAIBox2DArbiter;
 	friend class MOAIBox2DBody;
+    friend class MOAIBox2DParticleSystem;
 	friend class MOAIBox2DWorld;
 	
 	DECL_LUA_FACTORY ( MOAIBox2DFixture )

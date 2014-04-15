@@ -13,24 +13,6 @@
 /** @name   MOAIBox2DParticleSystem
 	@text   Box2D liquid fun particle system.
 	
-	@const  WATER_PARTICLE
-	@const  ZOMBIE_PARTICLE
-	@const  WALL_PARTICLE
-	@const  SPRING_PARTICLE
-	@const  ELASTIC_PARTICLE
-	@const  VISCOUS_PARTICLE
-	@const  POWDER_PARTICLE
-	@const  TENSILE_PARTICLE
-	@const  COLOR_MIXING_PARTICLE
-	@const  DESTRUCTION_LISTENER_PARTICLE
-	@const  BARRIER_PARTICLE
-	@const  STATIC_PRESSURE_PARTICLE
-	@const  REACTIVE_PARTICLE
-	@const  REPULSIVE_PARTICLE
-	@const  FIXTURE_CONTACT_LISTENER_PARTICLE
-	@const  PARTICLE_CONTACT_LISTENER_PARTICLE
-	@const  FIXTURE_CONTACT_FILTER_PARTICLE
-	@const  PARTICLE_CONTACT_FILTER_PARTICLE
 */
 class MOAIBox2DParticleSystem :
 	public MOAIBox2DPrim {
@@ -87,27 +69,6 @@ public:
 	friend class MOAIBox2DWorld;
 	
 	DECL_LUA_FACTORY ( MOAIBox2DParticleSystem )
-		
-	enum {
-		WATER						= b2_waterParticle,
-		ZOMBIE						= b2_zombieParticle,
-		WALL						= b2_wallParticle,
-		SPRING						= b2_springParticle,
-		ELASTIC						= b2_elasticParticle,
-		VISCOUS						= b2_viscousParticle,
-		POWDER						= b2_powderParticle,
-		TENSILE						= b2_tensileParticle,
-		COLOR_MIXING				= b2_colorMixingParticle,
-		DESTRUCTION_LISTENER		= b2_destructionListenerParticle,
-		BARRIER						= b2_barrierParticle,
-		STATIC_PRESSURE				= b2_staticPressureParticle,
-		REACTIVE					= b2_reactiveParticle,
-		REPULSIVE					= b2_repulsiveParticle,
-		FIXTURE_CONTACT_LISTENER	= b2_fixtureContactListenerParticle,
-		PARTICLE_CONTACT_LISTENER	= b2_particleContactListenerParticle,
-		FIXTURE_CONTACT_FILTER		= b2_fixtureContactFilterParticle,
-		PARTICLE_CONTACT_FILTER		= b2_particleContactFilterParticle
-	};
 	
 	//----------------------------------------------------------------//
 	void			Destroy						();

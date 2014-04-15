@@ -15,11 +15,14 @@
 #include <moai-box2d/MOAIBox2DGearJoint.h>
 #include <moai-box2d/MOAIBox2DJoint.h>
 #include <moai-box2d/MOAIBox2DMouseJoint.h>
+#include <moai-box2d/MOAIBox2DParticle.h>
+#include <moai-box2d/MOAIBox2DParticleGroup.h>
 #include <moai-box2d/MOAIBox2DParticleSystem.h>
 #include <moai-box2d/MOAIBox2DPrismaticJoint.h>
 #include <moai-box2d/MOAIBox2DPulleyJoint.h>
 #include <moai-box2d/MOAIBox2DRopeJoint.h>
 #include <moai-box2d/MOAIBox2DRevoluteJoint.h>
+#include <moai-box2d/MOAIBox2DShape.h>
 #include <moai-box2d/MOAIBox2DWeldJoint.h>
 #include <moai-box2d/MOAIBox2DWheelJoint.h>
 #include <moai-box2d/MOAIBox2DWorld.h>
