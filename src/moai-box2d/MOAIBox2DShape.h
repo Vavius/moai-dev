@@ -30,10 +30,12 @@ public:
 	DECL_LUA_FACTORY ( MOAIBox2DShape )
 	
 	//----------------------------------------------------------------//
+    void            Clear                   ();
 					MOAIBox2DShape          ();
 					~MOAIBox2DShape         ();
 	void            RegisterLuaClass        ( MOAILuaState& state );
 	void            RegisterLuaFuncs        ( MOAILuaState& state );
+    void            SetShape                ( b2Shape* shape );
 };
 
 #endif

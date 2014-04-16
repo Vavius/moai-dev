@@ -38,21 +38,21 @@ private:
 	
 	//----------------------------------------------------------------//
 	void			HandleCollision		( u32 eventType, MOAIBox2DFixture* other, MOAIBox2DArbiter* arbiter );
-	static u32		LoadVerts			( MOAILuaState& state, int idx, b2Vec2* verts, u32 max, float unitsToMeters  );
 	void			SetFixture			( b2Fixture* fixture );
 
 
 public:
 	
+    
 	friend class MOAIBox2DArbiter;
 	friend class MOAIBox2DBody;
-    friend class MOAIBox2DParticleSystem;
 	friend class MOAIBox2DWorld;
 	
 	DECL_LUA_FACTORY ( MOAIBox2DFixture )
 	
 	//----------------------------------------------------------------//
-	void			Destroy					();
+    void			Destroy					();
+    static u32		LoadVerts               ( MOAILuaState& state, int idx, b2Vec2* verts, u32 max, float unitsToMeters  );
 					MOAIBox2DFixture		();
 					~MOAIBox2DFixture		();
 	void			RegisterLuaClass		( MOAILuaState& state );

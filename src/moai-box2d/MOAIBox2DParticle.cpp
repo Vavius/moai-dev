@@ -29,6 +29,6 @@ void MOAIBox2DParticle::RegisterLuaClass ( MOAILuaState& state ) {
     state.SetField ( -1, "FIXTURE_CONTACT_LISTENER",    ( u32 )b2_fixtureContactListenerParticle );
     state.SetField ( -1, "PARTICLE_CONTACT_LISTENER",   ( u32 )b2_particleContactListenerParticle );
     state.SetField ( -1, "FIXTURE_CONTACT_FILTER",      ( u32 )b2_fixtureContactFilterParticle );
-    state.SetField ( -1, "PARTICLE_CONTACT_FILTER",     ( u32 )b2_particleContactFilterParticl );
+    state.SetField ( -1, "PARTICLE_CONTACT_FILTER",     ( u32 )b2_particleContactFilterParticle );
     
 }

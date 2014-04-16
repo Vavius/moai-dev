@@ -87,7 +87,7 @@ int MOAIBox2DParticleGroup::_destroyParticles ( lua_State* L ) {
 		return 0;
 	}
 
-	self->mParticleGroup->mWorld->DestroyParticles ( self );
+	self->mParticleGroup->DestroyParticles ( false );
 	return 0;
 }
 
@@ -265,6 +265,32 @@ int MOAIBox2DParticleGroup::_toggleGroupFlags ( lua_State* L ) {
 //================================================================//
 
 //----------------------------------------------------------------//
+bool MOAIBox2DParticleGroup::ApplyAttrOp ( u32 attrID, MOAIAttrOp& attrOp, u32 op ) {
+    
+	if ( this->mParticleGroup && MOAITransform::MOAITransformAttr::Check ( attrID ) ) {
+		const b2Transform & xform = mParticleGroup->GetTransform();
+		
+		switch ( UNPACK_ATTR ( attrID )) {
+			case MOAITransform::ATTR_X_LOC: {
+				attrOp.Apply ( xform.p.x, op, MOAIAttrOp::ATTR_READ );
+				return true;
+			}
+                
+			case MOAITransform::ATTR_Y_LOC: {
+				attrOp.Apply ( xform.p.y, op, MOAIAttrOp::ATTR_READ );
+				return true;
+			}
+                
+			case MOAITransform::ATTR_Z_ROT: {
+				attrOp.Apply ( xform.q.GetAngle(), op, MOAIAttrOp::ATTR_READ );
+				return true;
+			}
+		}
+	}
+	return MOAITransformBase::ApplyAttrOp (attrID, attrOp, op );
+}
+
+//----------------------------------------------------------------//
 void MOAIBox2DParticleGroup::Destroy () {
 
 	if ( this->mParticleGroup ) {
@@ -287,6 +313,29 @@ MOAIBox2DParticleGroup::MOAIBox2DParticleGroup () :
 MOAIBox2DParticleGroup::~MOAIBox2DParticleGroup () {
 
 	this->Destroy ();
+}
+
+//----------------------------------------------------------------//
+void MOAIBox2DParticleGroup::OnDepNodeUpdate () {
+    
+	if ( this->mParticleGroup ) {
+		
+		b2Transform transform = this->mParticleGroup->GetTransform ();
+		float scale = 1.0f / this->GetUnitsToMeters ();
+		
+		float* m = this->mLocalToWorldMtx.m;
+		
+		m [ ZLAffine3D::C0_R0 ] = ( float )transform.q.GetXAxis().x;
+		m [ ZLAffine3D::C0_R1 ] = ( float )transform.q.GetXAxis().y;
+        
+		m [ ZLAffine3D::C1_R0 ] = ( float )transform.q.GetYAxis().x;
+		m [ ZLAffine3D::C1_R1 ] = ( float )transform.q.GetYAxis().y;
+        
+		m [ ZLAffine3D::C3_R0 ] = ( float )transform.p.x * scale;
+		m [ ZLAffine3D::C3_R1 ] = ( float )transform.p.y * scale;
+		
+		this->mWorldToLocalMtx.Inverse ( this->mLocalToWorldMtx );
+	}
 }
 
 //----------------------------------------------------------------//

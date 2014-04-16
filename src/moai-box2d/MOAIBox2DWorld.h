@@ -119,6 +119,7 @@ private:
 	void			Destroy					();
 	void			SayGoodbye				( b2Fixture* fixture ); 
 	void			SayGoodbye				( b2Joint* joint );
+    void            SayGoodbye              ( b2ParticleGroup* group );
 	void			ScheduleDestruction		( MOAIBox2DBody& body );
 	void			ScheduleDestruction		( MOAIBox2DFixture& fixture );
 	void			ScheduleDestruction		( MOAIBox2DJoint& joint );

@@ -47,14 +47,17 @@ private:
 public:
 
 	friend class MOAIBox2DParticleSystem;
+    friend class MOAIBox2DWorld;
 	
 	DECL_LUA_FACTORY ( MOAIBox2DParticleGroup )
 
 
 	//----------------------------------------------------------------//
+    bool            ApplyAttrOp                 ( u32 attrID, MOAIAttrOp& attrOp, u32 op );
 	void            Destroy                     ();
-					MOAIBox2DParticleGroup     ();
-					~MOAIBox2DParticleGroup    ();
+    void            OnDepNodeUpdate             ();
+					MOAIBox2DParticleGroup      ();
+					~MOAIBox2DParticleGroup     ();
 	void            RegisterLuaClass            ( MOAILuaState& state );
 	void            RegisterLuaFuncs            ( MOAILuaState& state );
 };

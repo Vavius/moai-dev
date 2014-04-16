@@ -14,6 +14,7 @@
 #include <moai-box2d/MOAIBox2DJoint.h>
 #include <moai-box2d/MOAIBox2DMotorJoint.h>
 #include <moai-box2d/MOAIBox2DMouseJoint.h>
+#include <moai-box2d/MOAIBox2DParticleGroup.h>
 #include <moai-box2d/MOAIBox2DParticleSystem.h>
 #include <moai-box2d/MOAIBox2DPrismaticJoint.h>
 #include <moai-box2d/MOAIBox2DPulleyJoint.h>
@@ -1184,6 +1185,17 @@ void MOAIBox2DWorld::SayGoodbye ( b2Joint* joint ) {
 		moaiJoint->mJoint = 0;
 		moaiJoint->SetWorld ( 0 );
 		this->LuaRelease ( moaiJoint );
+	}
+}
+
+//----------------------------------------------------------------//
+void MOAIBox2DWorld::SayGoodbye ( b2ParticleGroup* group ) {
+    
+	MOAIBox2DParticleGroup* moaiGroup = ( MOAIBox2DParticleGroup* )group->GetUserData ();
+	if ( moaiGroup->mParticleGroup ) {
+		moaiGroup->mParticleGroup = 0;
+		moaiGroup->SetWorld ( 0 );
+		this->LuaRelease ( moaiGroup );
 	}
 }
 

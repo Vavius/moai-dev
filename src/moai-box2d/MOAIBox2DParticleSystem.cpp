@@ -169,6 +169,7 @@ int MOAIBox2DParticleSystem::_createParticleGroup ( lua_State* L ) {
 	
 	b2ParticleGroupDef def;
     b2Vec2* positionData = 0;
+    
 	if ( state.IsType ( 2, LUA_TTABLE )) {
 		def.flags 				= state.GetField < u32 >( 2, "flags", 0 );
 		def.groupFlags 			= state.GetField < u32 >( 2, "groupFlags", 0 );
@@ -214,16 +215,21 @@ int MOAIBox2DParticleSystem::_createParticleGroup ( lua_State* L ) {
 			def.particleCount = numPoints;
 			state.Pop ( 1 );
 		}
-
+        
 		MOAIBox2DParticleGroup* group = state.GetLuaObject < MOAIBox2DParticleGroup >( 2, "group", true );
 		MOAIBox2DShape* shape = state.GetLuaObject < MOAIBox2DShape >( 2, "shape", true );
-		def.group = group->mParticleGroup;
-		def.shape = shape->mShape;
+		if ( group ) {
+            def.group = group->mParticleGroup;
+        }
+        if ( shape ) {
+            def.shape = shape->mShape;
+        }
 	}
 
 	MOAIBox2DParticleGroup* moaiGroup = new MOAIBox2DParticleGroup ();
 	moaiGroup->SetParticleGroup ( self->mParticleSystem->CreateParticleGroup ( def ) );
-	self->LuaRetain ( moaiGroup );
+	moaiGroup->SetWorld ( self->mWorld );
+    self->mWorld->LuaRetain ( moaiGroup );
 	
 	moaiGroup->PushLuaUserdata ( state );
 	return 1;

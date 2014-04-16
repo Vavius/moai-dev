@@ -4,10 +4,8 @@
 #include "pch.h"
 
 #include <Box2D/Box2D.h>
-#include <moai-box2d/MOAIBox2DArbiter.h>
-#include <moai-box2d/MOAIBox2DBody.h>
-#include <moai-box2d/MOAIBox2DWeldJoint.h>
-#include <moai-box2d/MOAIBox2DWorld.h>
+#include <moai-box2d/MOAIBox2DFixture.h>
+#include <moai-box2d/MOAIBox2DShape.h>
 
 //================================================================//
 // local
@@ -18,16 +16,18 @@
 	@text 	Initialize shape as chain
 	
 	@in		MOAIBox2DShape self
-	@in		table verts					Array containing vertex coordinate components ( t[1] = x0, t[2] = y0, t[3] = x1, t[4] = y1... )
-	@opt	boolean closeChain			Default value is false.
-	@out	nil
+	@in		table   verts			Array containing vertex coordinate components ( t[1] = x0, t[2] = y0, t[3] = x1, t[4] = y1... )
+    @opt	boolean closeChain		Default value is false.
+    @opt    number  unitsToMeters   Conversion ratio from units to meters. As set in MOAIBox2DWorld where this shape will be used. Default is 1
+    @out	nil
 */
 int MOAIBox2DShape::_initChain ( lua_State* L ) {
-	MOAI_LUA_SETUP ( MOAIBox2DBody, "U" )
-
-	float unitsToMeters = self->GetUnitsToMeters ();
-	
+	MOAI_LUA_SETUP ( MOAIBox2DShape, "U" )
+    
 	u32 totalCoords = lua_objlen ( state, 2 );
+    bool closeChain = state.GetValue < bool >( 3, false );
+	float unitsToMeters = state.GetValue < float > ( 4, 1.0f );
+
 	if ( totalCoords < 4 || totalCoords % 2 != 0 ) {
 		MOAILog ( state, MOAILogMessages::MOAIBox2DBody_InvalidVertexCount_D, totalCoords );
 		return 0;
@@ -37,7 +37,6 @@ int MOAIBox2DShape::_initChain ( lua_State* L ) {
 	b2Vec2 * verts = (b2Vec2 *)alloca(sizeof(b2Vec2) * totalVerts);
 	int numVerts = MOAIBox2DFixture::LoadVerts( state, 2, verts, totalVerts, unitsToMeters );
 	
-	bool closeChain = state.GetValue < bool >( 3, false );
 	b2ChainShape* chainShape = new b2ChainShape ();
 	if( closeChain ) {
 		chainShape->CreateLoop(verts, numVerts);
@@ -55,16 +54,17 @@ int MOAIBox2DShape::_initChain ( lua_State* L ) {
 /**	@name	initCircle
 	@text 	Initialize shape as circle
 
-	@in		MOAIBox2DShape 	self
-	@in		number x		in units, world coordinates, converted to meters
-	@in		number y		in units, world coordinates, converted to meters
-	@in		number radius	in units, converted to meters
-	@out	nil
+	@in		MOAIBox2DShape          self
+	@in		number  x               in units, world coordinates, converted to meters
+	@in		number  y               in units, world coordinates, converted to meters
+	@in		number  radius          in units, converted to meters
+    @opt    number  unitsToMeters   Conversion ratio from units to meters. As set in MOAIBox2DWorld where this shape will be used. Default is 1
+    @out	nil
 */
 int MOAIBox2DShape::_initCircle ( lua_State* L ) {
-	MOAI_LUA_SETUP ( MOAIBox2DBody, "UNNN" )
+	MOAI_LUA_SETUP ( MOAIBox2DShape, "UNNN" )
 
-	float unitsToMeters = self->GetUnitsToMeters ();
+	float unitsToMeters = state.GetValue < float > ( 5, 1.0f );
 	
 	b2CircleShape* circleShape = new b2CircleShape ();
 
@@ -81,13 +81,14 @@ int MOAIBox2DShape::_initCircle ( lua_State* L ) {
 	@text	Initialize shape as polygon
 	
 	@in		MOAIBox2DBody self
-	@in		table verts					Array containing vertex coordinate components in units, world coordinates, converted to meters. ( t[1] = x0, t[2] = y0, t[3] = x1, t[4] = y1... )
-	@out	nil
+	@in		table   verts           Array containing vertex coordinate components in units, world coordinates, converted to meters. ( t[1] = x0, t[2] = y0, t[3] = x1, t[4] = y1... )
+    @opt    number  unitsToMeters   Conversion ratio from units to meters. As set in MOAIBox2DWorld where this shape will be used. Default is 1
+    @out	nil
 */
 int MOAIBox2DShape::_initPolygon ( lua_State* L ) {
-	MOAI_LUA_SETUP ( MOAIBox2DBody, "U" )
+	MOAI_LUA_SETUP ( MOAIBox2DShape, "U" )
 
-	float unitsToMeters = self->GetUnitsToMeters ();
+	float unitsToMeters = state.GetValue < float > ( 3, 1.0f );
 
 	b2Vec2 verts [ b2_maxPolygonVertices ];
 	
@@ -113,13 +114,14 @@ int MOAIBox2DShape::_initPolygon ( lua_State* L ) {
 	@in		number yMin		in units, world coordinates, converted to meters
 	@in		number xMax		in units, world coordinates, converted to meters
 	@in		number yMax		in units, world coordinates, converted to meters
-	@in		number angle
+	@opt	number angle
+    @opt    number unitsToMeters   Conversion ratio from units to meters. As set in MOAIBox2DWorld where this shape will be used. Default is 1
 	@out	nil
 */
 int MOAIBox2DShape::_initRect ( lua_State* L ) {
-	MOAI_LUA_SETUP ( MOAIBox2DBody, "UNNNN" )
+	MOAI_LUA_SETUP ( MOAIBox2DShape, "UNNNN" )
 	
-	float unitsToMeters = self->GetUnitsToMeters ();
+    float unitsToMeters = state.GetValue < float > ( 7, 1.0f );
 	
 	ZLRect rect = state.GetRect < float >( 2 );
 	rect.Bless ();
@@ -191,10 +193,8 @@ void MOAIBox2DShape::RegisterLuaFuncs ( MOAILuaState& state ) {
 //----------------------------------------------------------------//
 void MOAIBox2DShape::SetShape ( b2Shape* shape ) {
 
-	if ( this->mShape ) {
-		self->Clear ();
-	}
-	self->mShape = shape;
+    this->Clear ();
+	this->mShape = shape;
 }
 
 
