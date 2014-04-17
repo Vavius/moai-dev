@@ -354,7 +354,7 @@ int	MOAIBox2DWorld::_addParticleSystem ( lua_State* L ) {
 	b2ParticleSystemDef def;
 
 	if ( state.IsType ( 2, LUA_TTABLE )) {
-		def.radius 							= state.GetField < float >( 2, "radius", 1.0f );
+		def.radius 							= state.GetField < float >( 2, "radius", 1.0f ) * self->mUnitsToMeters;
 		def.pressureStrength 				= state.GetField < float >( 2, "pressureStrength", 0.05f );
 		def.dampingStrength 				= state.GetField < float >( 2, "dampingStrength", 1.0f );
 		def.elasticStrength 				= state.GetField < float >( 2, "elasticStrength", 0.25f );

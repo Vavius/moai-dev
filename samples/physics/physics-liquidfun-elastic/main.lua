@@ -100,10 +100,9 @@ function addElasticGroup (x, y)
 
     local circle = MOAIBox2DShape.new ()
     circle:initCircle ( 0, 0, 15, UNITS_TO_METERS )
-    print ( circle )
     
     group = particleSystem:createParticleGroup {
-        flags = MOAIBox2DParticle.ELASTIC,
+        flags = MOAIBox2DParticle.ELASTIC + MOAIBox2DParticle.REPULSIVE,
         shape = circle,
         x = x,
         y = y,

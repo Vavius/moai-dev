@@ -173,37 +173,45 @@ int MOAIBox2DParticleSystem::_createParticleGroup ( lua_State* L ) {
 	if ( state.IsType ( 2, LUA_TTABLE )) {
 		def.flags 				= state.GetField < u32 >( 2, "flags", 0 );
 		def.groupFlags 			= state.GetField < u32 >( 2, "groupFlags", 0 );
-		def.position.x 			= state.GetField < float >( 2, "x", 0.0f );
-		def.position.y 			= state.GetField < float >( 2, "y", 0.0f );
+		def.position.x 			= state.GetField < float >( 2, "x", 0.0f ) * unitsToMeters;
+		def.position.y 			= state.GetField < float >( 2, "y", 0.0f ) * unitsToMeters;
 		def.angle 				= state.GetField < float >( 2, "angle", 0.0f );
-		def.linearVelocity.x 	= state.GetField < float >( 2, "velocityX", 0.0f );
-		def.linearVelocity.y 	= state.GetField < float >( 2, "velocityY", 0.0f );
+		def.linearVelocity.x 	= state.GetField < float >( 2, "velocityX", 0.0f ) * unitsToMeters;
+		def.linearVelocity.y 	= state.GetField < float >( 2, "velocityY", 0.0f ) * unitsToMeters;
 		def.angularVelocity 	= state.GetField < float >( 2, "angularVelocity", 0.0f );
 		def.strength 			= state.GetField < float >( 2, "strength", 1.0f );
-		def.stride 				= state.GetField < float >( 2, "stride", 0.0f );
+		def.stride 				= state.GetField < float >( 2, "stride", 0.0f ) * unitsToMeters;
 		def.lifetime 			= state.GetField < float > ( 2, "lifetime", 0.0f );
-		def.particleCount 		= state.GetField < u32 >( 2, "particleCount", 0 );
 
 		if ( state.GetFieldWithType ( 2, "color", LUA_TTABLE ) ) {
-
+            float r = state.GetField < float > ( -1, 1, 1.0f ) * 255;
+            float g = state.GetField < float > ( -1, 2, 1.0f ) * 255;
+            float b = state.GetField < float > ( -1, 3, 1.0f ) * 255;
+            float a = state.GetField < float > ( -1, 4, 1.0f ) * 255;
+            
+            def.color = b2ParticleColor ( (u8) r, (u8) g, (u8) b, (u8) a );
 			state.Pop ( 1 );
 		}
-
+        
 		if ( state.GetFieldWithType ( 2, "shapes", LUA_TTABLE ) ) {
 
 			u32 totalShapes = lua_objlen ( state, -1 );
 			b2Shape* shapes [ totalShapes ];
 
 			int itr = state.PushTableItr ( -1 );
-			
-			for ( u32 idx = 0; state.TableItrNext ( itr ); ++idx ) {
+            u32 total = 0;
+			for ( int i = 0 ; state.TableItrNext ( itr ); ++i ) {
 				
 				MOAIBox2DShape* moaiShape = state.GetLuaObject < MOAIBox2DShape >( -1, true );
-				shapes [ idx ] = moaiShape->mShape;
+				if ( moaiShape ) {
+                    shapes [ total ] = moaiShape->mShape;
+                    total++;
+                }
 			}
+            def.shapeCount = total;
 			state.Pop ( 1 );
 		}
-
+        
 		if ( state.GetFieldWithType ( 2, "positionData", LUA_TTABLE ) ) {
 
 			u32 totalPoints = lua_objlen ( state, -1 );
@@ -225,12 +233,16 @@ int MOAIBox2DParticleSystem::_createParticleGroup ( lua_State* L ) {
             def.shape = shape->mShape;
         }
 	}
-
+    
 	MOAIBox2DParticleGroup* moaiGroup = new MOAIBox2DParticleGroup ();
 	moaiGroup->SetParticleGroup ( self->mParticleSystem->CreateParticleGroup ( def ) );
 	moaiGroup->SetWorld ( self->mWorld );
     self->mWorld->LuaRetain ( moaiGroup );
 	
+    if ( positionData ) {
+        delete [] positionData;
+    }
+    
 	moaiGroup->PushLuaUserdata ( state );
 	return 1;
 }

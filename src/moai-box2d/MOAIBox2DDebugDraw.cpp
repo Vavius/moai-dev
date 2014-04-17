@@ -191,10 +191,16 @@ void MOAIBox2DDebugDraw::DrawParticles( const b2Vec2* centers, float32 radius, c
 	gfxDevice.BeginPrim(ZGL_PRIM_POINTS);
 	
     for ( int32 i = 0; i < count; i++ ) {
-        b2Color c = colors [ i ].GetColor ();
         b2Vec2 p = centers [ i ];
         
-        gfxDevice.SetPenColor(c.r, c.g, c.b, 1.0f);
+        if ( colors ) {
+            b2Color c = colors [ i ].GetColor ();
+            gfxDevice.SetPenColor(c.r, c.g, c.b, 1.0f);
+        }
+        else {
+            gfxDevice.SetPenColor(1.0f, 1.0f, 1.0f, 1.0f);
+        }
+        
         this->WriteVtx(gfxDevice, p.x, p.y);
     }
 	

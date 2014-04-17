@@ -376,5 +376,6 @@ void MOAIBox2DParticleGroup::RegisterLuaFuncs ( MOAILuaState& state ) {
 //----------------------------------------------------------------//
 void MOAIBox2DParticleGroup::SetParticleGroup ( b2ParticleGroup* particleGroup ) {
 	this->mParticleGroup = particleGroup;
+    particleGroup->SetUserData ( this );
 }
 

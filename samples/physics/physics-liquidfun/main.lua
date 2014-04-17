@@ -32,9 +32,11 @@ texture = MOAIGfxQuad2D.new ()
 texture:setTexture ( 'moai.png' )
 texture:setRect ( -25/2, -25/2, 25/2, 25/2 )
 
-particleSystem = world:addParticleSystem ()
+particleSystem = world:addParticleSystem () 
+
 particleSystem:setRadius ( 4 )
 particleSystem:setDensity ( 1 )
+particleSystem:setMaxParticleCount ( 1000 )
 
 function addSprite()
 	local body = world:addBody ( MOAIBox2DBody.DYNAMIC, worldX, worldY )
@@ -47,7 +49,7 @@ function addSprite()
 	}
 
 	local fixture = body:addPolygon ( poly )
-	fixture:setDensity ( 0.01 )
+	fixture:setDensity ( 1 )
 	fixture:setFriction ( 0.3 )
 	fixture:setFilter ( 0x01 )
 
@@ -80,7 +82,7 @@ end
 --    PARTICLE_CONTACT_LISTENER
 --    FIXTURE_CONTACT_FILTER
 --    PARTICLE_CONTACT_FILTER
-flags = MOAIBox2DParticleSystem.COLOR_MIXING + MOAIBox2DParticleSystem.TENSILE + MOAIBox2DParticleSystem.VISCOUS
+flags = MOAIBox2DParticle.COLOR_MIXING + MOAIBox2DParticle.TENSILE + MOAIBox2DParticle.VISCOUS
 
 colors = { 
     { 1, 0.5, 0.5 },
