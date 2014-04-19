@@ -26,7 +26,6 @@ layer:setBox2DWorld ( world )
 
 worldBody = world:addBody ( MOAIBox2DBody.STATIC )
 fixture2 = worldBody:addRect ( -80, -100, 80, -150)
-fixture2:setFilter ( 0x02 )
 
 texture = MOAIGfxQuad2D.new ()
 texture:setTexture ( 'moai.png' )
@@ -51,7 +50,6 @@ function addSprite()
 	local fixture = body:addPolygon ( poly )
 	fixture:setDensity ( 1 )
 	fixture:setFriction ( 0.3 )
-	fixture:setFilter ( 0x01 )
 
 	body:resetMassData ()
 

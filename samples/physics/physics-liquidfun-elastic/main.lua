@@ -28,7 +28,6 @@ layer:setBox2DWorld ( world )
 
 worldBody = world:addBody ( MOAIBox2DBody.STATIC )
 fixture2 = worldBody:addRect ( -80, -100, 80, -150)
-fixture2:setFilter ( 0x02 )
 
 texture = MOAIGfxQuad2D.new ()
 texture:setTexture ( 'moai.png' )
@@ -49,9 +48,8 @@ function addSprite()
 	}
 
 	local fixture = body:addPolygon ( poly )
-	fixture:setDensity ( 0.01 )
+	fixture:setDensity ( 1 )
 	fixture:setFriction ( 0.3 )
-	fixture:setFilter ( 0x01 )
 
 	body:resetMassData ()
 
@@ -83,6 +81,19 @@ end
 --    FIXTURE_CONTACT_FILTER
 --    PARTICLE_CONTACT_FILTER
 
+function randomShape ()
+    local r = math.random()
+
+    local shape = MOAIBox2DShape.new ()
+    if r < 0.5 then
+        shape:initCircle ( 0, 0, math.random(15, 30), UNITS_TO_METERS )
+    else
+        shape:initRect ( math.random(-30, -10), math.random(-20, -10), 
+            math.random(10, 30), math.random(10, 20), 0, UNITS_TO_METERS )
+    end
+    return shape
+end
+
 
 function addElasticGroup (x, y)
     -- def.flags               = state.GetField < u32 >( 2, "flags", 0 );
@@ -98,12 +109,11 @@ function addElasticGroup (x, y)
     -- def.lifetime            = state.GetField < float > ( 2, "lifetime", 0.0f );
     -- def.particleCount       = state.GetField < u32 >( 2, "particleCount", 0 );
 
-    local circle = MOAIBox2DShape.new ()
-    circle:initCircle ( 0, 0, 15, UNITS_TO_METERS )
-    
+    local shape = randomShape ()
+
     group = particleSystem:createParticleGroup {
         flags = MOAIBox2DParticle.ELASTIC + MOAIBox2DParticle.REPULSIVE,
-        shape = circle,
+        shape = shape,
         x = x,
         y = y,
     }

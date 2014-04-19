@@ -790,6 +790,75 @@ int MOAIBox2DWorld::_getTimeToSleep ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/** @name   queryAABB
+    @text   Perform AABB query. Gather all fixtures in given AABB
+ 
+    @in     MOAIBox2DWorld self
+    @in     number  xMin, in units, converted to meters
+    @in     number  yMin, in units, converted to meters
+    @in     number  xMax, in units, converted to meters
+    @in     number  yMax, in units, converted to meters
+    @out    ...     fixtures
+ */
+int MOAIBox2DWorld::_queryAABB ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIBox2DWorld, "UNNNN" )
+    
+    ZLRect rect = state.GetRect < float >( 2 );
+	rect.Bless ();
+    
+    b2AABB aabb;
+    aabb.lowerBound = self->mUnitsToMeters * b2Vec2 ( rect.mXMin, rect.mYMin );
+    aabb.upperBound = self->mUnitsToMeters * b2Vec2 ( rect.mXMax, rect.mYMax );
+    
+    MOAIBox2DQueryCallback callback ( state );
+    self->mWorld->QueryAABB ( &callback, aabb );
+    
+    return callback.GetCount ();
+}
+
+//----------------------------------------------------------------//
+/** @name   rayCast
+    @text   Perform raycast
+
+    @in     MOAIBox2DWorld self
+    @in     number  p1x, in units, converted to meters
+    @in     number  p1y, in units, converted to meters
+    @in     number  p2x, in units, converted to meters
+    @in     number  p2y, in units, converted to meters
+    @in     number  type    one of RAYCAST_NEAREST, RAYCAST_ALL, RAYCAST_ANY. Default is RAYCAST_NEAREST
+    @in     number  flags   what results to return. Any combination of: RAYCAST_FIXTURE, RAYCAST_POINT, RAYCAST_NORMAL
+                            default is ( RAYCAST_FIXTURE + RAYCAST_POINT )
+ 
+    @out    ...     All results in the folowing format: fixture1, x1, y1, xn1, yn1, fixture2, x2, y2, xn2, yn2 ...
+                    Only values specified in raycast flags are present. Position values are in units. Results are not sorted
+ */
+int MOAIBox2DWorld::_rayCast ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIBox2DWorld, "U" )
+    
+    b2Vec2 start;
+    b2Vec2 end;
+	start.x = state.GetValue < float >( 2, 0.0f ) * self->mUnitsToMeters;
+	start.y = state.GetValue < float >( 3, 0.0f ) * self->mUnitsToMeters;
+	end.x   = state.GetValue < float >( 4, 0.0f ) * self->mUnitsToMeters;
+	end.y   = state.GetValue < float >( 5, 0.0f ) * self->mUnitsToMeters;
+    u32 type = state.GetValue < u32 > ( 6, MOAIBox2DRayCastCallback::RAYCAST_NEAREST );
+    u32 flags = state.GetValue < u32 > ( 7, MOAIBox2DRayCastCallback::RAYCAST_FIXTURE | MOAIBox2DRayCastCallback::RAYCAST_POINT );
+    
+	MOAIBox2DRayCastCallback callback ( state, self->mUnitsToMeters );
+    callback.SetType ( type );
+    callback.SetFlags ( flags );
+    
+	self->mWorld->RayCast ( &callback, start, end );
+    
+    if ( type == MOAIBox2DRayCastCallback::RAYCAST_NEAREST ) {
+        callback.PushResult ();
+    }
+    
+    return callback.GetCount();
+}
+
+
+//----------------------------------------------------------------//
 /**	@name	setAngularSleepTolerance
 	@text	See Box2D documentation.
 	
@@ -839,11 +908,7 @@ int MOAIBox2DWorld::_setDebugDrawEnabled ( lua_State* L ) {
  
 	if(enabled)
 	{
-		self->mDebugDraw->SetFlags (
-			b2Draw::e_shapeBit			|
-			b2Draw::e_jointBit			|
-			b2Draw::e_centerOfMassBit
-		);
+		self->mDebugDraw->SetFlags ( DEBUG_DRAW_DEFAULT );
 	}
 	else
 	{
@@ -1123,6 +1188,13 @@ void MOAIBox2DWorld::RegisterLuaClass ( MOAILuaState& state ) {
 	state.SetField ( -1, "DEBUG_DRAW_PARTICLES", ( u32 )DEBUG_DRAW_PARTICLES );
 	
 	state.SetField ( -1, "DEBUG_DRAW_DEFAULT", ( u32 )DEBUG_DRAW_DEFAULT );
+    
+    state.SetField ( -1, "RAYCAST_NEAREST", ( u32 )MOAIBox2DRayCastCallback::RAYCAST_NEAREST );
+    state.SetField ( -1, "RAYCAST_ALL",     ( u32 )MOAIBox2DRayCastCallback::RAYCAST_ALL );
+    state.SetField ( -1, "RAYCAST_ANY",     ( u32 )MOAIBox2DRayCastCallback::RAYCAST_ANY );
+    state.SetField ( -1, "RAYCAST_FIXTURE", ( u32 )MOAIBox2DRayCastCallback::RAYCAST_FIXTURE );
+    state.SetField ( -1, "RAYCAST_POINT",   ( u32 )MOAIBox2DRayCastCallback::RAYCAST_POINT );
+    state.SetField ( -1, "RAYCAST_NORMAL",  ( u32 )MOAIBox2DRayCastCallback::RAYCAST_NORMAL );
 }
 
 //----------------------------------------------------------------//
@@ -1150,6 +1222,8 @@ void MOAIBox2DWorld::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "getGravity",					_getGravity },
 		{ "getLinearSleepTolerance",	_getLinearSleepTolerance },
 		{ "getTimeToSleep",				_getTimeToSleep },
+        { "queryAABB",                  _queryAABB },
+        { "rayCast",                    _rayCast },
 		{ "setAngularSleepTolerance",	_setAngularSleepTolerance },
 		{ "setAutoClearForces",			_setAutoClearForces },
 		{ "setDebugDrawEnabled",		_setDebugDrawEnabled },
@@ -1159,7 +1233,6 @@ void MOAIBox2DWorld::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "setLinearSleepTolerance",	_setLinearSleepTolerance },
 		{ "setTimeToSleep",				_setTimeToSleep },
 		{ "setUnitsToMeters",			_setUnitsToMeters },
-		{ "getRayCast",					_getRayCast },
 		{ NULL, NULL }
 	};
 	
@@ -1243,53 +1316,195 @@ void MOAIBox2DWorld::ScheduleDestruction ( MOAIBox2DParticleSystem& particleSyst
 	this->Destroy ();
 }
 
+
+
+//================================================================//
+// MOAIBox2DRayCastCallback
+//================================================================//
+
 //----------------------------------------------------------------//
-/**     @name   getRayCast
-		@text   return RayCast 1st point hit
-	   
-		@in             MOAIBox2DWorld self
-		@in             number p1x
-		@in             number p1y
-		@in             number p2x
-		@in             number p2y
-		@out    bool	true if hit, false otherwise
-		@out	  MOAIBox2DFixture fixture that was hit, or nil
-		@out    number hitpoint.x
-		@out    number hitpoint.y
-*/
-int MOAIBox2DWorld::_getRayCast ( lua_State* L ) {
-	MOAI_LUA_SETUP ( MOAIBox2DWorld, "U" )
-	float p1x=state.GetValue < float >( 2, 0 );
-	float p1y=state.GetValue < float >( 3, 0 );
-	float p2x=state.GetValue < float >( 4, 0 );
-	float p2y=state.GetValue < float >( 5, 0 );
- 
-	b2Vec2 p1(p1x,p1y);
-	b2Vec2 p2(p2x,p2y);
-   
-	MOAIBox2DRayCastCallback callback;
-	self->mWorld->RayCast(&callback, p1, p2);
- 
-	if (NULL != callback.m_fixture) {
-		b2Vec2 hitpoint = callback.m_point;
-
-		lua_pushboolean ( state, true );
-		lua_pushnumber ( state, hitpoint.x / self->mUnitsToMeters );
-		lua_pushnumber ( state, hitpoint.y / self->mUnitsToMeters );
-
-		// Raycast hit a fixture
-		MOAIBox2DFixture* moaiFixture = ( MOAIBox2DFixture* ) callback.m_fixture->GetUserData ();
-		if ( moaiFixture ) {
-			moaiFixture->PushLuaUserdata ( state );
-			return 4;
-		} else {
-			return 3;
-		}
-
-	} else {
-
-		// Raycast did not hit a fixture
-		lua_pushboolean( state, false );
-		return 1;
-	}
+MOAIBox2DRayCastCallback::MOAIBox2DRayCastCallback ( MOAILuaState& state, float unitsToMeters ):
+    mType ( RAYCAST_NEAREST ),
+    mFlags ( RAYCAST_FIXTURE | RAYCAST_PARTICLE ),
+    mCount ( 0 ),
+    mParticleIdx ( b2_invalidParticleIndex ),
+    mUnitsToMeters ( unitsToMeters ),
+    mPoint ( 0, 0 ),
+    mNormal ( 0, 0 ),
+    mFixture ( 0 ),
+    mState ( state ) {
 }
+
+//----------------------------------------------------------------//
+MOAIBox2DRayCastCallback::~MOAIBox2DRayCastCallback() {
+    
+}
+
+//----------------------------------------------------------------//
+void MOAIBox2DRayCastCallback::PushResult () {
+
+    if ( this->mFixture ) {
+        this->PushResult ( this->mFixture, this->mPoint, this->mNormal );
+    }
+    
+    if ( this->mParticleIdx != b2_invalidParticleIndex ) {
+        this->PushResult ( this->mParticleIdx, this->mPoint, this->mNormal );
+    }
+}
+
+//----------------------------------------------------------------//
+void MOAIBox2DRayCastCallback::PushResult ( b2Fixture *fixture, const b2Vec2 &point, const b2Vec2 &normal ) {
+    
+    lua_checkstack ( this->mState, 10 );
+    
+    MOAIBox2DFixture* moaiFixture = ( MOAIBox2DFixture* ) fixture->GetUserData ();
+    if ( moaiFixture && ( this->mFlags & RAYCAST_FIXTURE ) ) {
+        moaiFixture->PushLuaUserdata ( this->mState );
+        this->mCount++;
+    }
+    
+    if ( this->mFlags & RAYCAST_POINT ) {
+        this->mState.Push ( point.x / this->mUnitsToMeters );
+        this->mState.Push ( point.y / this->mUnitsToMeters );
+        this->mCount += 2;
+    }
+    
+    if ( this->mFlags & RAYCAST_NORMAL ) {
+        this->mState.Push ( normal.x );
+        this->mState.Push ( normal.y );
+        this->mCount += 2;
+    }
+}
+
+
+//----------------------------------------------------------------//
+void MOAIBox2DRayCastCallback::PushResult ( int particleIdx, const b2Vec2 &point, const b2Vec2 &normal ) {
+    
+    lua_checkstack ( this->mState, 10 );
+    
+    if ( this->mFlags & RAYCAST_PARTICLE ) {
+        this->mState.Push ( particleIdx );
+        this->mCount++;
+    }
+    
+    if ( this->mFlags & RAYCAST_POINT ) {
+        this->mState.Push ( point.x / this->mUnitsToMeters );
+        this->mState.Push ( point.y / this->mUnitsToMeters );
+        this->mCount += 2;
+    }
+    
+    if ( this->mFlags & RAYCAST_NORMAL ) {
+        this->mState.Push ( normal.x );
+        this->mState.Push ( normal.y );
+        this->mCount += 2;
+    }
+}
+
+
+//----------------------------------------------------------------//
+float32 MOAIBox2DRayCastCallback::ReportFixture ( b2Fixture *fixture, const b2Vec2 &point,
+                                                 const b2Vec2 &normal, float32 fraction ) {
+    
+    switch ( this->mType ) {
+            
+        case RAYCAST_NEAREST:
+            this->mFixture = fixture;
+            this->mPoint = point;
+            this->mNormal = normal;
+            return fraction;
+        
+        case RAYCAST_ALL:
+            this->PushResult ( fixture, point, normal );
+            return 1.0f;
+
+        case RAYCAST_ANY:
+            this->PushResult ( fixture, point, normal );
+            return 0.0f;
+    }
+    
+    return 0;
+}
+
+
+//----------------------------------------------------------------//
+float32 MOAIBox2DRayCastCallback::ReportParticle ( const b2ParticleSystem *particleSystem, int32 index,
+                                                  const b2Vec2 &point, const b2Vec2 &normal, float32 fraction ) {
+    
+    switch ( this->mType ) {
+        case RAYCAST_NEAREST:
+            this->mParticleIdx = index;
+            this->mPoint = point;
+            this->mNormal = normal;
+            return fraction;
+            
+        case RAYCAST_ALL:
+            this->PushResult ( index, point, normal );
+            return 1.0f;
+            
+        case RAYCAST_ANY:
+            this->PushResult ( index, point, normal );
+            return 0.0f;
+    }
+    
+    return 0;
+}
+
+
+//----------------------------------------------------------------//
+bool MOAIBox2DRayCastCallback::ShouldQueryParticleSystem ( const b2ParticleSystem *particleSystem ) {
+    
+    // Always return false so that particles do not participate in b2World raycasts.
+    // Particle raycasts can be performed with MOAIBox2DParticleSystem
+    // which ignores value returned by ShouldQueryParticleSystem ()
+    return false;
+}
+
+
+
+//================================================================//
+// MOAIBox2DQueryCallback
+//================================================================//
+MOAIBox2DQueryCallback::MOAIBox2DQueryCallback ( MOAILuaState& state ):
+    mCount ( 0 ) {
+    
+    mState = state;
+}
+
+
+//----------------------------------------------------------------//
+MOAIBox2DQueryCallback::~MOAIBox2DQueryCallback () {
+    
+}
+
+//----------------------------------------------------------------//
+bool MOAIBox2DQueryCallback::ReportFixture ( b2Fixture *fixture ) {
+    
+    MOAIBox2DFixture* moaiFixture = ( MOAIBox2DFixture* ) fixture->GetUserData();
+    if ( moaiFixture ) {
+        lua_checkstack ( this->mState, 5 );
+        moaiFixture->PushLuaUserdata ( this->mState );
+        this->mCount++;
+    }
+    
+    return true;
+}
+
+//----------------------------------------------------------------//
+bool MOAIBox2DQueryCallback::ReportParticle ( const b2ParticleSystem *particleSystem, int32 index ) {
+    
+    lua_checkstack ( this->mState, 5 );
+    
+    this->mState.Push ( index );
+    this->mCount++;
+    
+    return true;
+}
+
+//----------------------------------------------------------------//
+bool MOAIBox2DQueryCallback::ShouldQueryParticleSystem ( const b2ParticleSystem *particleSystem ) {
+    
+    return false;
+}
+
+
+
