@@ -19,6 +19,7 @@ MOAISim.openWindow ( "cathead", 640, 480 )
 CONST = MOAIParticleScript.packConst
 
 local r1 = MOAIParticleScript.packReg ( 1 )
+local r2 = MOAIParticleScript.packReg ( 2 )
 
 ----------------------------------------------------------------
 local init = MOAIParticleScript.new ()
@@ -36,13 +37,18 @@ render:set				( MOAIParticleScript.SPRITE_ROT, r1 )
 render:ease				( MOAIParticleScript.SPRITE_X_SCL, CONST ( 0.5 ), CONST ( 3 ), MOAIEaseType.SHARP_EASE_IN )
 render:ease				( MOAIParticleScript.SPRITE_OPACITY, CONST ( 1 ), CONST ( 0 ), MOAIEaseType.EASE_OUT )
 
+render:div 				( r2, r1, CONST ( 360.0 ) )
+render:set 				( MOAIParticleScript.SPRITE_RED, r2 )
+render:sub 				( r2, CONST ( 1.0 ) , r2 )
+render:set 				( MOAIParticleScript.SPRITE_BLUE, r2 )
+
 ----------------------------------------------------------------
 texture = MOAIGfxQuad2D.new ()
 texture:setTexture ( "moai.png" )
 texture:setRect ( -16, -16, 16, 16 )
 
 system = MOAIParticleSystem.new ()
-system:reserveParticles ( 256, 1 )
+system:reserveParticles ( 256, 2 )
 system:reserveSprites ( 256 )
 system:reserveStates ( 2 )
 system:setDeck ( texture )

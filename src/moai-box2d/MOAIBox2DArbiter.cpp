@@ -81,6 +81,23 @@ int MOAIBox2DArbiter::_setContactEnabled ( lua_State* L ) {
 	return 0;
 }
 
+//----------------------------------------------------------------//
+/**	@name	setTangentSpeed
+ 	@text	Set the desired tangent speed for a conveyor belt behavior. 
+ 
+ 	@in		MOAIBox2DArbiter self
+ 	@in		number 	speed, in unit / s, converted to m / s
+ 	@out	nil
+ */
+int MOAIBox2DArbiter::_setTangentSpeed ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIBox2DArbiter, "U" )
+	
+	float speed = state.GetValue < float >( 2, 0.0f ) * self->GetUnitsToMeters ();
+	self->mContact->SetTangentSpeed ( speed );
+	
+	return 0;
+}
+
 //================================================================//
 // MOAIBox2DArbiter
 //================================================================//
@@ -230,6 +247,7 @@ void MOAIBox2DArbiter::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "getNormalImpulse",			_getNormalImpulse },
 		{ "getTangentImpulse",			_getTangentImpulse },
 		{ "setContactEnabled",			_setContactEnabled },
+		{ "setTangentSpeed",			_setTangentSpeed },
 		{ "new",						MOAILogMessages::_alertNewIsUnsupported },
 		{ NULL, NULL }
 	};

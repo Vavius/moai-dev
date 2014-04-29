@@ -41,6 +41,7 @@ private:
 	static int		_getNormalImpulse		( lua_State* L );
 	static int		_getTangentImpulse		( lua_State* L );
 	static int		_setContactEnabled		( lua_State* L );
+    static int      _setTangentSpeed        ( lua_State* L );
 	
 	//----------------------------------------------------------------//
 	void	BeginContact	( b2Contact* contact );

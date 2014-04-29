@@ -124,7 +124,7 @@ private:
 	void			Destroy					();
 	void			SayGoodbye				( b2Fixture* fixture ); 
 	void			SayGoodbye				( b2Joint* joint );
-	void            SayGoodbye              ( b2ParticleGroup* group );
+	void			SayGoodbye				( b2ParticleGroup* group );
 	void			ScheduleDestruction		( MOAIBox2DBody& body );
 	void			ScheduleDestruction		( MOAIBox2DFixture& fixture );
 	void			ScheduleDestruction		( MOAIBox2DJoint& joint );
@@ -148,11 +148,11 @@ public:
 	static const u32 DEBUG_DRAW_BOUNDS		= b2Draw::e_aabbBit;
 	static const u32 DEBUG_DRAW_PAIRS		= b2Draw::e_pairBit;
 	static const u32 DEBUG_DRAW_CENTERS		= b2Draw::e_centerOfMassBit;
-	static const u32 DEBUG_DRAW_PARTICLES   = b2Draw::e_particleBit;
+	static const u32 DEBUG_DRAW_PARTICLES	= b2Draw::e_particleBit;
 	
 	static const u32 DEBUG_DRAW_DEFAULT = DEBUG_DRAW_SHAPES | DEBUG_DRAW_JOINTS | DEBUG_DRAW_CENTERS | DEBUG_DRAW_PARTICLES;
-    
-    
+	
+	
 	//----------------------------------------------------------------//
 	void			DrawDebug				();
 	bool			IsDone					();
@@ -169,54 +169,51 @@ public:
 // MOAIBox2DRayCastCallback
 //================================================================//
 class MOAIBox2DRayCastCallback :
-    public b2RayCastCallback {
+	public b2RayCastCallback {
 private:
-    u32         mType;
-    u32         mFlags;
-    u32         mCount;
-    int         mParticleIdx;
-    float       mUnitsToMeters;
-    b2Vec2      mPoint;
-    b2Vec2      mNormal;
-    b2Fixture*  mFixture;
-    MOAILuaState mState;
-    
-    void PushResult ( b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal );
-    void PushResult ( int particleIdx, const b2Vec2& point, const b2Vec2& normal );
-    
+	u32			mType;
+	u32			mFlags;
+	u32			mCount;
+	int			mParticleIdx;
+	float		mUnitsToMeters;
+	b2Vec2		mPoint;
+	b2Vec2		mNormal;
+	b2Fixture*	mFixture;
+	MOAILuaState mState;
+	
+	void PushResult ( b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal );
+	void PushResult ( int particleIdx, const b2Vec2& point, const b2Vec2& normal );
+	
 public:
-    
-    GET_SET ( u32, Flags, mFlags )
-    GET_SET ( u32, Type, mType )
-    GET ( u32, Count, mCount )
-    GET ( b2Fixture*, Fixture, mFixture )
-    GET ( b2Vec2, Point, mPoint )
-    GET ( b2Vec2, Normal, mNormal )
-    
-    // raycast type
-    enum {
-        RAYCAST_NEAREST,
-        RAYCAST_ALL,
-        RAYCAST_ANY
-    };
-    
-    // raycast result flags
-    enum {
-        RAYCAST_FIXTURE = 0x01,
-        RAYCAST_POINT = 0x02,
-        RAYCAST_NORMAL = 0x04,
-        RAYCAST_PARTICLE = 0x08,
-    };
+	
+	GET_SET ( u32, Flags, mFlags )
+	GET_SET ( u32, Type, mType )
+	GET ( u32, Count, mCount )
+	
+	// raycast type
+	enum {
+		RAYCAST_NEAREST,
+		RAYCAST_ALL,
+		RAYCAST_ANY
+	};
+	
+	// raycast result flags
+	enum {
+		RAYCAST_FIXTURE = 0x01,
+		RAYCAST_POINT = 0x02,
+		RAYCAST_NORMAL = 0x04,
+		RAYCAST_PARTICLE = 0x08,
+	};
 
-    MOAIBox2DRayCastCallback    ( MOAILuaState& state, float unitsToMeters );
-    ~MOAIBox2DRayCastCallback   ();
-    
-    void PushResult ();
-    float32 ReportFixture   ( b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction );
-    float32 ReportParticle  ( const b2ParticleSystem* particleSystem, int32 index,
-                             const b2Vec2& point, const b2Vec2& normal, float32 fraction );
-    bool    ShouldQueryParticleSystem ( const b2ParticleSystem* particleSystem );
-    
+	MOAIBox2DRayCastCallback	( MOAILuaState& state, float unitsToMeters );
+	~MOAIBox2DRayCastCallback	();
+	
+	void PushResult ();
+	float32 ReportFixture	( b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction );
+	float32 ReportParticle	( const b2ParticleSystem* particleSystem, int32 index,
+							 const b2Vec2& point, const b2Vec2& normal, float32 fraction );
+	bool	ShouldQueryParticleSystem ( const b2ParticleSystem* particleSystem );
+	
 };
 
 
@@ -224,21 +221,21 @@ public:
 // MOAIBox2DQueryCallback
 //================================================================//
 class MOAIBox2DQueryCallback :
-    public b2QueryCallback {
+	public b2QueryCallback {
 private:
 
-    MOAILuaState    mState;
-    u32             mCount;
+	MOAILuaState	mState;
+	u32				mCount;
 
 public:
-    GET ( u32, Count, mCount )
-        
-    MOAIBox2DQueryCallback      ( MOAILuaState& mState );
-    ~MOAIBox2DQueryCallback     ();
-    
-    bool ReportFixture          ( b2Fixture* fixture );
-    bool ReportParticle         ( const b2ParticleSystem* particleSystem, int32 index );
-    bool ShouldQueryParticleSystem ( const b2ParticleSystem* particleSystem );
+	GET ( u32, Count, mCount )
+		
+	MOAIBox2DQueryCallback		( MOAILuaState& mState );
+	~MOAIBox2DQueryCallback		();
+	
+	bool ReportFixture			( b2Fixture* fixture );
+	bool ReportParticle			( const b2ParticleSystem* particleSystem, int32 index );
+	bool ShouldQueryParticleSystem ( const b2ParticleSystem* particleSystem );
 };
 
 #endif
