@@ -9,6 +9,7 @@
 
 #include <moai-sim/MOAIImage.h>
 #include <moai-sim/MOAIGfxDevice.h>
+#include <edtaa3func.h>
 
 //================================================================//
 // local
@@ -315,6 +316,31 @@ int MOAIImage::_generateSDFDeadReckoning( lua_State* L ) {
 	u32 threshold = state.GetValue < u32 >( 6, 256 );
 	
 	self->GenerateSDFDeadReckoning ( rect, threshold );
+	
+	return 0;
+}
+
+//----------------------------------------------------------------//
+/**	@lua	generateSDFEdtaa
+	@text	Given a rect, creates a signed distance field from it
+			taking into account antialiased edges 
+			(input is antialised image with box-filter)
+ 
+	@in		MOAIImage self
+	@in		number xMin
+	@in		number yMin
+	@in		number xMax
+	@in		number yMax
+	@opt	number threshold default is 0.2
+	@out	nil
+*/
+int MOAIImage::_generateSDFEdtaa( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIImage, "UNNNN" )
+	
+	ZLIntRect rect = state.GetRect <int>( 2 );
+	float threshold = state.GetValue < float >( 6, 0.2 );
+	
+	self->GenerateSDFEdtaa3 ( rect, threshold );
 	
 	return 0;
 }
@@ -1749,6 +1775,79 @@ void MOAIImage::GenerateSDFDeadReckoning( ZLIntRect rect, int threshold ) {
 }
 
 //----------------------------------------------------------------//
+void MOAIImage::GenerateSDFEdtaa3 ( ZLIntRect rect, float threshold ) {
+	
+	int width = rect.Width ();
+	int height = rect.Height ();
+	
+	short* xdist = ( short* ) malloc ( width * height * sizeof ( short ));
+    short* ydist = ( short* ) malloc ( width * height * sizeof ( short ));
+    double* gx		= ( double* ) calloc ( width * height, sizeof ( double ));
+    double* gy		= ( double* ) calloc ( width * height, sizeof ( double ));
+    double* data	= ( double* ) calloc ( width * height, sizeof ( double ));
+    double* outside	= ( double* ) calloc ( width * height, sizeof ( double ));
+    double* inside	= ( double* ) calloc ( width * height, sizeof ( double ));
+	
+    // Convert img into double (data)
+	for ( u32 y = 0; y < height; ++y ) {
+		for ( u32 x = 0; x < width; ++x ) {
+			
+			u32 color = this->GetColor ( x + rect.mXMin, y + rect.mYMin );
+			ZLColorVec colorVec;
+			colorVec.SetRGBA ( color );
+			double v = colorVec.mA;
+			data [ y * width + x ] = v;
+		}
+	}
+	
+    // Compute outside = edtaa3(bitmap); % Transform background (0's)
+    computegradient ( data, width, height, gx, gy );
+    edtaa3 ( data, gx, gy, width, height, xdist, ydist, outside );
+    for ( u32 i = 0; i < width * height; ++i ) {
+        if ( outside [ i ] < 0 ) {
+			outside [ i ] = 0.0;
+		}
+	}
+	
+    // Compute inside = edtaa3(1-bitmap); % Transform foreground (1's)
+    memset ( gx, 0, sizeof ( double ) * width * height );
+    memset ( gy, 0, sizeof ( double ) * width * height );
+    for ( u32 i = 0; i < width * height; ++i ) {
+        data [ i ] = 1.0 - data [ i ];
+	}
+    computegradient ( data, width, height, gx, gy );
+    edtaa3 ( data, gx, gy, width, height, xdist, ydist, inside );
+    for ( u32 i = 0; i < width * height; ++i ) {
+        if ( inside [ i ] < 0 ) {
+			inside [ i ] = 0.0;
+		}
+	}
+	
+	for ( u32 y = 0; y < height; ++y ) {
+		for ( u32 x = 0; x < width; ++x ) {
+			
+			u32 i = y * width + x;
+			
+			float dist = outside [ i ] - inside [ i ];
+			dist = 0.5f + dist * threshold;
+			dist = MAX ( 0.0f, MIN ( dist, 1.0f ));
+			
+			ZLColorVec colorVec;
+			colorVec.Set ( 0, 0, 0, 1.0f - dist );
+			this->SetColor ( x + rect.mXMin, y + rect.mYMin, colorVec.PackRGBA ());
+		}
+	}
+	
+    free ( xdist );
+    free ( ydist );
+    free ( gx );
+    free ( gy );
+    free ( data );
+    free ( outside );
+    free ( inside );
+}
+
+//----------------------------------------------------------------//
 u32 MOAIImage::GetBitmapSize () const {
 
 	return this->GetRowSize () * this->mHeight;
@@ -2212,6 +2311,7 @@ void MOAIImage::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "generateOutlineFromSDF",		_generateOutlineFromSDF },
 		{ "generateSDF",				_generateSDF },
 		{ "generateSDFDeadReckoning",	_generateSDFDeadReckoning },
+		{ "generateSDFEdtaa",			_generateSDFEdtaa },
 		{ "getColor32",					_getColor32 },
 		{ "getFormat",					_getFormat },
 		{ "getRGBA",					_getRGBA },

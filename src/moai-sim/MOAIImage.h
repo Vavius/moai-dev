@@ -67,6 +67,7 @@ private:
 	static int		_generateOutlineFromSDF		( lua_State* L );
 	static int		_generateSDF				( lua_State* L );
 	static int		_generateSDFDeadReckoning	( lua_State* L );
+	static int		_generateSDFEdtaa			( lua_State* L );
 	static int		_getColor32					( lua_State* L );
 	static int		_getFormat					( lua_State* L );
 	static int		_getRGBA					( lua_State* L );
@@ -139,6 +140,7 @@ public:
 	void				GenerateOutlineFromSDF	( ZLIntRect rect, float distMin, float distMax, float r, float g, float b, float a );
 	void				GenerateSDF				( ZLIntRect rect );
 	void				GenerateSDFDeadReckoning( ZLIntRect rect, int threshold );
+	void				GenerateSDFEdtaa3		( ZLIntRect rect, float threshold );
 	u32					GetBitmapSize			() const;
 	ZLIntRect			GetBounds				();
 	u32					GetColor				( u32 i ) const;
