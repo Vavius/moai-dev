@@ -57,6 +57,10 @@ void AKUModulesAppFinalize () {
 		AKUFmodExAppFinalize ();
 	#endif
 
+	#if AKU_WITH_FMOD_STUDIO
+		AKUFmodStudioAppFinalize ();
+	#endif
+
 	#if AKU_WITH_HARNESS
 		AKUHarnessAppFinalize ();
 	#endif
@@ -119,6 +123,10 @@ void AKUModulesAppInitialize () {
 
 	#if AKU_WITH_FMOD_EX
 		AKUFmodExAppInitialize ();
+	#endif
+
+	#if AKU_WITH_FMOD_STUDIO
+		AKUFmodStudioAppInitialize ();
 	#endif
 
 	#if AKU_WITH_HARNESS
@@ -185,6 +193,10 @@ void AKUModulesContextInitialize () {
 		AKUFmodExContextInitialize ();
 	#endif
 
+	#if AKU_WITH_FMOD_STUDIO
+		AKUFmodStudioContextInitialize ();
+	#endif
+
 	#if AKU_WITH_HARNESS
 		AKUHarnessContextInitialize ();
 	#endif
@@ -236,6 +248,10 @@ void AKUModulesPause ( bool pause ) {
 	#if AKU_WITH_UNTZ
 		AKUUntzPause ( pause );
 	#endif
+
+	#if AKU_WITH_FMOD_STUDIO
+		AKUFmodStudioPause ( pause );
+	#endif
 	
 	#if AKU_WITH_IOS
 		AKUModulesIosPause ( pause );
@@ -259,6 +275,10 @@ void AKUModulesUpdate () {
 
 	#if AKU_WITH_FMOD_EX
 		AKUFmodExUpdate ();
+	#endif
+
+	#if AKU_WITH_FMOD_STUDIO
+		AKUFmodStudioUpdate ();
 	#endif
 
 	#if AKU_WITH_HARNESS
