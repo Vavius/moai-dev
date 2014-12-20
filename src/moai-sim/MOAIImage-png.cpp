@@ -286,17 +286,25 @@ void MOAIImage::LoadPng ( void* pngParam, void* pngInfoParam, u32 transform ) {
 
 //----------------------------------------------------------------//
 bool MOAIImage::WritePNG ( ZLStream& stream ) {
-
-	png_structp png_ptr;
-	png_infop info_ptr;
 	
-	png_ptr = png_create_write_struct ( PNG_LIBPNG_VER_STRING, 0, _pngError, 0 );
-	assert ( png_ptr ); // TODO
-
-	info_ptr = png_create_info_struct ( png_ptr );
-	assert ( png_ptr ); // TODO
-
+	png_structp png_ptr = png_create_write_struct ( PNG_LIBPNG_VER_STRING, 0, _pngError, 0 );
+	if ( !png_ptr ) return false;
+	
+	png_infop info_ptr = png_create_info_struct ( png_ptr );
+	if ( !info_ptr ) return false;
+	
 	png_set_write_fn ( png_ptr, &stream, _pngWrite, _pngFlush );
+	bool success = this->WritePNG ( png_ptr, info_ptr, stream );
+	
+	png_destroy_write_struct ( &png_ptr, &info_ptr );
+	return success;
+}
+
+//----------------------------------------------------------------//
+bool MOAIImage::WritePNG ( void* pngParam, void* pngInfoParam, ZLStream& stream ) {
+
+	png_structp png_ptr = ( png_structp )pngParam;
+	png_infop info_ptr = ( png_infop )pngInfoParam;
 
 	int bitDepth = 0;
 	int colorType = 0;
@@ -331,7 +339,8 @@ bool MOAIImage::WritePNG ( ZLStream& stream ) {
 		case ZLColor::RGB_565:
 		case ZLColor::RGBA_5551:
 		default:
-			assert ( false ); // TODO
+			// assert ( false ); // TODO
+			return ( false );
 	};
 	
 	// Set the image information here.  Width and height are up to 2^31,
@@ -380,8 +389,6 @@ bool MOAIImage::WritePNG ( ZLStream& stream ) {
 	//if ( trans ) {
 	//	png_free ( png_ptr, trans );
 	//}
-
-	png_destroy_write_struct ( &png_ptr, &info_ptr );
 	
 	return true;
 }

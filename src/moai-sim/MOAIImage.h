@@ -207,7 +207,8 @@ public:
 	void					Transform					( u32 transform );
 	
 	#if MOAI_WITH_LIBPNG
-		bool					WritePNG					( ZLStream& stream );
+		bool				WritePNG					( ZLStream& stream );
+		bool				WritePNG					( void* png_ptr, void* info_ptr, ZLStream& stream );
 	#endif
 };
 
