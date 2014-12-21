@@ -410,6 +410,12 @@
 		20D82E991A455B51007D59BF /* MOAIFmodStudioChannel.h in Headers */ = {isa = PBXBuildFile; fileRef = 20D82E911A455B51007D59BF /* MOAIFmodStudioChannel.h */; };
 		20D82E9A1A455B51007D59BF /* MOAIFmodStudioSound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 20D82E921A455B51007D59BF /* MOAIFmodStudioSound.cpp */; };
 		20D82E9B1A455B51007D59BF /* MOAIFmodStudioSound.h in Headers */ = {isa = PBXBuildFile; fileRef = 20D82E931A455B51007D59BF /* MOAIFmodStudioSound.h */; };
+		20D82ECC1A46B568007D59BF /* edtaa3func.c in Sources */ = {isa = PBXBuildFile; fileRef = 20D82ECA1A46B568007D59BF /* edtaa3func.c */; };
+		20D82ECD1A46B568007D59BF /* edtaa3func.c in Sources */ = {isa = PBXBuildFile; fileRef = 20D82ECA1A46B568007D59BF /* edtaa3func.c */; };
+		20D82ECE1A46B568007D59BF /* edtaa3func.c in Sources */ = {isa = PBXBuildFile; fileRef = 20D82ECA1A46B568007D59BF /* edtaa3func.c */; };
+		20D82ECF1A46B568007D59BF /* edtaa3func.h in Headers */ = {isa = PBXBuildFile; fileRef = 20D82ECB1A46B568007D59BF /* edtaa3func.h */; };
+		20D82ED01A46B568007D59BF /* edtaa3func.h in Headers */ = {isa = PBXBuildFile; fileRef = 20D82ECB1A46B568007D59BF /* edtaa3func.h */; };
+		20D82ED11A46B568007D59BF /* edtaa3func.h in Headers */ = {isa = PBXBuildFile; fileRef = 20D82ECB1A46B568007D59BF /* edtaa3func.h */; };
 		663704171612813D002D0D27 /* moai_whirlpool.h in Headers */ = {isa = PBXBuildFile; fileRef = 663704111612812C002D0D27 /* moai_whirlpool.h */; };
 		663704191612813E002D0D27 /* moai_whirlpool.h in Headers */ = {isa = PBXBuildFile; fileRef = 663704111612812C002D0D27 /* moai_whirlpool.h */; };
 		66E345461614CA710021FC4B /* moai_whirlpool.c in Sources */ = {isa = PBXBuildFile; fileRef = 66E345451614CA710021FC4B /* moai_whirlpool.c */; };
@@ -5585,6 +5591,8 @@
 		20D82E911A455B51007D59BF /* MOAIFmodStudioChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MOAIFmodStudioChannel.h; path = "moai-fmod-studio/MOAIFmodStudioChannel.h"; sourceTree = "<group>"; };
 		20D82E921A455B51007D59BF /* MOAIFmodStudioSound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MOAIFmodStudioSound.cpp; path = "moai-fmod-studio/MOAIFmodStudioSound.cpp"; sourceTree = "<group>"; };
 		20D82E931A455B51007D59BF /* MOAIFmodStudioSound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MOAIFmodStudioSound.h; path = "moai-fmod-studio/MOAIFmodStudioSound.h"; sourceTree = "<group>"; };
+		20D82ECA1A46B568007D59BF /* edtaa3func.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = edtaa3func.c; path = ../../3rdparty/contrib/edtaa3func.c; sourceTree = "<group>"; };
+		20D82ECB1A46B568007D59BF /* edtaa3func.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = edtaa3func.h; path = ../../3rdparty/contrib/edtaa3func.h; sourceTree = "<group>"; };
 		43BA2E5A17733267007DCDF0 /* JSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JSON.h; path = "../../3rdparty/playhaven-ios-1.13.1/JSON/JSON.h"; sourceTree = "<group>"; };
 		43BA2E5B17733267007DCDF0 /* SBJsonBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SBJsonBase.h; path = "../../3rdparty/playhaven-ios-1.13.1/JSON/SBJsonBase.h"; sourceTree = "<group>"; };
 		43BA2E5C17733267007DCDF0 /* SBJsonBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SBJsonBase.m; path = "../../3rdparty/playhaven-ios-1.13.1/JSON/SBJsonBase.m"; sourceTree = "<group>"; };
@@ -8477,6 +8485,8 @@
 		03240A7613564CAF000ADC60 /* contrib */ = {
 			isa = PBXGroup;
 			children = (
+				20D82ECA1A46B568007D59BF /* edtaa3func.c */,
+				20D82ECB1A46B568007D59BF /* edtaa3func.h */,
 				CD9F761B1808C7670001EF0C /* MOAIOpenUDID.h */,
 				CD9F761C1808C7670001EF0C /* MOAIOpenUDID.m */,
 				CD80F63D135BBCFF006B0683 /* MOAIIso8601DateFormatter.h */,
@@ -13126,6 +13136,7 @@
 				CDD48B4E17FA794B00525B77 /* SFMT-alti.h in Headers */,
 				CD881ED619FF66E5004498E8 /* alphai.h in Headers */,
 				CD881F1E19FF670D004498E8 /* dsp.h in Headers */,
+				20D82ED01A46B568007D59BF /* edtaa3func.h in Headers */,
 				CDD48B5817FA794B00525B77 /* SFMT-params86243.h in Headers */,
 				CD881FF219FF6743004498E8 /* decode.h in Headers */,
 				CD69AB3E17FA6CF90053E028 /* dict.h in Headers */,
@@ -13336,6 +13347,7 @@
 				CD9F761F1808CC5A0001EF0C /* MOAIOpenUDID.h in Headers */,
 				CD881ED519FF66E5004498E8 /* alphai.h in Headers */,
 				CD881F1D19FF670D004498E8 /* dsp.h in Headers */,
+				20D82ECF1A46B568007D59BF /* edtaa3func.h in Headers */,
 				CDD48B7517FA794E00525B77 /* SFMT-params19937.h in Headers */,
 				CD881FF119FF6743004498E8 /* decode.h in Headers */,
 				663704191612813E002D0D27 /* moai_whirlpool.h in Headers */,
@@ -13417,6 +13429,7 @@
 			files = (
 				20D82E951A455B51007D59BF /* host.h in Headers */,
 				20D82E6A1A455A67007D59BF /* fmod_ios.h in Headers */,
+				20D82ED11A46B568007D59BF /* edtaa3func.h in Headers */,
 				20D82E991A455B51007D59BF /* MOAIFmodStudioChannel.h in Headers */,
 				20D82E6B1A455A67007D59BF /* fmod_output.h in Headers */,
 				20D82E971A455B51007D59BF /* MOAIFmodStudio.h in Headers */,
@@ -16412,6 +16425,7 @@
 				CD881F1C19FF670D004498E8 /* dec.c in Sources */,
 				03240D1413564CB0000ADC60 /* pngwutil.c in Sources */,
 				03240D4D13564CB0000ADC60 /* tinyxml.cpp in Sources */,
+				20D82ECD1A46B568007D59BF /* edtaa3func.c in Sources */,
 				CD881FCB19FF6736004498E8 /* huffman_encode.c in Sources */,
 				CD881FE719FF6736004498E8 /* utils.c in Sources */,
 				03240D4F13564CB0000ADC60 /* tinyxmlerror.cpp in Sources */,
@@ -16699,6 +16713,7 @@
 				CDD4911C17FA7A8600525B77 /* ftfstype.c in Sources */,
 				CDD490FE17FA7A8000525B77 /* ftbbox.c in Sources */,
 				CD881F9819FF6728004498E8 /* muxinternal.c in Sources */,
+				20D82ECC1A46B568007D59BF /* edtaa3func.c in Sources */,
 				CD9F76201808CC5A0001EF0C /* MOAIOpenUDID.m in Sources */,
 				CDD4910B17FA7A8000525B77 /* psaux.c in Sources */,
 				CDD4910917FA7A8000525B77 /* pcf.c in Sources */,
@@ -16932,6 +16947,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				20D82E941A455B51007D59BF /* host.cpp in Sources */,
+				20D82ECE1A46B568007D59BF /* edtaa3func.c in Sources */,
 				20D82E9A1A455B51007D59BF /* MOAIFmodStudioSound.cpp in Sources */,
 				20D82E981A455B51007D59BF /* MOAIFmodStudioChannel.cpp in Sources */,
 				20D82E961A455B51007D59BF /* MOAIFmodStudio.cpp in Sources */,
