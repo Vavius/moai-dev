@@ -65,6 +65,7 @@ private:
 
 	//----------------------------------------------------------------//
 	static int		_bleedRect					( lua_State* L );
+	static int		_blur						( lua_State* L );
 	static int		_compare					( lua_State* L );
 	static int		_convert					( lua_State* L );
 	static int		_copy						( lua_State* L );
@@ -157,6 +158,7 @@ public:
 	static MOAIImage*		AffirmImage					( MOAILuaState& state, int idx );
 	void					BleedRect					( ZLIntRect rect );
 	void					Blit						( const MOAIImage& image, int srcX, int srcY, int destX, int destY, int width, int height );
+	void					Blur						();
 	void					Clear						();
 	void					ClearBitmap					();
 	void					ClearRect					( ZLIntRect rect );
