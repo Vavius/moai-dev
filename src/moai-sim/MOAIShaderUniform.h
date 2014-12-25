@@ -52,6 +52,7 @@ public:
 
 	//----------------------------------------------------------------//
 	void		AddValue			( const MOAIAttrOp& attrOp );
+	void		Default				();
 	void		GetFlags			( MOAIAttrOp& attrOp );
 	void        GetValue			( MOAIAttrOp& attrOp );
 	void		SetType				( u32 type );
@@ -83,6 +84,11 @@ public:
 
 	//----------------------------------------------------------------//
 	void		Bind				();
+	
+	//----------------------------------------------------------------//
+	inline bool IsValid () {
+		return this->mAddr != ZGL_INVALID_UNIFORM_ADDR;
+	}
 };
 
 #endif
