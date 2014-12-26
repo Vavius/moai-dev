@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>BEC5DEDA-4835-415C-BC5E-B3A8A3916D4B</string>
+	<key>IDESourceControlProjectName</key>
+	<string>AdColonyBasic</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>9F39544D-433C-4193-AACD-E63CA9B72B63</key>
+		<string>https://github.com/AdColony/AdColony-iOS-SDK.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Sample Apps/AdColonyBasic/AdColonyBasic.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>9F39544D-433C-4193-AACD-E63CA9B72B63</key>
+		<string>../../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/AdColony/AdColony-iOS-SDK.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>9F39544D-433C-4193-AACD-E63CA9B72B63</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>9F39544D-433C-4193-AACD-E63CA9B72B63</string>
+			<key>IDESourceControlWCCName</key>
+			<string>AdColony-iOS-SDK</string>
+		</dict>
+	</array>
+</dict>
+</plist>

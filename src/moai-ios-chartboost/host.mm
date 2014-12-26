@@ -2,7 +2,7 @@
 // http://getmoai.com
 
 #include <moai-ios-chartboost/host.h>
-#include <moai-ios-chartboost/MOAIChartBoostIOS.h>
+#include <moai-ios-chartboost/MOAIChartboostIOS.h>
 
 //================================================================//
 // aku
@@ -19,5 +19,5 @@ void AKUIosChartBoostAppInitialize () {
 //----------------------------------------------------------------//
 void AKUIosChartBoostContextInitialize () {
 
-	REGISTER_LUA_CLASS ( MOAIChartBoostIOS );
+	REGISTER_LUA_CLASS ( MOAIChartboostIOS );
 }

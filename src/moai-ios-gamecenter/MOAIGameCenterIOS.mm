@@ -3,15 +3,15 @@
 
 #include "pch.h"
 
-#import <moai-ios/headers.h>
 #import <moai-ios-gamecenter/MOAIGameCenterIOS.h>
+#import <moai-ios/NSDate+MOAILib.h>
 
 //================================================================//
 // lua
 //================================================================//
 
 //----------------------------------------------------------------//
-/**	@lua	authenticatePlayer
+/**	@name	authenticatePlayer
 	@text	Makes sure GameCenter is supported and an account is 
 			logged in. If none are logged in, this will prompt the 
 			user to log in. This must be called before any other 
@@ -24,12 +24,6 @@ int MOAIGameCenterIOS::_authenticatePlayer ( lua_State* L ) {
 	
 	MOAILuaState state ( L );
 	
-	// TODO: investigate copy constructor support for MOAILuaStrongRef
-	//MOAILuaStrongRef& onAuthenticate = *( new MOAILuaStrongRef ()); // wow this is hideous
-	//if ( state.IsType ( 1, LUA_TFUNCTION )) {
-	//	onAuthenticate.SetRef ( state, 1 );
-	//}
-	
 	// Check for presence of GKLocalPlayer class.
     BOOL localPlayerClassAvailable = ( NSClassFromString ( @"GKLocalPlayer" )) != nil;
 	
@@ -37,40 +31,67 @@ int MOAIGameCenterIOS::_authenticatePlayer ( lua_State* L ) {
     NSString *reqSysVer = @"4.1";
     NSString *currSysVer = [[ UIDevice currentDevice ] systemVersion ];
     BOOL osVersionSupported = ([ currSysVer compare:reqSysVer options:NSNumericSearch ] != NSOrderedAscending );
-    if ( localPlayerClassAvailable && osVersionSupported ) {
-		
-		// If GameCenter is available, attempt to authenticate the local player
-		GKLocalPlayer* localPlayer = [ GKLocalPlayer localPlayer ];
-		[ localPlayer authenticateWithCompletionHandler: ^( NSError *error ) {
+    
+	if ( !localPlayerClassAvailable || !osVersionSupported ) {
+		// early out; gamecenter is not supported
+		return 0;
+	}
+	
+	
+	GKLocalPlayer *localPlayer = [ GKLocalPlayer localPlayer ];
+	
+	
+	BOOL oldLoginFlow = ([ currSysVer compare:@"6.0" options:NSNumericSearch ] == NSOrderedAscending );
+
+	if ( oldLoginFlow ) {
+		// iOS 5.x and below
+		[ localPlayer authenticateWithCompletionHandler:^(NSError *error) {
 			
-			bool success = true;
-			
-			if ([ error code ] == GKErrorNotSupported || [ error  code ] == GKErrorGameUnrecognized ) {
+			if ( [ error code ] == GKErrorNotSupported || [ error  code ] == GKErrorGameUnrecognized ) {
+				
 				MOAIGameCenterIOS::Get ().mIsGameCenterSupported = FALSE;
-				success = false;
 			}
 			else if ([ GKLocalPlayer localPlayer ].isAuthenticated) {
+				
 				MOAIGameCenterIOS::Get ().mLocalPlayer = localPlayer;
-				MOAIGameCenterIOS::Get ().mIsGameCenterSupported = TRUE;	
-				MOAIGameCenterIOS::Get ().GetAchievements ();						
+				MOAIGameCenterIOS::Get ().mIsGameCenterSupported = TRUE;
+				MOAIGameCenterIOS::Get ().GetAchievements ();
 			}
+		}];
+	}
+	else {
+		// iOS 6.0 and above
+		[ localPlayer setAuthenticateHandler:^(UIViewController *viewcontroller, NSError *error) {
 			
-			// TODO: investigate copy constructor support for MOAILuaState
-			//MOAILuaState localState ( L );
-			//if ( onAuthenticate ) {
-			//	onAuthenticate.PushRef ( localState );
-			//	localState.Push ( success );
-			//	localState.DebugCall ( 1, 0 );
-			//}
-			//delete ( &onAuthenticate ); // really? :/
-		 }];
-	}	
+			if ( !error && viewcontroller ) {
+				
+				UIWindow* window = [[ UIApplication sharedApplication ] keyWindow ];
+				UIViewController* rootVC = [ window rootViewController ];
+				[ rootVC presentViewController:viewcontroller animated:YES completion:nil];
+			}
+			else {
+				
+				if ( [ error code ] == GKErrorNotSupported || [ error  code ] == GKErrorGameUnrecognized ) {
+					
+                    cc8* message = [[ error description ] UTF8String ];
+                    MOAIPrint ( message );
+					MOAIGameCenterIOS::Get ().mIsGameCenterSupported = FALSE;
+				}
+				else if ([ GKLocalPlayer localPlayer ].isAuthenticated) {
+					
+					MOAIGameCenterIOS::Get ().mLocalPlayer = localPlayer;
+					MOAIGameCenterIOS::Get ().mIsGameCenterSupported = TRUE;
+					MOAIGameCenterIOS::Get ().GetAchievements ();
+				}
+			}
+		}];
+	}
 	
 	return 0;
 }
 
 //----------------------------------------------------------------//
-/**	@lua	getPlayerAlias
+/**	@name	getPlayerAlias
 	@text	Returns the user visible player name string from GameCenter.
 
 	@in 	nil
@@ -87,7 +108,7 @@ int MOAIGameCenterIOS::_getPlayerAlias ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
-/**	@lua	getScores
+/**	@name	getScores
 	@text	Returns the top ten scores of everyone for all-time. 
 			Optionally specify a leaderboard, player scope, time scope 
 			and range. If no leaderboard was specified, this will 
@@ -130,7 +151,7 @@ int MOAIGameCenterIOS::_getScores ( lua_State* L ) {
 		
             if ( error != nil ) {
 	
-				printf ( "Error in getting leaderboard scores: %ld\n", ( long )[ error code ]);
+				printf ( "Error in getting leaderboard scores: %d\n", [ error code ]);
             }
             if ( scores != nil ) {
 	
@@ -143,23 +164,7 @@ int MOAIGameCenterIOS::_getScores ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
-/**	@lua	isAuthenticated
-	@text	Returns whether or not there is an authenticated local player.
-			
-	@in		nil
-	@out	bool	isAuthenticated
-*/
-int MOAIGameCenterIOS::_isAuthenticated ( lua_State* L ) {
-	
-	MOAILuaState state ( L );
-
-	lua_pushboolean ( state, [ GKLocalPlayer localPlayer ].isAuthenticated == YES );
-	
-	return 1;
-}
-
-//----------------------------------------------------------------//
-/**	@lua	isSupported
+/**	@name	isSupported
 	@text	Returns whether or not GameCenter is supported on the 
 			current device.
 			
@@ -176,7 +181,7 @@ int MOAIGameCenterIOS::_isSupported ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
-/**	@lua	reportAchievementProgress
+/**	@name	reportAchievementProgress
 	@text	Reports an achievement progress to GameCenter.
 			
 	@in		string	identifier
@@ -192,20 +197,20 @@ int MOAIGameCenterIOS::_reportAchievementProgress ( lua_State* L ) {
 	
 	MOAILuaState state ( L );
 
-	cc8* identifier = lua_tostring ( state, 1 );
-	float percent =  ( float )lua_tonumber ( state, 2 );
-		
+	cc8* identifier = state.GetValue < cc8* >( 1, "" );
+	float percent	= state.GetValue < float >( 2, 0.0f );
+    
 	MOAIGameCenterIOS::Get ().ReportAchievementProgress ( identifier, percent );
 	
 	return 0;
 }
 
 //----------------------------------------------------------------//
-/**	@lua	reportScore
+/**	@name	reportScore
 	@text	Reports a score to a desired leaderboard on GameCenter.
-			
-	@in		number	score
+ 
 	@in		string	category
+ 	@in		number	score
 	@out	nil
 */
 int MOAIGameCenterIOS::_reportScore ( lua_State* L ) {
@@ -216,9 +221,9 @@ int MOAIGameCenterIOS::_reportScore ( lua_State* L ) {
 	}
 	
 	MOAILuaState state ( L );
-
-	s64 score =  ( s64 )lua_tonumber ( state, 1 );
-	cc8* category = lua_tostring ( state, 2 );
+	
+	cc8* category = state.GetValue < cc8* >( 1, "" );
+    s64 score = state.GetValue < s64 >( 2, 0 );
 		
 	MOAIGameCenterIOS::Get ().ReportScore ( score, category );
 	
@@ -226,7 +231,7 @@ int MOAIGameCenterIOS::_reportScore ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
-/**	@lua	setGetScoresCallabck
+/**	@name	setGetScoresCallabck
 	@text	Sets the function to be called upon a successful '
 			getScores () call.
 			
@@ -243,7 +248,7 @@ int MOAIGameCenterIOS::_setGetScoresCallback ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
-/**	@lua	showDefaultAchievments
+/**	@name	showDefaultAchievments
 	@text	Displays the default achievements view.
 			
 	@in		nil
@@ -272,7 +277,7 @@ int MOAIGameCenterIOS::_showDefaultAchievements ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
-/**	@lua	showDefaultLeaderboard
+/**	@name	showDefaultLeaderboard
 	@text	Displays the default leaderboard view.
 			
 	@in		nil
@@ -299,6 +304,40 @@ int MOAIGameCenterIOS::_showDefaultLeaderboard ( lua_State* L ) {
 	return 0;
 }
 
+//----------------------------------------------------------------//
+/**	@name	showDefaultLeaderboard
+	@text	Displays the default leaderboard view.
+ 
+	@in		number	state	One of MOAIGameCenterIOS.VIEW_DEFAULT, VIEW_LEADERBOARDS,
+							VIEW_ACHIEVEMENTS, VIEW_CHALLENGES
+	@out	nil
+*/
+
+int MOAIGameCenterIOS::_showGameCenter ( lua_State *L ) {
+	
+	MOAILuaState state ( L );
+	
+	GKGameCenterViewControllerState viewState = state.GetValue < int >( 1, GKGameCenterViewControllerStateDefault );
+	
+	UIWindow* window = [[ UIApplication sharedApplication ] keyWindow ];
+	UIViewController* rootVC = [ window rootViewController ];
+	
+	GKGameCenterViewController* gameCenterController = [[ GKGameCenterViewController alloc ] init ];
+	if ( gameCenterController ) {
+		
+		gameCenterController.gameCenterDelegate = MOAIGameCenterIOS::Get ().mGameCenterDelegate;
+		gameCenterController.viewState = viewState;
+		if ( rootVC != nil ) {
+			
+			[ rootVC presentViewController:gameCenterController animated:YES completion:nil ];
+		}
+	}
+	
+	[ gameCenterController release ];
+	
+	return 0;
+}
+
 //================================================================//
 // MOAIGameCenterIOS
 //================================================================//
@@ -307,10 +346,11 @@ int MOAIGameCenterIOS::_showDefaultLeaderboard ( lua_State* L ) {
 MOAIGameCenterIOS::MOAIGameCenterIOS () :
 	mIsGameCenterSupported ( false ) {
 
-	RTTI_SINGLE ( MOAILuaObject )		
+	RTTI_SINGLE ( MOAILuaObject )
 	
-	mLeaderboardDelegate = [ MOAIGameCenterIOSLeaderboardDelegate alloc ];
-	mAchievementDelegate = [ MOAIGameCenterIOSAchievementDelegate alloc ];
+	mLeaderboardDelegate = [[ MOAIGameCenterIOSLeaderboardDelegate alloc ] init];
+	mAchievementDelegate = [[ MOAIGameCenterIOSAchievementDelegate alloc ] init];
+	mGameCenterDelegate = [[ MOAIGameCenterIOSGameCenterDelegate alloc ] init];
 	mAchievementsDictionary = [[ NSMutableDictionary alloc ] init ];
 }
 
@@ -319,6 +359,7 @@ MOAIGameCenterIOS::~MOAIGameCenterIOS () {
 	
 	[ mAchievementDelegate release ];
 	[ mLeaderboardDelegate release ];
+	[ mGameCenterDelegate release ];
 }
 
 //----------------------------------------------------------------//
@@ -331,17 +372,22 @@ void MOAIGameCenterIOS::RegisterLuaClass ( MOAILuaState& state ) {
 	state.SetField ( -1, "PLAYERSCOPE_GLOBAL",	( u32 )PLAYERSCOPE_GLOBAL );
 	state.SetField ( -1, "PLAYERSCOPE_FRIENDS",	( u32 )PLAYERSCOPE_FRIENDS );
 	
+	state.SetField ( -1, "VIEW_DEFAULT",		( int )GKGameCenterViewControllerStateDefault );
+	state.SetField ( -1, "VIEW_LEADERBOARDS",	( int )GKGameCenterViewControllerStateLeaderboards );
+	state.SetField ( -1, "VIEW_ACHIEVEMENTS",	( int )GKGameCenterViewControllerStateAchievements );
+	state.SetField ( -1, "VIEW_CHALLENGES",		( int )GKGameCenterViewControllerStateChallenges );
+	
 	luaL_Reg regTable [] = {
 		{ "authenticatePlayer",			_authenticatePlayer },
 		{ "getPlayerAlias",				_getPlayerAlias },
 		{ "getScores",					_getScores },
-		{ "isAuthenticated",			_isAuthenticated },
 		{ "isSupported",				_isSupported },
 		{ "reportAchievementProgress",	_reportAchievementProgress },
 		{ "reportScore",				_reportScore },
 		{ "setGetScoresCallback",		_setGetScoresCallback },
 		{ "showDefaultAchievements",	_showDefaultAchievements },
 		{ "showDefaultLeaderboard",		_showDefaultLeaderboard },
+		{ "showGameCenter",				_showGameCenter },
 		{ NULL, NULL }
 	};
 
@@ -387,6 +433,7 @@ void MOAIGameCenterIOS::CallScoresCallback ( NSArray* scores ) {
 void MOAIGameCenterIOS::CreateAchievementDictionary ( NSArray* achievements ) {
 	
 	for ( GKAchievement* achievement in achievements ) {
+				
 		[ mAchievementsDictionary setObject: achievement forKey: achievement.identifier ];
 	}
 }
@@ -397,7 +444,9 @@ GKAchievement* MOAIGameCenterIOS::GetAchievementFromDictionary ( cc8* identifier
 	GKAchievement* achievement = [ mAchievementsDictionary objectForKey:[ NSString stringWithUTF8String:identifier ]];
 	
     if ( achievement == nil ) {
+	
         achievement = [[[ GKAchievement alloc ] initWithIdentifier:[ NSString stringWithUTF8String:identifier ]] autorelease ];
+		achievement.showsCompletionBanner = YES;
         [ mAchievementsDictionary setObject:achievement forKey:achievement.identifier  ];
     }
 	
@@ -408,7 +457,9 @@ GKAchievement* MOAIGameCenterIOS::GetAchievementFromDictionary ( cc8* identifier
 void MOAIGameCenterIOS::GetAchievements () {
 	
 	[ GKAchievement loadAchievementsWithCompletionHandler:^( NSArray* achievements, NSError* error ) {
+	
 		if ( error == nil ) {
+					
 			CreateAchievementDictionary ( achievements );
 		}
 	}];
@@ -418,17 +469,21 @@ void MOAIGameCenterIOS::GetAchievements () {
 void MOAIGameCenterIOS::ReportAchievementProgress ( cc8* identifier, float percent ) {
 
 	GKAchievement *achievement = GetAchievementFromDictionary ( identifier );
-	
+
     if ( achievement != nil && achievement.percentComplete < percent ) {
 		
 		if ( !achievement.isCompleted ) {
 			
+			double curPercent = achievement.percentComplete;
 			achievement.percentComplete = percent;
 			
-			[ achievement reportAchievementWithCompletionHandler:^( NSError *error ) {
-				if ( error != nil ) {
-					printf ( "Error in achievement reporting: %ld", ( long )[ error code ]);
+			[ achievement reportAchievementWithCompletionHandler: ^(NSError *error) {
+				if ( error != nil )
+				{
+					printf ( "Error in achievement reporting: %d", [ error code ]);
 					// TODO: Save off achievement for later if network error
+					// roll back to previous percentage
+					achievement.percentComplete = curPercent;
 				}
 			}];
 		}
@@ -437,7 +492,7 @@ void MOAIGameCenterIOS::ReportAchievementProgress ( cc8* identifier, float perce
 
 //----------------------------------------------------------------//
 void MOAIGameCenterIOS::ReportScore ( s64 score, cc8* category ) {
-
+    
 	GKScore *scoreReporter = [[[ GKScore alloc ] initWithCategory:[ NSString stringWithUTF8String:category ]] autorelease ];
 	
 	if ( scoreReporter ) {
@@ -447,7 +502,7 @@ void MOAIGameCenterIOS::ReportScore ( s64 score, cc8* category ) {
 		[ scoreReporter reportScoreWithCompletionHandler: ^( NSError *error ) {
 			if ( error != nil ) {
 				
-				printf ( "Error in score reporting: %ld", ( long )[ error code ]);
+				printf ( "Error in score reporting: %d", [ error code ]);
 				// TODO: Save off score for later if network error
 			}
 		}];
@@ -457,17 +512,21 @@ void MOAIGameCenterIOS::ReportScore ( s64 score, cc8* category ) {
 //================================================================//
 // MOAIGameCenterIOSLeaderboardDelegate
 //================================================================//
-#pragma mark -
-#pragma mark Protocol MOAIGameCenterIOSLeaderboardDelegate
 @implementation MOAIGameCenterIOSLeaderboardDelegate
 
-	//----------------------------------------------------------------//
+	//================================================================//
+	#pragma mark -
+	#pragma mark Protocol MOAIGameCenterIOSLeaderboardDelegate
+	//================================================================//
+	
 	- ( void ) leaderboardViewControllerDidFinish:( GKLeaderboardViewController* ) viewController {
+		
 		UNUSED ( viewController );
 	
 		UIWindow* window = [[ UIApplication sharedApplication ] keyWindow ];
 		UIViewController* rootVC = [ window rootViewController ];
 		if ( rootVC ) {
+			
 			[ rootVC dismissModalViewControllerAnimated:YES ];
 		}
 	}
@@ -476,18 +535,45 @@ void MOAIGameCenterIOS::ReportScore ( s64 score, cc8* category ) {
 //================================================================//
 // MOAIGameCenterIOSAchievementDelegate
 //================================================================//
-#pragma mark -
-#pragma mark Protocol MOAIGameCenterIOSAchievementDelegate
 @implementation MOAIGameCenterIOSAchievementDelegate
 
-	//----------------------------------------------------------------//
+	//================================================================//
+	#pragma mark -
+	#pragma mark Protocol MOAIGameCenterIOSAchievementDelegate
+	//================================================================//
+	
 	- ( void ) achievementViewControllerDidFinish:( GKAchievementViewController* ) viewController {
+		
 		UNUSED ( viewController );
 	
 		UIWindow* window = [[ UIApplication sharedApplication ] keyWindow ];
 		UIViewController* rootVC = [ window rootViewController ];
 		if ( rootVC ) {
+			
 			[ rootVC dismissModalViewControllerAnimated:YES ];
 		}
 	}
+@end
+
+//================================================================//
+// MOAIGameCenterIOSGameCenterDelegate
+//================================================================//
+@implementation MOAIGameCenterIOSGameCenterDelegate
+
+//================================================================//
+#pragma mark -
+#pragma mark Protocol MOAIGameCenterIOSGameCenterDelegate
+//================================================================//
+
+- ( void ) gameCenterViewControllerDidFinish:( GKGameCenterViewController* ) viewController {
+	
+	UNUSED ( viewController );
+	
+	UIWindow* window = [[ UIApplication sharedApplication ] keyWindow ];
+	UIViewController* rootVC = [ window rootViewController ];
+	if ( rootVC ) {
+		
+		[ rootVC dismissModalViewControllerAnimated:YES ];
+	}
+}
 @end

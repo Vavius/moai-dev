@@ -33,6 +33,8 @@
 class MOAIBillingIOS :
 	public MOAIGlobalClass < MOAIBillingIOS, MOAILuaObject > {
 private:
+    
+    NSMutableDictionary* mProducts;
 
 	//----------------------------------------------------------------//
 	static int	_canMakePayments				( lua_State* L );

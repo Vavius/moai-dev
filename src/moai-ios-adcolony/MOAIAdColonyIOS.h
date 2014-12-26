@@ -7,6 +7,8 @@
 #ifndef MOAIADCOLONYIOS_H
 #define MOAIADCOLONYIOS_H
 
+#ifndef DISABLE_ADCOLONY
+
 #include <moai-core/headers.h>
 
 #import <AdColony/AdColony.h>
@@ -21,36 +23,57 @@ class MOAIAdColonyIOS :
 public MOAIGlobalClass < MOAIAdColonyIOS, MOAILuaObject >,
 public MOAIGlobalEventSource {
 private:
-	
+    
 	MOAIAdColonyIOSDelegate*			mAdColonyDelegate;
+	MOAIAdColonyIOSTakeoverDelegate*	mTakeoverDelegate;
 	
 	//----------------------------------------------------------------//
-	static int		_init					( lua_State* L );
-	static int		_playVideo				( lua_State* L );
-	static int		_videoReadyForZone		( lua_State* L );
+	static int	_getDeviceID		( lua_State* L );
+	static int	_init				( lua_State* L );
+	static cc8*	_luaParseTable 		( lua_State* L, int idx );
+	static int	_playVideo			( lua_State* L );
+	static int	_videoReadyForZone	( lua_State* L );
 	
 public:
 
 	DECL_LUA_SINGLETON ( MOAIAdColonyIOS );
 	
 	enum {
-		VIDEO_STARTED,
-		VIDEO_SHOWN,
-		VIDEO_FAILED,
+		VIDEO_BEGAN_IN_ZONE,
+		VIDEO_ENDED_IN_ZONE,
+		VIDEO_FAILED_IN_ZONE,
+		VIDEO_PAUSED_IN_ZONE,
+		VIDEO_RESUMED_IN_ZONE,
+		AVAILABILITY_CHANGE,
+		REWARD,
+		TOTAL
 	};
 	
-	//----------------------------------------------------------------//
-					MOAIAdColonyIOS					();
-					~MOAIAdColonyIOS				();
-	void			RegisterLuaClass				( MOAILuaState& state );
+            MOAIAdColonyIOS				();
+			~MOAIAdColonyIOS			();
+	void	NotifyTakeoverEventOccurred	( int event, cc8* zone );
+	void	NotifyAvailabilityChange	( BOOL available, cc8* zone );
+	void	NotifyV4VCReward			( BOOL success, cc8* currencyName, int amount, cc8* zone );
+	
+	void	RegisterLuaClass			( MOAILuaState& state );
 };
 
 //================================================================//
 // MOAIAdColonyIOSDelegate
 //================================================================//
-@interface MOAIAdColonyIOSDelegate : NSObject < AdColonyDelegate, AdColonyAdDelegate > {
+@interface MOAIAdColonyIOSDelegate : NSObject < AdColonyDelegate > {
 @private
 }
 @end
 
-#endif // MOAIADCOLONYIOS_H
+//================================================================//
+// MOAIAdColonyIOSTakeoverDelegate
+//================================================================//
+@interface MOAIAdColonyIOSTakeoverDelegate : NSObject < AdColonyAdDelegate > {
+@private
+}
+@end
+
+#endif // MOAIADCOLONY_H
+
+#endif // DISABLE_ADCOLONY

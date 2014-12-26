@@ -2,8 +2,8 @@ cmake_minimum_required ( VERSION 2.8.11 )
 project ( moai-ios-flurry )
 
 # lib
-set(FLURRY_ROOT ${MOAI_ROOT}/3rdparty/Flurry-iOS-5.0.0/Flurry)
-set(FLURRY_LIB ${FLURRY_ROOT}/libFlurry_5.0.0.a)
+set(FLURRY_ROOT ${MOAI_ROOT}/3rdparty/Flurry-iOS-6.0.0/Flurry)
+set(FLURRY_LIB ${FLURRY_ROOT}/libFlurry_6.0.0.a)
 
 add_library(Flurry STATIC IMPORTED)
 set_property(TARGET Flurry PROPERTY IMPORTED_LOCATION ${FLURRY_LIB})

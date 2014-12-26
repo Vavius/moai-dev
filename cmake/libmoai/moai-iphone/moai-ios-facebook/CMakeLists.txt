@@ -2,7 +2,7 @@ cmake_minimum_required ( VERSION 2.8.11 )
 project ( moai-ios-facebook )
 
 #lib
-set(FACEBOOK_ROOT ${MOAI_ROOT}/3rdparty/facebook-ios-sdk-3.14.1/FacebookSDK.framework)
+set(FACEBOOK_ROOT ${MOAI_ROOT}/3rdparty/facebook-ios-sdk-3.21/FacebookSDK.framework)
 set(FACEBOOK_LIB ${FACEBOOK_ROOT}/FacebookSDK)
 add_library(FacebookSDK SHARED IMPORTED)
 set_property(TARGET FacebookSDK PROPERTY IMPORTED_LOCATION ${FACEBOOK_LIB})

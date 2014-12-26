@@ -6,6 +6,10 @@
 #import <moai-ios-billing/MOAIBillingIOS.h>
 #import <moai-ios-billing/MOAIStoreKitListener.h>
 
+#ifndef DISABLE_CHARTBOOST
+#include <moai-ios-chartboost/MOAIChartboostIOS.h>
+#endif
+
 //================================================================//
 // lua
 //================================================================//
@@ -132,6 +136,7 @@ MOAIBillingIOS::MOAIBillingIOS () {
 	RTTI_SINGLE ( MOAILuaObject )
 	
 	this->mStoreKitListener = [[ MOAIStoreKitListener alloc ] init ];
+    this->mProducts = [[ NSMutableDictionary alloc ] init ];
 	[[ SKPaymentQueue defaultQueue ] addTransactionObserver:this->mStoreKitListener ];
 }
 
@@ -139,6 +144,7 @@ MOAIBillingIOS::MOAIBillingIOS () {
 MOAIBillingIOS::~MOAIBillingIOS () {
 
 	[[ SKPaymentQueue defaultQueue ] removeTransactionObserver:this->mStoreKitListener];
+    [ this->mProducts release ];
 	[ this->mStoreKitListener release ];
 }
 
@@ -185,6 +191,23 @@ void MOAIBillingIOS::PaymentQueueUpdatedTransactions ( SKPaymentQueue* queue, NS
 			this->PushPaymentTransaction ( state, transaction );
 			state.DebugCall ( 1, 0 );
 		}
+
+		#ifndef DISABLE_CHARTBOOST
+        if ( transaction.transactionState == SKPaymentTransactionStatePurchased ) {
+            
+            SKProduct* product = [ this->mProducts objectForKey:transaction.payment.productIdentifier ];
+            
+            NSBundle* bundle = [ NSBundle mainBundle ];
+            NSData* receipt = nil;
+            if ([ bundle respondsToSelector:@selector ( appStoreReceiptURL )]) {
+                receipt = [ NSData dataWithContentsOfURL: [ bundle appStoreReceiptURL ]];
+            }
+            else {
+                receipt = transaction.transactionReceipt;
+            }
+            MOAIChartboostIOS::Get ().ReportPurchase ( receipt, product );
+        }
+        #endif
 		
 		if ( transaction.transactionState != SKPaymentTransactionStatePurchasing ) {
 			
@@ -223,6 +246,8 @@ void MOAIBillingIOS::ProductsRequestDidReceiveResponse ( SKProductsRequest* requ
 			state.SetField ( -1, "productIdentifier", [ product.productIdentifier UTF8String ]);
 			
 			lua_settable ( state, -3 );
+            
+            [ this->mProducts setObject:product forKey:product.productIdentifier ];
 		}
 		
 		// Note: If you're testing in-app purchases, chances are your product Id

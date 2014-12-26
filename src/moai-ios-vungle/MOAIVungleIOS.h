@@ -7,42 +7,52 @@
 #ifndef	MOAIVUNGLEIOS_H
 #define	MOAIVUNGLEIOS_H
 
+#ifndef DISABLE_VUNGLE
+
 #include <moai-core/headers.h>
 
-@class MOAIVungleDelegate;
+@class MoaiVungleDelegate;
 
 //================================================================//
 // MOAIVungleIOS
 //================================================================//
 class MOAIVungleIOS :
-	public MOAIGlobalClass < MOAIVungleIOS, MOAIGlobalEventSource > {
+	public MOAIGlobalClass < MOAIVungleIOS, MOAILuaObject > {
 private:
 
-	MOAIVungleDelegate*		mDelegate;
-	bool					mWatchedAd;
-	
+	MoaiVungleDelegate*	mDelegate;
+		
 	//----------------------------------------------------------------//
-	static int		_allowAutoRotate			( lua_State* L );
-	static int		_cacheSizeGet				( lua_State* L );
-	static int		_cacheSizeSet				( lua_State* L );
-	static int		_displayAdvert				( lua_State* L );
-	static int		_init						( lua_State* L );
-	static int		_isVideoAvailable			( lua_State* L );
+	static int  _adIsAvailable		( lua_State* L );
+	static int	_playModalAd		( lua_State* L );
+	static int	_playIncentivizedAd	( lua_State* L );
+	static int	_init 				( lua_State* L );
+	static int	_setListener		( lua_State* L );
 	
 public:
 		
 	enum {
-		AD_VIEWED,
+        MOVIE_WILL_APPEAR,
+		MOVIE_PLAYED,
+        MOVIE_CACHED,
+        PRODUCT_SHEET_CLOSED,
+		TOTAL
 	};
+		
+	MOAILuaStrongRef	mListeners [ TOTAL ];
 
 	DECL_LUA_SINGLETON ( MOAIVungleIOS );
 
-	//----------------------------------------------------------------//
+	
 					MOAIVungleIOS				();
 					~MOAIVungleIOS				();
-	void			NotifyMoviePlayed			();
+    void            NotifyMovieCached           ();
+    void			NotifyMoviePlayed			( bool willShowProductSheet, bool playedFull, float playTime, bool didDownload );
+    void			NotifyMovieWillAppear		();
+    void            NotifyProductSheetClosed    ();
 	void			RegisterLuaClass			( MOAILuaState& state );
-	void			WatchedAd					( bool playedFull );
 };
+
+#endif  //DISABLE_VUNGLE
 
 #endif  //MOAIVUNGLEIOS_H

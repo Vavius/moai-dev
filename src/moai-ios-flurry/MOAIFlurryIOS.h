@@ -1,57 +1,51 @@
-// Copyright (c) 2010-2011 Zipline Games, Inc. All Rights Reserved.
+//----------------------------------------------------------------//
+// Copyright (c) 2010-2011 Zipline Games, Inc. 
+// All Rights Reserved. 
 // http://getmoai.com
+//----------------------------------------------------------------//
 
-#ifndef	MOAIFLURRYIOS_H
-#define	MOAIFLURRYIOS_H
+#ifndef MOAIFLURRYIOS_H
+#define MOAIFLURRYIOS_H
 
+#ifndef DISABLE_FLURRY
+
+#import <Foundation/Foundation.h> 
 #import <moai-core/headers.h>
+
+#import "Flurry.h"
 
 //================================================================//
 // MOAIFlurryIOS
 //================================================================//
-/**	@lua	MOAIFlurryIOS
-	@text	Wrapper for Flurry interface.
-*/
+/**	@name	MOAIFlurryIOS
+ @text	Wrapper for Flurry integration on iOS devices.
+ Flurry provides analytics and behaviour statistics. 
+ Exposed to lua via MOAIFlurry on 
+ all mobile platforms.
+ 
+ */
 class MOAIFlurryIOS :
-	public MOAIGlobalClass < MOAIFlurryIOS, MOAILuaObject > {
+public MOAIGlobalClass < MOAIFlurryIOS, MOAILuaObject > {
 private:
-
+	
 	//----------------------------------------------------------------//
-	static int	_beginEvent							( lua_State* L );
-	static int	_endEvent							( lua_State* L );
-	static int	_getAgentVersion					( lua_State* L );
-	static int	_logEvent							( lua_State* L );
-	static int	_setAge								( lua_State* L );
-	static int	_setAppVersion						( lua_State* L );
-	static int	_setDebugLogEnabled					( lua_State* L );
-	static int	_setEventLoggingEnabled				( lua_State* L );
-	static int	_setGender							( lua_State* L );
-	static int	_setLocation						( lua_State* L );
-	static int	_setSecureTransportEnabled			( lua_State* L );
-	static int	_setSessionContinueSeconds			( lua_State* L );
-	static int	_setSessionReportsOnCloseEnabled	( lua_State* L );
-	static int	_setSessionReportsOnPauseEnabled	( lua_State* L );
-	static int	_setShowErrorInLogEnabled			( lua_State* L );
-	static int	_setUserID							( lua_State* L );
-	static int	_startSession						( lua_State* L );
-
-	//----------------------------------------------------------------//
-	static void	LogEvent				( lua_State* L, int idx, bool timed );
-
+	static int _endTimedEvent		( lua_State* L );
+	static int _logError			( lua_State* L );
+	static int _logEvent			( lua_State* L );
+	static int _logTimedEvent		( lua_State* L );
+	static int _setAppVersion		( lua_State* L );
+	static int _setCrashTracking	( lua_State* L );
+	static int _startSession		( lua_State* L );
+	
 public:
+    
+	DECL_LUA_SINGLETON ( MOAIFlurryIOS );
 	
-	DECL_LUA_SINGLETON ( MOAIFlurryIOS )
-	
-	enum {
-		GENDER_MALE,
-		GENDER_FEMALE,
-		GENDER_UNKNOWN,
-	};
-	
-	//----------------------------------------------------------------//
-			MOAIFlurryIOS				();
-			~MOAIFlurryIOS				();
-	void	RegisterLuaClass			( MOAILuaState& state );
+	MOAIFlurryIOS		();
+	~MOAIFlurryIOS		();
+	void	RegisterLuaClass	( MOAILuaState& state );
 };
 
-#endif
+#endif  //DISABLE_FLURRY
+
+#endif // MOAIFLURRY_H

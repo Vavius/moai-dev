@@ -3,7 +3,7 @@ project ( moai-ios-adcolony )
 
 
 
-set(ADCOLONY_ROOT ${MOAI_ROOT}/3rdparty/adcolony-2.2.4/AdColony.framework)
+set(ADCOLONY_ROOT ${MOAI_ROOT}/3rdparty/AdColony-iOS-SDK/AdColony.framework)
 set(ADCOLONY_LIB ${ADCOLONY_ROOT}/AdColony)
 add_library(AdColony SHARED IMPORTED)
 set_property(TARGET AdColony PROPERTY IMPORTED_LOCATION ${ADCOLONY_LIB})
