@@ -40,6 +40,7 @@ cd build-osx
 set -e
 cmake -G "Xcode" \
 -DBUILD_OSX=TRUE \
+-DMOAI_LUAJIT=FALSE \
 -DCMAKE_BUILD_TYPE=Release \
 -DCMAKE_INSTALL_PREFIX=$libprefix \
 $moai_root/cmake/hosts/host-osx-sdl
