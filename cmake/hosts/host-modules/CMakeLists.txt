@@ -33,6 +33,10 @@ if ( MOAI_UNTZ OR LIB_PATH)
   target_link_libraries ( host-modules moai-untz )
 endif ( MOAI_UNTZ OR LIB_PATH)
 
+#FMOD_STUDIO
+if ( MOAI_FMOD_STUDIO OR LIB_PATH)
+  target_link_libraries ( host-modules moai-fmod-studio )
+endif ( MOAI_FMOD_STUDIO OR LIB_PATH)
 
 #Http Client
 if ( MOAI_HTTP_CLIENT OR LIB_PATH)
@@ -46,6 +50,11 @@ endif ( MOAI_LUAEXT OR LIB_PATH)
 
 #audiosampler
   target_link_libraries ( host-modules moai-audiosampler)
+
+#spine
+if ( MOAI_SPINE )
+  target_link_libraries ( host-modules moai-spine )
+endif ( MOAI_SPINE )
 
 #plugins
 if ( MOAI_PLUGINS )

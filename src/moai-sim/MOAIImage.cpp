@@ -10,6 +10,7 @@
 #include <moai-sim/MOAIImage.h>
 #include <moai-sim/MOAIGfxDevice.h>
 #include <float.h>
+#include <contrib/edtaa3func.h>
 
 //================================================================//
 // local
@@ -37,6 +38,23 @@ int MOAIImage::_bleedRect ( lua_State* L ) {
 	rect.mYMax	= state.GetValue < int >( 5, 0 );
 	
 	self->BleedRect ( rect );
+	
+	return 0;
+}
+
+//----------------------------------------------------------------//
+/**	@lua	blur
+	@text	Fast gaussian blur O(n)
+ 
+	@in		MOAIImage   self
+	@in		number      radius
+	@out	nil
+*/
+int MOAIImage::_blur ( lua_State *L ) {
+	MOAI_LUA_SETUP ( MOAIImage, "U" )
+	
+//	float radius = state.GetValue < float >( 2, 5.0f );
+	self->Blur ();
 	
 	return 0;
 }
@@ -247,6 +265,33 @@ int MOAIImage::_fillCircle ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/**	@lua	fillEllipse
+	@text	Draw a filled ellipse.
+ 
+	@in		number x
+	@in		number y
+	@in		number radiusX
+	@in		number radiusY
+	@opt	number r			Default value is 0.
+	@opt	number g			Default value is 0.
+	@opt	number b			Default value is 0.
+	@opt	number a			Default value is 0.
+	@out	nil
+*/
+int MOAIImage::_fillEllipse ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIImage, "UNNN" )
+	
+	int x0	= state.GetValue < int >( 2, 0 );
+	int y0	= state.GetValue < int >( 3, 0 );
+	int rX	= state.GetValue < int >( 4, 0 );
+	int rY	= state.GetValue < int >( 5, 0 );
+	u32 color	= state.GetColor32 ( 6, 0.0f, 0.0f, 0.0f, 0.0f );
+	
+	self->FillEllipse ( x0, y0, rX, rY, color );
+	return 0;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	fillRect
 	@text	Fill a rectangle in the image with a solid color.
 
@@ -347,6 +392,30 @@ int MOAIImage::_generateSDF( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/**	@lua	generateSDFAA
+	@text	Given a rect, creates a signed distance field from it
+			taking into account antialiased edges
+ 
+	@in		MOAIImage self
+	@in		number xMin
+	@in		number yMin
+	@in		number xMax
+	@in		number yMax
+	@opt	number threshold default is 0.2
+	@out	nil
+*/
+int MOAIImage::_generateSDFAA ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIImage, "UNNNN" )
+	
+	ZLIntRect rect = state.GetRect <int>( 2 );
+	float threshold = state.GetValue < float >( 6, 0.2 );
+	
+	self->GenerateSDFAA ( rect, threshold );
+	
+	return 0;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	generateSDFDeadReckoning
 	@text	Given a rect, creates a signed distance field from it 
 			using dead reckoning technique
@@ -358,7 +427,7 @@ int MOAIImage::_generateSDF( lua_State* L ) {
 	@in		number yMax
 	@opt	number threshold default is 256
 	@out	nil
- */
+*/
 int MOAIImage::_generateSDFDeadReckoning( lua_State* L ) {
 	MOAI_LUA_SETUP ( MOAIImage, "UNNNN" )
 	
@@ -989,6 +1058,67 @@ void MOAIImage::Blit ( const MOAIImage& image, int srcX, int srcY, int destX, in
 		void* destRow = this->GetRowAddr ( y + destY );
 		
 		ZLBitBuffer::Blit ( destRow, destX, srcRow, srcX, width, pixelDepth );
+	}
+}
+
+//----------------------------------------------------------------//
+int reflect( int M, int x ) {
+	
+	if ( x < 0 ) {
+		return -x - 1;
+	}
+	if ( x >= M ) {
+		return 2 * M - x - 1;
+	}
+	return x;
+}
+
+//----------------------------------------------------------------//
+void MOAIImage::Blur () {
+	
+	MOAIImage image;
+	image.Copy ( *this );
+	
+	ZLColorVec sum, color;
+	int x1, y1;
+	
+	// coefficients of 1D gaussian kernel with sigma = 1
+	float coeffs [] = { 0.0545, 0.2442, 0.4026, 0.2442, 0.0545 };
+//    float coeffs [] = { 0.006, 0.061, 0.242, 0.383, 0.242, 0.061, 0.006 };
+	int r = 2;
+	
+	// along y - direction
+	for ( int y = 0; y < this->mHeight; y++ ) {
+		for ( int x = 0; x < this->mWidth; x++ ) {
+			sum.SetRGBA ( 0 );
+			for ( int i = -r; i <= r; i++ ) {
+				y1 = reflect ( this->mHeight, y - i );
+				color.SetRGBA ( this->GetColor ( x, y1 ));
+				color.mA *= coeffs [ i + r ];
+				color.mR *= coeffs [ i + r ];
+				color.mG *= coeffs [ i + r ];
+				color.mB *= coeffs [ i + r ];
+				sum.Add ( color );
+			}
+			image.SetColor ( x, y, sum.PackRGBA ());
+		}
+	}
+	
+	// along x - direction
+	for ( int y = 0; y < this->mHeight; y++ ) {
+		for ( int x = 0; x < this->mWidth; x++ ) {
+			sum.SetRGBA ( 0 );
+			for ( int i = -r; i <= r; i++ ) {
+				x1 = reflect ( this->mWidth, x - i );
+				color.SetRGBA ( image.GetColor ( x1, y ));
+				color.mA *= coeffs [ i + r ];
+				color.mR *= coeffs [ i + r ];
+				color.mG *= coeffs [ i + r ];
+				color.mB *= coeffs [ i + r ];
+				sum.Add ( color );
+			}
+			this->SetColor ( x, y, sum.PackRGBA ());
+		}
 	}
 }
 
@@ -1661,6 +1791,62 @@ void MOAIImage::FillCircle ( float centerX, float centerY, float xRad, u32 color
 }
 
 //----------------------------------------------------------------//
+void MOAIImage::FillEllipse ( int centerX, int centerY, int xRad, int yRad, u32 color ) {
+	
+	int x0 = centerX;
+	int y0 = centerY;
+	s64 err = 0;
+	s64 aa2 = 2 * xRad * xRad;
+	s64 bb2 = 2 * yRad * yRad;
+	s64 x = xRad;
+	s64 y = 0;
+	s64 stopX = bb2 * xRad;
+	s64 stopY = 0;
+	s64 dx = yRad * yRad * ( 1 - 2 * xRad );
+	s64 dy = xRad * xRad;
+	
+	while ( stopX >= stopY ) {
+		this->DrawLine ( x0 - x, y0 + y, x0 + x, y0 + y, color );
+		this->DrawLine ( x0 - x, y0 - y, x0 + x, y0 - y, color );
+		
+		y++;
+		stopY += aa2;
+		err += dy;
+		dy += aa2;
+		
+		if ( 2 * err + dx > 0 ) {
+			x--;
+			stopX -= bb2;
+			err += dx;
+			dx += bb2;
+		}
+	}
+	
+	x = 0;
+	y = yRad;
+	dx = yRad * yRad;
+	dy = xRad * xRad * ( 1 - 2 * yRad );
+	err = 0;
+	stopX = 0;
+	stopY = aa2 * yRad;
+	while ( stopX <= stopY ) {
+		
+		this->DrawLine ( x0 - x, y0 + y, x0 + x, y0 + y, color );
+		this->DrawLine ( x0 - x, y0 - y, x0 + x, y0 - y, color );
+		x++;
+		stopX += bb2;
+		err += dx;
+		dx += bb2;
+		if ( 2 * err + dy > 0 ) {
+			y--;
+			stopY -= aa2;
+			err += dy;
+			dy += aa2;
+		}
+	}
+}
+
+//----------------------------------------------------------------//
 void MOAIImage::FillRect ( ZLIntRect rect, u32 color ) {
 
 	if ( !color ) {
@@ -1810,6 +1996,79 @@ void MOAIImage::GenerateSDF ( ZLIntRect rect ) {
 	delete [] grid1;
 	delete [] grid2;
 	delete [] gridDistance;
+}
+
+//----------------------------------------------------------------//
+void MOAIImage::GenerateSDFAA ( ZLIntRect rect, float threshold ) {
+	
+	int width = rect.Width ();
+	int height = rect.Height ();
+	
+	short* xdist = ( short* ) malloc ( width * height * sizeof ( short ));
+	short* ydist = ( short* ) malloc ( width * height * sizeof ( short ));
+	double* gx		= ( double* ) calloc ( width * height, sizeof ( double ));
+	double* gy		= ( double* ) calloc ( width * height, sizeof ( double ));
+	double* data	= ( double* ) calloc ( width * height, sizeof ( double ));
+	double* outside	= ( double* ) calloc ( width * height, sizeof ( double ));
+	double* inside	= ( double* ) calloc ( width * height, sizeof ( double ));
+	
+	// Convert img into double (data)
+	for ( u32 y = 0; y < height; ++y ) {
+		for ( u32 x = 0; x < width; ++x ) {
+			
+			u32 color = this->GetColor ( x + rect.mXMin, y + rect.mYMin );
+			ZLColorVec colorVec;
+			colorVec.SetRGBA ( color );
+			double v = colorVec.mA;
+			data [ y * width + x ] = v;
+		}
+	}
+	
+	// Compute outside = edtaa3(bitmap); % Transform background (0's)
+	computegradient ( data, width, height, gx, gy );
+	edtaa3 ( data, gx, gy, width, height, xdist, ydist, outside );
+	for ( u32 i = 0; i < width * height; ++i ) {
+		if ( outside [ i ] < 0 ) {
+			outside [ i ] = 0.0;
+		}
+	}
+	
+	// Compute inside = edtaa3(1-bitmap); % Transform foreground (1's)
+	memset ( gx, 0, sizeof ( double ) * width * height );
+	memset ( gy, 0, sizeof ( double ) * width * height );
+	for ( u32 i = 0; i < width * height; ++i ) {
+		data [ i ] = 1.0 - data [ i ];
+	}
+	computegradient ( data, width, height, gx, gy );
+	edtaa3 ( data, gx, gy, width, height, xdist, ydist, inside );
+	for ( u32 i = 0; i < width * height; ++i ) {
+		if ( inside [ i ] < 0 ) {
+			inside [ i ] = 0.0;
+		}
+	}
+	
+	for ( u32 y = 0; y < height; ++y ) {
+		for ( u32 x = 0; x < width; ++x ) {
+			
+			u32 i = y * width + x;
+			
+			float dist = outside [ i ] - inside [ i ];
+			dist = 0.5f + dist * threshold;
+			dist = MAX ( 0.0f, MIN ( dist, 1.0f ));
+			
+			ZLColorVec colorVec;
+			colorVec.Set ( 0, 0, 0, 1.0f - dist );
+			this->SetColor ( x + rect.mXMin, y + rect.mYMin, colorVec.PackRGBA ());
+		}
+	}
+	
+	free ( xdist );
+	free ( ydist );
+	free ( gx );
+	free ( gy );
+	free ( data );
+	free ( outside );
+	free ( inside );
 }
 
 //----------------------------------------------------------------//
@@ -2362,6 +2621,7 @@ void MOAIImage::RegisterLuaFuncs ( MOAILuaState& state ) {
 
 	luaL_Reg regTable [] = {
 		{ "bleedRect",					_bleedRect },
+		{ "blur",						_blur },
 		{ "compare",					_compare },
 		{ "convert",					_convert },
 		{ "convertColors",				_convert }, // back compat
@@ -2371,9 +2631,11 @@ void MOAIImage::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "copyRect",					_copyRect },
 		{ "desaturate",					_desaturate },
 		{ "fillCircle",					_fillCircle },
+		{ "fillEllipse",				_fillEllipse },
 		{ "fillRect",					_fillRect },
 		{ "generateOutlineFromSDF",		_generateOutlineFromSDF },
 		{ "generateSDF",				_generateSDF },
+		{ "generateSDFAA",				_generateSDFAA },
 		{ "generateSDFDeadReckoning",	_generateSDFDeadReckoning },
 		{ "getColor32",					_getColor32 },
 		{ "getFormat",					_getFormat },

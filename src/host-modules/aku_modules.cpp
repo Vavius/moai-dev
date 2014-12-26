@@ -57,6 +57,10 @@ void AKUModulesAppFinalize () {
 		AKUFmodExAppFinalize ();
 	#endif
 
+	#if AKU_WITH_FMOD_STUDIO
+		AKUFmodStudioAppFinalize ();
+	#endif
+
 	#if AKU_WITH_HARNESS
 		AKUHarnessAppFinalize ();
 	#endif
@@ -75,6 +79,10 @@ void AKUModulesAppFinalize () {
 
 	#if AKU_WITH_SIM
 		AKUSimAppFinalize ();
+	#endif
+
+	#if AKU_WITH_SPINE
+		AKUSpineAppFinalize ();
 	#endif
 
 	#if AKU_WITH_TEST
@@ -121,6 +129,10 @@ void AKUModulesAppInitialize () {
 		AKUFmodExAppInitialize ();
 	#endif
 
+	#if AKU_WITH_FMOD_STUDIO
+		AKUFmodStudioAppInitialize ();
+	#endif
+
 	#if AKU_WITH_HARNESS
 		AKUHarnessAppInitialize ();
 	#endif
@@ -139,6 +151,10 @@ void AKUModulesAppInitialize () {
 
 	#if AKU_WITH_SIM
 		AKUSimAppInitialize ();
+	#endif
+
+	#if AKU_WITH_SPINE
+		AKUSpineAppInitialize ();
 	#endif
 
 	#if AKU_WITH_TEST
@@ -185,6 +201,10 @@ void AKUModulesContextInitialize () {
 		AKUFmodExContextInitialize ();
 	#endif
 
+	#if AKU_WITH_FMOD_STUDIO
+		AKUFmodStudioContextInitialize ();
+	#endif
+
 	#if AKU_WITH_HARNESS
 		AKUHarnessContextInitialize ();
 	#endif
@@ -203,6 +223,10 @@ void AKUModulesContextInitialize () {
 
 	#if AKU_WITH_SIM
 		AKUSimContextInitialize ();
+	#endif
+
+	#if AKU_WITH_SPINE
+		AKUSpineContextInitialize ();
 	#endif
 
 	#if AKU_WITH_TEST
@@ -236,6 +260,10 @@ void AKUModulesPause ( bool pause ) {
 	#if AKU_WITH_UNTZ
 		AKUUntzPause ( pause );
 	#endif
+
+	#if AKU_WITH_FMOD_STUDIO
+		AKUFmodStudioPause ( pause );
+	#endif
 	
 	#if AKU_WITH_IOS
 		AKUModulesIosPause ( pause );
@@ -259,6 +287,10 @@ void AKUModulesUpdate () {
 
 	#if AKU_WITH_FMOD_EX
 		AKUFmodExUpdate ();
+	#endif
+
+	#if AKU_WITH_FMOD_STUDIO
+		AKUFmodStudioUpdate ();
 	#endif
 
 	#if AKU_WITH_HARNESS

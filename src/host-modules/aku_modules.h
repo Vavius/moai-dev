@@ -29,6 +29,10 @@
 	#include <moai-fmod-ex/host.h>
 #endif
 
+#if AKU_WITH_FMOD_STUDIO
+	#include <moai-fmod-studio/host.h>
+#endif
+
 #if AKU_WITH_HARNESS
 	#include <moai-harness/host.h>
 #endif
@@ -47,6 +51,10 @@
 
 #if AKU_WITH_SIM
 	#include <moai-sim/host.h>
+#endif
+
+#if AKU_WITH_SPINE
+    #include <moai-spine/host.h>
 #endif
 
 #if AKU_WITH_TEST

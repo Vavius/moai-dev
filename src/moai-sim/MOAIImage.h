@@ -65,6 +65,7 @@ private:
 
 	//----------------------------------------------------------------//
 	static int		_bleedRect					( lua_State* L );
+	static int		_blur						( lua_State* L );
 	static int		_compare					( lua_State* L );
 	static int		_convert					( lua_State* L );
 	static int		_copy						( lua_State* L );
@@ -72,10 +73,12 @@ private:
 	static int		_copyRect					( lua_State* L );
 	static int		_desaturate					( lua_State* L );
 	static int		_fillCircle					( lua_State* L );
+	static int		_fillEllipse				( lua_State* L );
 	static int		_fillRect					( lua_State* L );
 	static int		_gammaCorrection			( lua_State* L );
 	static int		_generateOutlineFromSDF		( lua_State* L );
 	static int		_generateSDF				( lua_State* L );
+	static int		_generateSDFAA				( lua_State* L );
 	static int		_generateSDFDeadReckoning	( lua_State* L );
 	static int		_getColor32					( lua_State* L );
 	static int		_getFormat					( lua_State* L );
@@ -156,6 +159,7 @@ public:
 	static MOAIImage*		AffirmImage					( MOAILuaState& state, int idx );
 	void					BleedRect					( ZLIntRect rect );
 	void					Blit						( const MOAIImage& image, int srcX, int srcY, int destX, int destY, int width, int height );
+	void					Blur						();
 	void					Clear						();
 	void					ClearBitmap					();
 	void					ClearRect					( ZLIntRect rect );
@@ -167,10 +171,12 @@ public:
 	void					Desaturate					( const MOAIImage& image, float rY, float gY, float bY, float K );
 	void					DrawLine					( int p1x, int p1y, int p2x, int p2y, u32 color );
 	void					FillCircle					( float x, float y, float xRad, u32 color );
+	void					FillEllipse					( int x, int y, int xRad, int yRad, u32 color );	
 	void					FillRect					( ZLIntRect rect, u32 color );
 	void					GammaCorrection				( const MOAIImage& image, float gamma );
 	void					GenerateOutlineFromSDF		( ZLIntRect rect, float distMin, float distMax, float r, float g, float b, float a );
 	void					GenerateSDF					( ZLIntRect rect );
+	void					GenerateSDFAA				( ZLIntRect rect, float threshold );
 	void					GenerateSDFDeadReckoning	( ZLIntRect rect, int threshold );
 	u32						GetBitmapSize				() const;
 	ZLIntRect				GetBounds					();
@@ -207,7 +213,8 @@ public:
 	void					Transform					( u32 transform );
 	
 	#if MOAI_WITH_LIBPNG
-		bool					WritePNG					( ZLStream& stream );
+		bool				WritePNG					( ZLStream& stream );
+		bool				WritePNG					( void* png_ptr, void* info_ptr, ZLStream& stream );
 	#endif
 };
 
