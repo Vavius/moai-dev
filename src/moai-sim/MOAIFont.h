@@ -82,8 +82,9 @@ protected:
 	int	mMagFilter;
 
 	//----------------------------------------------------------------//
+	static int			_canRenderGlyph			( lua_State* L );
 	static int			_getCache				( lua_State* L );
-	static int			_getDefaultSize         ( lua_State* L );
+	static int			_getDefaultSize			( lua_State* L );
 	static int			_getFilename			( lua_State* L );
 	static int			_getFlags				( lua_State* L );
 	static int			_getImage				( lua_State* L );
@@ -134,6 +135,7 @@ public:
 	//----------------------------------------------------------------//
 	void				AffirmGlyph				( float size, u32 c );
     MOAIGlyphSet&		AffirmGlyphSet			( float size );
+	bool				CanRenderGlyph			( cc8* charCodes, float size );
 	MOAIGlyphSet*		GetGlyphSet				( float size );
 	MOAITextureBase*	GetGlyphTexture			( MOAIGlyph& glyph );
 	void				Init					( cc8* filename );
