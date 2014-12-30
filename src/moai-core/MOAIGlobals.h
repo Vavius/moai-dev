@@ -73,7 +73,7 @@ private:
 	friend class MOAIGlobalsMgr;
 
 	enum {
-		CHUNK_SIZE = 32,
+		CHUNK_SIZE = 128,
 	};
 
 	ZLLeanArray < MOAIGlobalPair >	mGlobals;
