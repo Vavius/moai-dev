@@ -16,7 +16,23 @@
 //================================================================//
 
 //----------------------------------------------------------------//
-/**	@lua	getAppIconBadgeNumber
+/**	@name	cancelAllLocalNotifications
+	@text	Cancel all scheduled local notifications
+			
+	@out 	nil
+*/
+int MOAINotificationsIOS::_cancelAllLocalNotifications ( lua_State* L ) {
+
+	MOAILuaState state ( L );
+	
+	UIApplication* application = [ UIApplication sharedApplication ];
+	[ application cancelAllLocalNotifications ];
+	
+	return 0;
+}
+
+//----------------------------------------------------------------//
+/**	@name	getAppIconBadgeNumber
 	@text	Get the current icon badge number.
 				
 	@out 	integer	count
@@ -39,8 +55,8 @@ int MOAINotificationsIOS::_localNotificationInSeconds ( lua_State* L ) {
  	
 	cc8* alertBody				= state.GetValue < cc8* >( 2, 0 );
  	
- 	UILocalNotification* notification = [[[ UILocalNotification alloc ] init ] autorelease ]; 	
- 	notification.fireDate			= [[ NSDate date ] dateByAddingTimeInterval:seconds ]; 	
+ 	UILocalNotification* notification = [[[ UILocalNotification alloc ] init ] autorelease ];
+ 	notification.fireDate			= [[ NSDate date ] dateByAddingTimeInterval:seconds ];
  	notification.alertBody			= [ NSString stringWithUTF8String:alertBody ];
 	
 	if ( state.IsType ( 3, LUA_TTABLE )) {
@@ -59,7 +75,24 @@ int MOAINotificationsIOS::_localNotificationInSeconds ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
-/**	@lua	registerForRemoteNotifications
+int MOAINotificationsIOS::_registerForLocalNotifications ( lua_State* L ) {
+	
+    MOAILuaState state ( L );
+    
+    UIApplication* application = [ UIApplication sharedApplication ];
+
+    if ([ application respondsToSelector:@selector(registerUserNotificationSettings:) ]) {
+        
+        UIUserNotificationType types = state.GetValue < u32 >( 1, ( u32 )( UIUserNotificationTypeAlert | UIUserNotificationTypeSound | UIUserNotificationTypeBadge ));
+        UIUserNotificationSettings *settings = [ UIUserNotificationSettings settingsForTypes:types categories:nil];
+        [ application registerUserNotificationSettings:settings ];
+    }
+    
+    return 0;
+}
+
+//----------------------------------------------------------------//
+/**	@name	registerForRemoteNotifications
 	@text	Register to receive remote notifications.
 			
 	@in		integer	types			A mask of requested notification types. See Apple documentation.
@@ -76,7 +109,7 @@ int MOAINotificationsIOS::_registerForRemoteNotifications ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
-/**	@lua	setAppIconBadgeNumber
+/**	@name	setAppIconBadgeNumber
 	@text	Set the current icon badge number.
 			
 	@in		integer	count			The count to set on the icon badge.
@@ -108,7 +141,7 @@ int MOAINotificationsIOS::_setListener ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
-/**	@lua	unregisterForRemoteNotifications
+/**	@name	unregisterForRemoteNotifications
 	@text	Dregister for remote notifications.
 			
 	@out 	nil
@@ -147,6 +180,11 @@ void MOAINotificationsIOS::RegisterLuaClass ( MOAILuaState& state ) {
 	state.SetField ( -1, "REMOTE_NOTIFICATION_BADGE",					( u32 )UIRemoteNotificationTypeBadge );
 	state.SetField ( -1, "REMOTE_NOTIFICATION_SOUND",					( u32 )UIRemoteNotificationTypeSound );
 	state.SetField ( -1, "REMOTE_NOTIFICATION_ALERT",					( u32 )UIRemoteNotificationTypeAlert );
+    
+    state.SetField ( -1, "LOCAL_NOTIFICATION_NONE",                     ( u32 )UIUserNotificationTypeNone );
+    state.SetField ( -1, "LOCAL_NOTIFICATION_BADGE",					( u32 )UIUserNotificationTypeBadge );
+    state.SetField ( -1, "LOCAL_NOTIFICATION_SOUND",					( u32 )UIUserNotificationTypeSound );
+    state.SetField ( -1, "LOCAL_NOTIFICATION_ALERT",					( u32 )UIUserNotificationTypeAlert );
 
 	state.SetField ( -1, "LOCAL_NOTIFICATION_MESSAGE_RECEIVED", 		( u32 )LOCAL_NOTIFICATION_MESSAGE_RECEIVED );
 	state.SetField ( -1, "REMOTE_NOTIFICATION_REGISTRATION_COMPLETE", 	( u32 )REMOTE_NOTIFICATION_REGISTRATION_COMPLETE );
@@ -157,9 +195,11 @@ void MOAINotificationsIOS::RegisterLuaClass ( MOAILuaState& state ) {
 	state.SetField ( -1, "REMOTE_NOTIFICATION_RESULT_ERROR", 			( u32 )REMOTE_NOTIFICATION_RESULT_ERROR );
 	
 	luaL_Reg regTable [] = {
+		{ "cancelAllLocalNotifications",		_cancelAllLocalNotifications },
 		{ "getAppIconBadgeNumber",				_getAppIconBadgeNumber },
 		{ "localNotificationInSeconds",			_localNotificationInSeconds },
-		{ "registerForRemoteNotifications",		_registerForRemoteNotifications },
+		{ "registerForLocalNotifications",		_registerForLocalNotifications },
+        { "registerForRemoteNotifications",		_registerForRemoteNotifications },
 		{ "setAppIconBadgeNumber",				_setAppIconBadgeNumber },
 		{ "setListener",						_setListener },
 		{ "unregisterForRemoteNotifications",	_unregisterForRemoteNotifications },
@@ -168,7 +208,6 @@ void MOAINotificationsIOS::RegisterLuaClass ( MOAILuaState& state ) {
 
 	luaL_register ( state, 0, regTable );
 }
-
 //----------------------------------------------------------------//
 void MOAINotificationsIOS::NotifyLocalNotificationReceived ( UILocalNotification* notification ) {
  
@@ -219,7 +258,7 @@ void MOAINotificationsIOS::NotifyRemoteDeregistrationComplete () {
 }
 
 //----------------------------------------------------------------//
-void MOAINotificationsIOS::NotifyRemoteRegistrationComplete ( NSData* deviceToken, NSError *error ) {
+void MOAINotificationsIOS::NotifyRemoteRegistrationComplete ( NSData* deviceToken, NSError* error ) {
 	
 	MOAILuaRef& callback = this->mListeners [ REMOTE_NOTIFICATION_REGISTRATION_COMPLETE ];
 	
@@ -234,10 +273,10 @@ void MOAINotificationsIOS::NotifyRemoteRegistrationComplete ( NSData* deviceToke
 		
 			lua_pushinteger ( state, REMOTE_NOTIFICATION_RESULT_REGISTERED );
 			lua_pushstring ( state, token );
-		}
-		else {			
+		} else {
+			
 			lua_pushinteger ( state, REMOTE_NOTIFICATION_RESULT_ERROR );
-
+			
 			if ( error != nil ) {
 				[[ error localizedDescription ] toLua:state ];
 			} else {
