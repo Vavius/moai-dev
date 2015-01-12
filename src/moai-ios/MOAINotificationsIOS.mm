@@ -80,14 +80,18 @@ int MOAINotificationsIOS::_registerForLocalNotifications ( lua_State* L ) {
     MOAILuaState state ( L );
     
     UIApplication* application = [ UIApplication sharedApplication ];
-
-    if ([ application respondsToSelector:@selector(registerUserNotificationSettings:) ]) {
-        
-        UIUserNotificationType types = state.GetValue < u32 >( 1, ( u32 )( UIUserNotificationTypeAlert | UIUserNotificationTypeSound | UIUserNotificationTypeBadge ));
-        UIUserNotificationSettings *settings = [ UIUserNotificationSettings settingsForTypes:types categories:nil];
-        [ application registerUserNotificationSettings:settings ];
-    }
-    
+	
+	if ([ application respondsToSelector:@selector ( registerUserNotificationSettings: ) ]) {
+		
+		Class UserNotificationSettings = NSClassFromString(@"UIUserNotificationSettings");
+		if ( UserNotificationSettings != nil ) {
+			
+			UIUserNotificationType types = state.GetValue < u32 >( 1, ( u32 )( UIUserNotificationTypeAlert | UIUserNotificationTypeSound | UIUserNotificationTypeBadge ));
+			id settings = [ UserNotificationSettings settingsForTypes:types categories:nil];
+			[ application registerUserNotificationSettings:settings ];
+		}
+	}
+	
     return 0;
 }
 
