@@ -167,7 +167,7 @@ int MOAISpineSkeleton::_getSlot ( lua_State *L ) {
 	}
 	
 	if ( self->mSlotColorMap.contains( slotName ) ) {
-		self->mBoneTransformMap [ slotName ]->PushLuaUserdata ( state );
+		self->mSlotColorMap [ slotName ]->PushLuaUserdata ( state );
 		return 1;
 	}
 	
