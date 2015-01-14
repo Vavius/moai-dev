@@ -123,7 +123,7 @@ int MOAIParticleSystem::_pushParticle ( lua_State* L ) {
 	float dx = state.GetValue < float >( 4, 0.0f );
 	float dy = state.GetValue < float >( 5, 0.0f );
 	
-	u32 stateIdx = state.GetValue < u32 >( 6, 0 );
+	u32 stateIdx = state.GetValue < u32 >( 6, 1 ) - 1;
 	
 	bool result = self->PushParticle ( x, y, dx, dy, stateIdx );
 	lua_pushboolean ( state, result );
