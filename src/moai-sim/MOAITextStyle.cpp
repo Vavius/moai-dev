@@ -34,6 +34,7 @@ bool MOAITextStyleState::NeedsLayout ( const MOAITextStyleState& compare ) const
 
 	if ( this->mFont != compare.mFont ) return true;
 	if ( this->mSize != compare.mSize ) return true;
+	if ( this->mScale.mX != compare.mScale.mX || this->mScale.mY != compare.mScale.mY ) return true;
 	
 	return false;
 }
@@ -191,6 +192,7 @@ int MOAITextStyle::_setScale ( lua_State* L ) {
 	MOAI_LUA_SETUP ( MOAITextStyle, "U" )
 	self->mScale.mX = state.GetValue < float >( 2, 1.0f );
 	self->mScale.mY = state.GetValue < float >( 3, self->mScale.mX );
+	self->ScheduleUpdate ();
 	return 0;
 }
 
