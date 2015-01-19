@@ -770,12 +770,7 @@ void MOAISpineSkeleton::OnDepNodeUpdate () {
 
 //----------------------------------------------------------------//
 u32 MOAISpineSkeleton::OnGetModelBounds ( ZLBox &bounds ) {
-    
-    if ( this->mFlags & FLAGS_OVERRIDE_BOUNDS ) {
-        bounds = this->mBoundsOverride;
-        return BOUNDS_OK;
-    }
-    
+	
     u32 size = mSkeleton->slotCount;
     
     if ( size == 0) {
