@@ -1486,7 +1486,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"/Users/vavius/moai/moai-forge/3rdparty/fmod-studio/lib/osx",
+					"/Users/vavius/moai/moai-new/3rdparty/fmod-studio/lib/osx",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1509,7 +1509,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"/Users/vavius/moai/moai-forge/3rdparty/fmod-studio/lib/osx",
+					"/Users/vavius/moai/moai-new/3rdparty/fmod-studio/lib/osx",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
