@@ -12,9 +12,8 @@ else
   libprefix=$1
 fi
 
-libprefix=$(cd $libprefix; pwd)
-
 mkdir -p $libprefix
+libprefix=$(cd $libprefix; pwd)
 
 cd `dirname $0`/..
 moai_root=$(pwd)

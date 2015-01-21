@@ -25,8 +25,9 @@ class MoaiPlugin implements Plugin<Project> {
 
             def my_modules = project.moaiModules.replaceAll(',',' ')
             def my_flags = project.moaiModules.split(',')
+
             my_flags = my_flags.collect {
-                i -> i.trim().toUpperCase().replaceAll('-','_').replaceFirst('^MOAI_','-DAKU_WITH_') + "=1"
+                i -> i.trim().toUpperCase().replaceAll('-','_').replaceFirst('^MOAI_','-DAKU_WITH_') // "=1"
             }
             def flags = my_flags.join(' ')
 

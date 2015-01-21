@@ -29,6 +29,11 @@ if ( BUILD_IOS )
 # libfmod_iphonesimulator.a
 endif ( BUILD_IOS )
 
+if ( BUILD_ANDROID )
+  add_library(libfmod SHARED IMPORTED)
+  set( FMOD_SHARED_LIB ${MOAI_ROOT}/3rdparty/fmod-studio/lib/android/${ANDROID_ABI}/libfmod.so )
+  set_property(TARGET libfmod PROPERTY IMPORTED_LOCATION ${FMOD_SHARED_LIB})
+endif ( BUILD_ANDROID )
 
 # add_library ( moai-fmod-studio STATIC ${MOAI_FMOD_SRC} )
 # target_include_directories( moai-fmod-studio PUBLIC ${MOAI_FMOD_INCLUDES})
@@ -46,5 +51,8 @@ target_include_directories (moai-fmod-studio PUBLIC
 set_target_properties(moai-fmod-studio PROPERTIES FOLDER Modules)  
 install(TARGETS moai-fmod-studio EXPORT libmoai ARCHIVE DESTINATION lib)
 
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION include/moai-fmod-studio
-          FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION include/moai-fmod-studio FILES_MATCHING PATTERN "*.h")
+
+if (BUILD_ANDROID)
+  install(FILES ${FMOD_SHARED_LIB} DESTINATION lib)
+endif(BUILD_ANDROID)
