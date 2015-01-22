@@ -51,6 +51,10 @@ else (BUILD_ANDROID)
   )
 endif (BUILD_ANDROID)
 
+if (BUILD_OSX)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DLUA_USE_MACOSX")
+endif(BUILD_OSX)
+
 add_library( liblua-static STATIC ${LUA_SOURCES} )
 target_include_directories( liblua-static PUBLIC "$<BUILD_INTERFACE:${LUA_INCLUDES}>" )
 set (LUA_HEADERS ${LUA_INCLUDES} PARENT_SCOPE)
