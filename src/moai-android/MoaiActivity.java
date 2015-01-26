@@ -63,6 +63,10 @@ public class MoaiActivity extends Activity {
 	//----------------------------------------------------------------//
 	static {
 		
+		//TODO Make script for loading additional libraries
+		MoaiLog.i ( "Loading libfmod.so" );
+		System.loadLibrary ( "fmod" );
+
 		MoaiLog.i ( "Loading libmoai.so" );
 		System.loadLibrary ( "moai" );
 	}
