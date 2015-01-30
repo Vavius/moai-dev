@@ -344,12 +344,21 @@ void MOAIBillingIOS::PushPaymentTransaction ( lua_State* L, SKPaymentTransaction
 	if ( transaction.transactionState == SKPaymentTransactionStatePurchased ) {
 		
 		lua_pushstring ( L, "transactionReceipt" );
-		if( transaction.transactionReceipt != nil ) {
-			
-			[ transaction.transactionReceipt toLua:L ];
+		
+		NSBundle *bundle = [ NSBundle mainBundle ];
+		NSData *receipt = nil;
+		if ([ bundle respondsToSelector:@selector ( appStoreReceiptURL )]) {
+			receipt = [ NSData dataWithContentsOfURL: [ bundle appStoreReceiptURL ]];
 		}
 		else {
-			
+			receipt = transaction.transactionReceipt;
+		}
+		
+		if ( receipt != nil ) {
+			NSString *base64 = [ receipt base64Encoding ];
+			[ base64 toLua:L ];
+		}
+		else {
 			lua_pushnil ( L );
 		}
 
