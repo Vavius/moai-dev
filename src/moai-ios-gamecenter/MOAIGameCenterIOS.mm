@@ -42,13 +42,13 @@ int MOAIGameCenterIOS::_authenticatePlayer ( lua_State* L ) {
 	
 	
 	BOOL oldLoginFlow = ([ currSysVer compare:@"6.0" options:NSNumericSearch ] == NSOrderedAscending );
-
+	
 	if ( oldLoginFlow ) {
 		// iOS 5.x and below
 		[ localPlayer authenticateWithCompletionHandler:^(NSError *error) {
-			
-			if ( [ error code ] == GKErrorNotSupported || [ error  code ] == GKErrorGameUnrecognized ) {
+			if ( [ error code ] == GKErrorNotSupported || [ error code ] == GKErrorGameUnrecognized ) {
 				
+				MOAIPrint ([[ error description ] UTF8String ]);
 				MOAIGameCenterIOS::Get ().mIsGameCenterSupported = FALSE;
 			}
 			else if ([ GKLocalPlayer localPlayer ].isAuthenticated) {
@@ -70,7 +70,6 @@ int MOAIGameCenterIOS::_authenticatePlayer ( lua_State* L ) {
 				[ rootVC presentViewController:viewcontroller animated:YES completion:nil];
 			}
 			else {
-				
 				if ( [ error code ] == GKErrorNotSupported || [ error  code ] == GKErrorGameUnrecognized ) {
 					
                     cc8* message = [[ error description ] UTF8String ];
