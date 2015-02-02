@@ -12,16 +12,12 @@ dependencies {
 }
 
 android {
-    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
-    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+    compileSdkVersion 20
+    buildToolsVersion "20.0.0"
 
     defaultConfig {
-        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
-        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
-    }
-
-    lintOptions {
-        abortOnError false
+        minSdkVersion 8
+        targetSdkVersion 20
     }
 
     sourceSets {
