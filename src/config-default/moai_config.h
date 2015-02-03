@@ -109,7 +109,7 @@
 	#endif
 	
 	#ifndef MOAI_WITH_UNTZ
-		#define MOAI_WITH_UNTZ 1
+		#define MOAI_WITH_UNTZ 0
 	#endif
 	
 	#ifndef MOAI_WITH_VORBIS

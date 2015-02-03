@@ -78,10 +78,25 @@ public class MoaiLocalNotificationReceiver extends BroadcastReceiver {
 		    notification.setLatestEventInfo ( context, title, message, contentIntent );
 		    notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
-			String tag = intent.getStringExtra ( "collapse_key" );
-			int id = ( intent.getStringExtra ( "id" ) != null ) ? Integer.parseInt ( intent.getStringExtra ( "id" )) : 1;
+//			String tag = intent.getStringExtra ( "collapse_key" );
+//			int id = ( intent.getStringExtra ( "id" ) != null ) ? Integer.parseInt ( intent.getStringExtra ( "id" )) : 1;
+			
+			//TEMPORARY USING FOR REMOVEING SOME NOTIF
+			//BY ID AS SECONDS, AND TAG AS MESSAGE
+			String tag = intent.getStringExtra ( "message" );
+			String id = intent.getStringExtra ( "seconds" );
 
-		    notificationManager.notify ( tag, id, notification );		
+			MoaiLog.i ( "MoaiLocalNotificationReceiver handleMessage: tag = " + tag + "  id = " + id );
+
+			try {
+
+				int sec = Integer.parseInt ( id );
+
+		    	notificationManager.notify ( tag, sec, notification );		
+			} catch ( NumberFormatException e ) {
+
+		    	notificationManager.notify ( tag, 1, notification );		
+			}	
 		} else {
 		
 			MoaiLog.i ( "MoaiLocalNotificationReceiver handleMessage: delivering notification" );

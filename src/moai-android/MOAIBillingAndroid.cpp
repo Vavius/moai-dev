@@ -841,8 +841,8 @@ void MOAIBillingAndroid::NotifyBillingSupported ( bool supported ) {
 }
 
 //----------------------------------------------------------------//
-void MOAIBillingAndroid::NotifyPurchaseResponseReceived ( int code, cc8* identifier ) {
-
+void MOAIBillingAndroid::NotifyPurchaseResponseReceived ( int code, cc8* identifier, cc8* token ) {
+	
 	MOAILuaRef& callback = this->mListeners [ PURCHASE_RESPONSE_RECEIVED ];
 
 	if ( callback ) {
@@ -851,8 +851,8 @@ void MOAIBillingAndroid::NotifyPurchaseResponseReceived ( int code, cc8* identif
 
 		lua_pushinteger ( state, code );
 		lua_pushstring ( state, identifier );
-
-		state.DebugCall ( 2, 0 );
+		lua_pushstring ( state, token );
+		state.DebugCall ( 3, 0 );
 	}
 }
 
@@ -949,7 +949,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_ziplinegames_moai_MoaiAmazonBilling_A
 
 	JNI_GET_CSTRING ( jidentifier, identifier );
 
-	MOAIBillingAndroid::Get ().NotifyPurchaseResponseReceived ( MOAIBillingAndroid::MapAmazonPurchaseRequestStatus ( code ), identifier );
+	MOAIBillingAndroid::Get ().NotifyPurchaseResponseReceived ( MOAIBillingAndroid::MapAmazonPurchaseRequestStatus ( code ), identifier, NULL );
 
 	JNI_RELEASE_CSTRING ( jidentifier, identifier );
 }
@@ -1001,11 +1001,15 @@ extern "C" JNIEXPORT void JNICALL Java_com_ziplinegames_moai_MoaiGoogleBilling_A
 }
 
 //----------------------------------------------------------------//
-extern "C" JNIEXPORT void JNICALL Java_com_ziplinegames_moai_MoaiGoogleBilling_AKUNotifyGooglePurchaseResponseReceived ( JNIEnv* env, jclass obj, jint code, jstring jidentifier ) {
+extern "C" void Java_com_ziplinegames_moai_MoaiGoogleBilling_AKUNotifyGooglePurchaseResponseReceived ( JNIEnv* env, jclass obj, jint code, jstring jidentifier, jstring jtoken ) {
 
 	JNI_GET_CSTRING ( jidentifier, identifier );
 
-	MOAIBillingAndroid::Get ().NotifyPurchaseResponseReceived ( MOAIBillingAndroid::MapGoogleResponseCode ( code ), identifier);
+	JNI_GET_CSTRING ( jtoken, token );
+
+	MOAIBillingAndroid::Get ().NotifyPurchaseResponseReceived ( MOAIBillingAndroid::MapGoogleResponseCode ( code ), identifier, token);
+
+	JNI_RELEASE_CSTRING ( jtoken, token );
 
 	JNI_RELEASE_CSTRING ( jidentifier, identifier );
 }
@@ -1076,7 +1080,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_ziplinegames_moai_MoaiTstoreBilling_A
 
 	JNI_GET_CSTRING ( jidentifier, identifier );
 
-	MOAIBillingAndroid::Get ().NotifyPurchaseResponseReceived ( MOAIBillingAndroid::MapAmazonPurchaseRequestStatus ( code ), identifier );
+	MOAIBillingAndroid::Get ().NotifyPurchaseResponseReceived ( MOAIBillingAndroid::MapAmazonPurchaseRequestStatus ( code ), identifier, NULL );
 
 	JNI_RELEASE_CSTRING ( jidentifier, identifier );
 }

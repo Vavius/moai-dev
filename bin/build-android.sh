@@ -33,7 +33,8 @@ build_folder=$moai_root/build
 
 
 
-for ARCH in armeabi armeabi-v7a x86
+#for ARCH in armeabi armeabi-v7a x86
+for ARCH in armeabi-v7a
 do
 
   cd $build_folder

@@ -162,7 +162,7 @@ public:
 	static int		MapGooglePurchaseStateCode		( int code );
 	static int		MapGoogleResponseCode			( int code );
 	void			NotifyBillingSupported			( bool supported );
-	void			NotifyPurchaseResponseReceived	( int code, cc8* identifier );
+	void			NotifyPurchaseResponseReceived	( int code, cc8* identifier, cc8* token );
 	void			NotifyPurchaseStateChanged		( int code, cc8* identifier, cc8* order, cc8* user, cc8* notification, cc8* payload );
 	void			NotifyRestoreResponseReceived	( int code, bool more, cc8* offset );
 	void			NotifyUserIdDetermined			( int code, cc8* user );
