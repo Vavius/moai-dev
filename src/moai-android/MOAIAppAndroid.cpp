@@ -359,6 +359,20 @@ void MOAIAppAndroid::NotifyPictureTaken() {
 }
 
 //----------------------------------------------------------------//
+bool MOAIAppAndroid::NotifyBackButtonPressed() {
+
+	MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
+	if ( MOAIAppAndroid::Get ().PushListener ( BACK_BUTTON_PRESSED, state )) {
+
+		state.DebugCall ( 0, 1 );
+
+		return lua_toboolean ( state, -1 );
+	}
+
+	return false;
+}
+
+//----------------------------------------------------------------//
 void MOAIAppAndroid::PushPictureCode( MOAILuaState& state ) {
 	JNI_GET_ENV( jvm, env );
 
@@ -421,6 +435,11 @@ extern "C" JNIEXPORT jboolean JNICALL Java_com_ziplinegames_moai_Moai_AKUAppInvo
 		return state.GetValue < bool >( -1, false );
 	}
 	return false;
+}
+
+//----------------------------------------------------------------//
+extern "C" JNIEXPORT bool JNICALL Java_com_ziplinegames_moai_Moai_AKUAppBackButtonPressed ( JNIEnv* env, jclass obj ) {
+	return MOAIAppAndroid::Get ().NotifyBackButtonPressed ();
 }
 
 //----------------------------------------------------------------//

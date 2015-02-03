@@ -57,6 +57,7 @@ public:
 			MOAIAppAndroid				();
 			~MOAIAppAndroid				();
 	void	NotifyPictureTaken			();
+	bool	NotifyBackButtonPressed		();
 	void	PushPictureCode				( MOAILuaState& state );
 	void	PushPictureData				( MOAILuaState& state );
 	void	PushPicturePath				( MOAILuaState& state );
