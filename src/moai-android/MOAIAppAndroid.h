@@ -38,6 +38,7 @@ private:
 	};
 
 	//----------------------------------------------------------------//
+	static int	_exitGame				( lua_State* L );
 	static int	_getPictureCode			( lua_State* L );
 	static int	_getPicturePath			( lua_State* L );
 	static int	_getUTCTime				( lua_State* L );

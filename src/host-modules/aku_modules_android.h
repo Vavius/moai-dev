@@ -27,6 +27,10 @@
 	#include <moai-android-flurry/host.h>
 #endif
 
+#if AKU_WITH_ANDROID_GOOGLE_ANALYTICS
+	#include <moai-android-google-analytics/host.h>
+#endif
+
 #if AKU_WITH_ANDROID_GOOGLE_PLAY_SERVICES
 	#include <moai-android-google-play-services/host.h>
 #endif

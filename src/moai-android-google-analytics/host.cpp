@@ -1,24 +1,24 @@
 // Copyright (c) 2010-2011 Zipline Games, Inc. All Rights Reserved.
 // http://getmoai.com
 
-#include <moai-android-chartboost/host.h>
-#include <moai-android-chartboost/MOAIChartboostAndroid.h>
+#include <moai-android-google-analytics/host.h>
+#include <moai-android-google-analytics/MOAIGoogleAnalyticsAndroid.h>
 
 //================================================================//
 // aku
 //================================================================//
 
 //----------------------------------------------------------------//
-void AKUAndroidChartboostAppFinalize () {
+void AKUAndroidGoogleAnalyticsAppFinalize () {
 }
 
 //----------------------------------------------------------------//
-void AKUAndroidChartboostAppInitialize () {
+void AKUAndroidGoogleAnalyticsAppInitialize () {
 }
 
 //----------------------------------------------------------------//
-void AKUAndroidChartboostContextInitialize () {
+void AKUAndroidGoogleAnalyticsContextInitialize () {
 
-	REGISTER_LUA_CLASS ( MOAIChartboostAndroid );
+	REGISTER_LUA_CLASS ( MOAIGoogleAnalyticsAndroid );
 	
 }

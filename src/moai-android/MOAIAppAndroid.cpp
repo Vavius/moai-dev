@@ -16,6 +16,36 @@ extern JavaVM* jvm;
 //================================================================//
 
 //----------------------------------------------------------------//
+/**	@name	exitGame
+    @text Close app
+
+    @out	nil
+*/
+int	MOAIAppAndroid::_exitGame ( lua_State* L ) {
+    MOAILuaState state ( L );
+
+    JNI_GET_ENV ( jvm, env );
+
+    jclass moai = env->FindClass ( "com/ziplinegames/moai/Moai" );
+    if ( moai == NULL ) {
+
+		ZLLog::LogF ( ZLLog::CONSOLE, "MOAIAppAndroid: Unable to find java class %s", "com/ziplinegames/moai/Moai" );
+    } else {
+
+    	jmethodID exitGame = env->GetStaticMethodID ( moai, "exitGame", "()V" );
+    	if ( exitGame == NULL ) {
+
+			ZLLog::LogF ( ZLLog::CONSOLE, "MOAIAppAndroid: Unable to find static java method %s", "exitGame" );
+    	} else {
+
+			env->CallStaticVoidMethod ( moai, exitGame );
+		}
+	}
+
+	return 0;
+}
+
+//----------------------------------------------------------------//
 // TODO: doxygen
 int MOAIAppAndroid::_getPictureCode( lua_State* L ) {
 	MOAILuaState state( L );
@@ -285,6 +315,7 @@ void MOAIAppAndroid::RegisterLuaClass ( MOAILuaState& state ) {
 	state.SetField ( -1, "EVENT_PICTURE_TAKEN",		( u32 )EVENT_PICTURE_TAKEN );
 
 	luaL_Reg regTable [] = {
+		{ "exitGame",				_exitGame },
         { "getPictureCode",			_getPictureCode },
         { "getPicturePath",			_getPicturePath },
 		{ "getListener",			&MOAIGlobalEventSource::_getListener < MOAIAppAndroid > },
