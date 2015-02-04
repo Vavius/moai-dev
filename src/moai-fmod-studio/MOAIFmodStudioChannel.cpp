@@ -485,8 +485,12 @@ void MOAIFmodStudioChannel::SetVolume ( float volume ) {
 //----------------------------------------------------------------//
 void MOAIFmodStudioChannel::Stop () {
 	if ( !this->mChannel ) return;
-	FMOD_RESULT result = FMOD_Channel_Stop ( this->mChannel );
+	
+	if ( MOAIFmodStudio::IsValid () && MOAIFmodStudio::Get ().GetSoundSys ()) {
+		FMOD_RESULT result = FMOD_Channel_Stop ( this->mChannel );
+		MOAIFmodCheckError ( result );
+	}
+	
     this->mChannel = 0;
-    MOAIFmodCheckError ( result );
 }
 

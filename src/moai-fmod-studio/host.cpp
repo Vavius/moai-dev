@@ -51,6 +51,10 @@ void interruptionListenerCallback ( void *inUserData, UInt32 interruptionState )
 
 //----------------------------------------------------------------//
 void AKUFmodStudioAppFinalize () {
+	
+	if ( MOAIFmodStudio::IsValid ()) {
+		MOAIFmodStudio::Get ().CloseSoundSystem ();
+	}
 }
 
 //----------------------------------------------------------------//

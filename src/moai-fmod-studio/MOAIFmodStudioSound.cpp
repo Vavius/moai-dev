@@ -237,7 +237,7 @@ void MOAIFmodStudioSound::ReleaseSound () {
 
 	if ( !this->mSound ) return;
 	
-	if ( MOAIFmodStudio::IsValid ()) {
+	if ( MOAIFmodStudio::IsValid () && MOAIFmodStudio::Get ().GetSoundSys ()) {
         FMOD_RESULT result = FMOD_Sound_Release ( this->mSound );
         MOAIFmodCheckError ( result );
 	}
