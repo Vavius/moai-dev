@@ -608,8 +608,10 @@ public class MoaiFacebook {
 
 	        sActivity.runOnUiThread(new Runnable() {
 				public void run() {
+
+					if ( params == null ) params = new Bundle();
 	    	
-	    	WebDialog inviteDialog = ( new WebDialog.Builder ( sActivity, mCurrentSession, "apprequests",  params ) ) 
+	    		WebDialog inviteDialog = ( new WebDialog.Builder ( sActivity, mCurrentSession, "apprequests",  params ) ) 
 	    		.setOnCompleteListener ( new OnCompleteListener () {
 
 	    			public void onComplete ( Bundle values, FacebookException error ) {

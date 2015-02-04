@@ -268,13 +268,11 @@ int MOAIFacebookAndroid::_sendRequest ( lua_State* L ) {
 	
 	jstring jmessage = self->GetJString ( lua_tostring ( state, 1 ));
 	jobjectArray jparams = NULL;
-	if ( state.IsType ( 2, LUA_TTABLE )) {
-        jparams = self->StringArrayFromLua ( L, 2 );
-	}
-	if ( jparams == NULL ) {
-		jparams = self->Env ()->NewObjectArray ( 0, self->Env ()->FindClass( "java/lang/String" ), 0 );
-	}
-	self->CallStaticVoidMethod ( self->mJava_SendRequest, jmessage, jparams );		
+	jobject jbundle;
+    if ( state.IsType ( 2, LUA_TTABLE ) ) {
+       jbundle = self->BundleFromLua( L, 2 );
+    }
+	self->CallStaticVoidMethod ( self->mJava_SendRequest, jmessage, jbundle );		
 	return 0;
 }
 
