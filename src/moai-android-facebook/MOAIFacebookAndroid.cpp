@@ -268,13 +268,11 @@ int MOAIFacebookAndroid::_sendRequest ( lua_State* L ) {
 	
 	jstring jmessage = self->GetJString ( lua_tostring ( state, 1 ));
 	jobjectArray jparams = NULL;
-	if ( state.IsType ( 2, LUA_TTABLE )) {
-        jparams = self->StringArrayFromLua ( L, 2 );
-	}
-	if ( jparams == NULL ) {
-		jparams = self->Env ()->NewObjectArray ( 0, self->Env ()->FindClass( "java/lang/String" ), 0 );
-	}
-	self->CallStaticVoidMethod ( self->mJava_SendRequest, jmessage, jparams );		
+	jobject jbundle;
+    if ( state.IsType ( 2, LUA_TTABLE ) ) {
+       jbundle = self->BundleFromLua( L, 2 );
+    }
+	self->CallStaticVoidMethod ( self->mJava_SendRequest, jmessage, jbundle );		
 	return 0;
 }
 
@@ -318,7 +316,7 @@ MOAIFacebookAndroid::MOAIFacebookAndroid () {
 	this->mJava_AppEventsConstants 			= this->GetClass 		( "com/facebook/AppEventsConstants" );
 	// this->mJava_DeclinedPermissions			= this->GetStaticMethod ( "declinedPermissions", "()[Ljava/lang/String;" );
 	this->mJava_GraphRequest				= this->GetStaticMethod ( "graphRequest", "(Ljava/lang/String;Ljava/lang/String;Landroid/os/Bundle;I)V" );
-	// this->mJava_HasGranted					= this->GetStaticMethod ( "hasGranted", "(Ljava/lang/String;)Z" );
+	this->mJava_HasGranted					= this->GetStaticMethod ( "hasGranted", "(Ljava/lang/String;)Z" );
 	this->mJava_Init						= this->GetStaticMethod ( "init", "(Ljava/lang/String;)V" );
 	this->mJava_LogEvent					= this->GetStaticMethod ( "logEvent", "(Ljava/lang/String;DLandroid/os/Bundle;)V" );
 	this->mJava_LogPurchase					= this->GetStaticMethod ( "logPurchase", "(DLjava/lang/String;Landroid/os/Bundle;)V" );
@@ -383,7 +381,7 @@ void MOAIFacebookAndroid::RegisterLuaClass ( MOAILuaState& state ) {
 	this->RegisterStringConstant ( state, mJava_AppEventsConstants, "PARAMETER_VALUE_YES", 						"EVENT_PARAM_VALUE_YES");
 
 	luaL_Reg regTable [] = {
-    	{ "declinedPermissions",		_declinedPermissions },
+    	// { "declinedPermissions",		_declinedPermissions },
 		{ "graphRequest",				_graphRequest },
     	{ "hasGranted",					_hasGranted },
 		{ "init",						_init },
@@ -396,7 +394,6 @@ void MOAIFacebookAndroid::RegisterLuaClass ( MOAILuaState& state ) {
 		{ "restoreSession",				_restoreSession },
 		{ "requestPublishPermissions",	_requestPublishPermissions },
 		{ "requestReadPermissions",		_requestReadPermissions },
-		{ "restoreSession",				_restoreSession },
 		{ "sendRequest",				_sendRequest },
 		{ "sessionValid",				_sessionValid },
 		// { "setListener",				_setListener },
