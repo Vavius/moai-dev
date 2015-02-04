@@ -502,21 +502,18 @@ public class MoaiFacebook {
 	}
 
 	//----------------------------------------------------------------//	
-	public static void requestPublishPermissions ( String [] permissions ) {
+	public static boolean hasGranted ( String permission ) {
 
 		Session mCurrentSession = null;
 		
 	    mCurrentSession = Session.getActiveSession ();
 
-		if ( isSessionValid(mCurrentSession) ) {
-
-			MoaiLog.i ( " -------------------------------------------------------- MoaiFacebook: requestPublishPermissions : requesting...  -------------------------------------------------------- " );
+		if ( isSessionValid ( mCurrentSession ) ) {
 			
-			requestPublishPermissions ( sActivity, mCurrentSession, Arrays.asList ( permissions ), REQUEST_PUBLISH_PERMISSION );
-		} else {
-
-			MoaiLog.i ( " -------------------------------------------------------- MoaiFacebook: requestPublishPermissions : FAIL -------------------------------------------------------- " );
+			return mCurrentSession.isPermissionGranted(permission);
 		}
+
+		return false;
 	}
 
 	//----------------------------------------------------------------//	
@@ -609,7 +606,7 @@ public class MoaiFacebook {
 	        sActivity.runOnUiThread(new Runnable() {
 				public void run() {
 
-					if ( params == null ) params = new Bundle();
+				params.putString ( "message", message );
 	    	
 	    		WebDialog inviteDialog = ( new WebDialog.Builder ( sActivity, mCurrentSession, "apprequests",  params ) ) 
 	    		.setOnCompleteListener ( new OnCompleteListener () {
