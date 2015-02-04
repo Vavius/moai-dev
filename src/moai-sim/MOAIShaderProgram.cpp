@@ -388,6 +388,7 @@ bool MOAIShaderProgram::OnGPUCreate () {
 
 		if ( uniform.mType != MOAIShaderUniform::UNIFORM_NONE ) {
 			uniform.mAddr = zglGetUniformLocation ( this->mProgram, uniform.mName );
+			uniform.ClearValue ();
 		}
 	}
 

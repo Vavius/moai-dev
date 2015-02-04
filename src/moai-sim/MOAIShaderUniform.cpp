@@ -43,6 +43,12 @@ void MOAIShaderUniformBuffer::Clear () {
 }
 
 //----------------------------------------------------------------//
+void MOAIShaderUniformBuffer::ClearValue () {
+	
+	this->SetType ( this->mType );
+}
+
+//----------------------------------------------------------------//
 void MOAIShaderUniformBuffer::GetFlags ( MOAIAttrOp& attrOp ) {
     
 	switch ( this->mType ) {
