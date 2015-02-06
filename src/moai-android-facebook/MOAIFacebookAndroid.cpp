@@ -69,8 +69,18 @@ int MOAIFacebookAndroid::_graphRequest ( lua_State* L ) {
 int MOAIFacebookAndroid::_hasGranted ( lua_State* L ) {
 	MOAI_JAVA_LUA_SETUP ( MOAIFacebookAndroid, "" )
 
-	jstring jpermission = self->GetJString ( lua_tostring ( state, 1 ));
-	lua_pushboolean ( state, self->CallStaticBooleanMethod ( self->mJava_HasGranted, jpermission ));
+	cc8* permission = state.GetValue < cc8* > ( 1, 0 );
+	
+	if ( permission ) {
+		
+		jstring jpermission = self->GetJString ( permission );
+		state.Push ( self->CallStaticBooleanMethod ( self->mJava_HasGranted, jpermission ));
+	}
+	else {
+	
+		state.Push ( false );
+	}
+
 	return 1;
 }
 
