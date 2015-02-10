@@ -14,6 +14,7 @@
 
 #import <ifaddrs.h>
 #import <arpa/inet.h>
+#import <sys/sysctl.h>
 
 //================================================================//
 // lua
@@ -145,6 +146,38 @@ int MOAIAppIOS::_getIPAddress ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/**	@name	getSystemUptime
+	@text	Get the current uptime in seconds. This value does not change when system clock is modified by user
+	
+	@in		nil
+	@out	num 	time since last boot in seconds or nil if failed
+*/
+int MOAIAppIOS::_getSystemUptime ( lua_State* L ) {
+	
+	MOAILuaState state ( L );
+	
+	struct timeval boottime;
+	
+	int mib [ 2 ] = { CTL_KERN, KERN_BOOTTIME };
+	size_t size = sizeof ( boottime );
+	time_t now;
+	time_t uptime = -1;
+	
+	( void ) time ( &now );
+	
+	if ( sysctl ( mib, 2, &boottime, &size, NULL, 0 ) != -1 && boottime.tv_sec != 0 ) {
+		uptime = now - boottime.tv_sec;
+	}
+	
+	if ( uptime != -1 ) {
+		state.Push ( (double) uptime );
+		return 1;
+	}
+	
+	return 0;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	getUTCTime
  @text	Get the current UTC time in seconds
  
@@ -173,27 +206,27 @@ int MOAIAppIOS::_sendMail ( lua_State* L ) {
 	
 	MOAILuaState state ( L );
 	
-//	cc8* recipient = state.GetValue < cc8* >( 1, "" );
-//	cc8* subject = state.GetValue < cc8* >( 2, "" );
-//	cc8* message = state.GetValue < cc8* >( 3, "" );
-//	
-//	MFMailComposeViewController* controller = [[ MFMailComposeViewController alloc ] init ];
-//	controller.mailComposeDelegate = MOAIAppIOS::Get ().mMailDelegate;
-//	
-//	NSArray* to = [ NSArray arrayWithObject:[ NSString  stringWithUTF8String:recipient ]];
-//	
-//	[ controller setToRecipients:to ];
-//	[ controller setSubject:[ NSString stringWithUTF8String:subject ]];
-//	[ controller setMessageBody:[ NSString stringWithUTF8String:message ] isHTML:NO ]; 
-//	
-//	if (controller) {
-//				
-//		UIWindow* window = [[ UIApplication sharedApplication ] keyWindow ];
-//		UIViewController* rootVC = [ window rootViewController ];	
-//		[ rootVC presentViewController:controller animated:YES completion:nil];
-//	}
-//	
-//	[controller release];
+	cc8* recipient = state.GetValue < cc8* >( 1, "" );
+	cc8* subject = state.GetValue < cc8* >( 2, "" );
+	cc8* message = state.GetValue < cc8* >( 3, "" );
+	
+	MFMailComposeViewController* controller = [[ MFMailComposeViewController alloc ] init ];
+	controller.mailComposeDelegate = MOAIAppIOS::Get ().mMailDelegate;
+	
+	NSArray* to = [ NSArray arrayWithObject:[ NSString  stringWithUTF8String:recipient ]];
+	
+	[ controller setToRecipients:to ];
+	[ controller setSubject:[ NSString stringWithUTF8String:subject ]];
+	[ controller setMessageBody:[ NSString stringWithUTF8String:message ] isHTML:NO ]; 
+	
+	if (controller) {
+				
+		UIWindow* window = [[ UIApplication sharedApplication ] keyWindow ];
+		UIViewController* rootVC = [ window rootViewController ];	
+		[ rootVC presentViewController:controller animated:YES completion:nil];
+	}
+	
+	[controller release];
 	
 	return 1;
 }
@@ -327,6 +360,7 @@ void MOAIAppIOS::RegisterLuaClass ( MOAILuaState& state ) {
 		{ "getInterfaceOrientation",	_getInterfaceOrientation },
 		{ "getIPAddress",				_getIPAddress },
 		{ "getListener",				&MOAIGlobalEventSource::_getListener < MOAIAppIOS > },
+		{ "getSystemUptime",			_getSystemUptime },
 		{ "getUTCTime",					_getUTCTime },
 		{ "sendMail",					_sendMail },
 		{ "setListener",				&MOAIGlobalEventSource::_setListener < MOAIAppIOS > },
