@@ -330,12 +330,6 @@ int MOAISpineSkeleton::_setFlip ( lua_State *L ) {
 	}
 	self->mSkeleton->flipX = flipX;
 	self->mSkeleton->flipY = flipY;
-	
-	BoneTransformIt it = self->mBoneTransformMap.begin ();
-	for ( ; it != self->mBoneTransformMap.end (); ++it ) {
-		it->second->mFlipX = flipX;
-		it->second->mFlipY = flipY;
-	}
     
 	return 0;
 }
@@ -481,8 +475,6 @@ void MOAISpineSkeleton::AffirmBoneHierarchy ( spBone* bone ) {
 		
 		MOAISpineBone* luaBone = new MOAISpineBone();
 		luaBone->SetBone ( boneIt );
-		luaBone->mFlipX = mSkeleton->flipX;
-		luaBone->mFlipY = mSkeleton->flipY;
 		this->LuaRetain ( luaBone );
 		mBoneTransformMap [ boneIt->data->name ] = luaBone;
 		
@@ -538,7 +530,7 @@ void MOAISpineSkeleton::Draw ( int subPrimID, float lod ) {
 	MOAIQuadBrush brush;
 	brush.BindVertexFormat ( gfxDevice );
 	
-	for ( u32 i = 0; i < mSkeleton->slotCount; ++i ) {
+	for ( u32 i = 0; i < mSkeleton->slotsCount; ++i ) {
 		spSlot* slot = mSkeleton->drawOrder [ i ];
 		if ( !slot->attachment ) {
 			continue;
@@ -562,7 +554,7 @@ void MOAISpineSkeleton::Draw ( int subPrimID, float lod ) {
 				a = attachment->a;
 				
 				mVertices.SetTop ( 8 );
-				spRegionAttachment_computeWorldVertices ( attachment, mSkeleton->x, mSkeleton->y, slot->bone, mVertices );
+				spRegionAttachment_computeWorldVertices ( attachment, slot->bone, mVertices );
 				break;
 			}
 				
@@ -579,7 +571,7 @@ void MOAISpineSkeleton::Draw ( int subPrimID, float lod ) {
 				a = attachment->a;
 				
 				mVertices.SetTop ( attachment->verticesCount );
-				spMeshAttachment_computeWorldVertices ( attachment, mSkeleton->x, mSkeleton->y, slot, mVertices );
+				spMeshAttachment_computeWorldVertices ( attachment, slot, mVertices );
 				break;
 			}
 				
@@ -596,7 +588,7 @@ void MOAISpineSkeleton::Draw ( int subPrimID, float lod ) {
 				a = attachment->a;
 				
 				mVertices.SetTop ( attachment->uvsCount );
-				spSkinnedMeshAttachment_computeWorldVertices ( attachment, mSkeleton->x, mSkeleton->y, slot, mVertices );
+				spSkinnedMeshAttachment_computeWorldVertices ( attachment, slot, mVertices );
 				break;
 			}
 				
@@ -771,7 +763,7 @@ void MOAISpineSkeleton::OnDepNodeUpdate () {
 //----------------------------------------------------------------//
 u32 MOAISpineSkeleton::OnGetModelBounds ( ZLBox &bounds ) {
 	
-    u32 size = mSkeleton->slotCount;
+    u32 size = mSkeleton->slotsCount;
     
     if ( size == 0) {
         return MOAIProp::BOUNDS_EMPTY;
@@ -872,7 +864,7 @@ void MOAISpineSkeleton::SetMix ( cc8* fromName, cc8* toName, float duration ) {
 void MOAISpineSkeleton::UpdateBounds () {
 
 	mSkeletonBounds.Init ( FLT_MAX, -FLT_MAX, -FLT_MAX, FLT_MAX, 0.f, 0.f );
-	for ( u32 i = 0; i < mSkeleton->slotCount; ++i ) {
+	for ( u32 i = 0; i < mSkeleton->slotsCount; ++i ) {
 		spSlot* slot = mSkeleton->drawOrder [ i ];
 		if ( !slot->attachment ) {
 			continue;
@@ -883,28 +875,28 @@ void MOAISpineSkeleton::UpdateBounds () {
 			case SP_ATTACHMENT_BOUNDING_BOX: {
 				spBoundingBoxAttachment *attachment = ( spBoundingBoxAttachment* ) slot->attachment;
 				mVertices.SetTop ( attachment->verticesCount );
-				spBoundingBoxAttachment_computeWorldVertices ( attachment, mSkeleton->x, mSkeleton->y, slot->bone, mVertices );
+				spBoundingBoxAttachment_computeWorldVertices ( attachment, slot->bone, mVertices );
 				break;
 			}
 				
 			case SP_ATTACHMENT_REGION: {
 				spRegionAttachment *attachment = ( spRegionAttachment* ) slot->attachment;
 				mVertices.SetTop ( 8 );
-				spRegionAttachment_computeWorldVertices ( attachment, mSkeleton->x, mSkeleton->y, slot->bone, mVertices );
+				spRegionAttachment_computeWorldVertices ( attachment, slot->bone, mVertices );
 				break;
 			}
 				
 			case SP_ATTACHMENT_MESH: {
 				spMeshAttachment *attachment = ( spMeshAttachment* ) slot->attachment;
 				mVertices.SetTop ( attachment->verticesCount );
-				spMeshAttachment_computeWorldVertices ( attachment, mSkeleton->x, mSkeleton->y, slot, mVertices );
+				spMeshAttachment_computeWorldVertices ( attachment, slot, mVertices );
 				break;
 			}
 				
 			case SP_ATTACHMENT_SKINNED_MESH: {
 				spSkinnedMeshAttachment *attachment = ( spSkinnedMeshAttachment* ) slot->attachment;
 				mVertices.SetTop ( attachment->uvsCount );
-				spSkinnedMeshAttachment_computeWorldVertices ( attachment, mSkeleton->x, mSkeleton->y, slot, mVertices );
+				spSkinnedMeshAttachment_computeWorldVertices ( attachment, slot, mVertices );
 				break;
 			}
 				
