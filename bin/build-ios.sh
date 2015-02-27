@@ -103,7 +103,7 @@ mv -v ${lib_dir}/lib/*.a ${lib_dir}/lib-iphonesimulator
 
 rm -f ${lib_dir}/lib/*.a
 
-xcodebuild ONLY_ACTIVE_ARCH=NO ARCHS="armv7 armv7s arm64" -project moai.xcodeproj -target install -configuration Release -target install -sdk iphoneos
+xcodebuild ONLY_ACTIVE_ARCH=NO ARCHS="armv7 armv7s arm64" -project moai.xcodeproj -target install -configuration Release -target install -sdk iphoneos IPHONEOS_DEPLOYMENT_TARGET=6.0
 
 #work around cmake install bug with ios projects
 find . -iregex ".*/.*-iphoneos/[^/]*.a" | xargs -J % cp -npv % ${lib_dir}/lib
