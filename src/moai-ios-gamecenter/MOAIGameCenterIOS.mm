@@ -309,6 +309,7 @@ int MOAIGameCenterIOS::_showDefaultLeaderboard ( lua_State* L ) {
  
 	@in		number	state	One of MOAIGameCenterIOS.VIEW_DEFAULT, VIEW_LEADERBOARDS,
 							VIEW_ACHIEVEMENTS, VIEW_CHALLENGES
+	@opt	string	id		Leaderboard ID
 	@out	nil
 */
 
@@ -317,6 +318,12 @@ int MOAIGameCenterIOS::_showGameCenter ( lua_State *L ) {
 	MOAILuaState state ( L );
 	
 	GKGameCenterViewControllerState viewState = state.GetValue < int >( 1, GKGameCenterViewControllerStateDefault );
+	cc8* name = state.GetValue < cc8* > ( 2, 0 );
+	
+	NSString* leaderboardId = nil;
+	if ( name ) {
+		leaderboardId = [ NSString stringWithUTF8String:name ];
+	}
 	
 	UIWindow* window = [[ UIApplication sharedApplication ] keyWindow ];
 	UIViewController* rootVC = [ window rootViewController ];
@@ -326,6 +333,11 @@ int MOAIGameCenterIOS::_showGameCenter ( lua_State *L ) {
 		
 		gameCenterController.gameCenterDelegate = MOAIGameCenterIOS::Get ().mGameCenterDelegate;
 		gameCenterController.viewState = viewState;
+		
+		if ( [ gameCenterController respondsToSelector:@selector ( leaderboardIdentifier )] ) {
+			gameCenterController.leaderboardIdentifier = leaderboardId;
+		}
+		
 		if ( rootVC != nil ) {
 			
 			[ rootVC presentViewController:gameCenterController animated:YES completion:nil ];
