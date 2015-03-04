@@ -300,7 +300,7 @@ MOAIAppIOS::MOAIAppIOS () {
 	this->mReachabilityListener = [ MOAIReachabilityListener alloc ];
 	[ this->mReachabilityListener startListener ];
 
-	//this->mMailDelegate = [ MoaiMailComposeDelegate alloc ];
+	this->mMailDelegate = [ MoaiMailComposeDelegate alloc ];
 	this->mTakeCameraListener = [ MOAITakeCameraListener alloc ];
 	
 	this->RegisterNotificationListeners ();
@@ -311,7 +311,7 @@ MOAIAppIOS::~MOAIAppIOS () {
 
 	RemoveNotificationListeners ();
 
-	//[ this->mMailDelegate release ];
+	[ this->mMailDelegate release ];
 	[ this->mTakeCameraListener release];
 }
 
@@ -425,26 +425,26 @@ void MOAIAppIOS::UpdateReachability () {
 //================================================================//
 // MoaiMailComposeDelegate
 //================================================================//
-//@implementation MoaiMailComposeDelegate
-//
+@implementation MoaiMailComposeDelegate
+
 ////================================================================//
 //#pragma mark -
 //#pragma mark Protocol MoaiMailComposeDelegate
 ////================================================================//
-//
-//- (void)mailComposeController:(MFMailComposeViewController*)controller
-//          didFinishWithResult:(MFMailComposeResult)result
-//                        error:(NSError*)error {
-//	UNUSED ( controller );
-//	UNUSED ( result );
-//	UNUSED ( error );
-//
-//	UIWindow* window = [[ UIApplication sharedApplication ] keyWindow ];
-//	UIViewController* rootVC = [ window rootViewController ];
-//
-//	if ( rootVC ) {
-//		[ rootVC dismissViewControllerAnimated:YES completion:nil ];
-//	}
-//}
-//
-//@end
+
+- (void)mailComposeController:(MFMailComposeViewController*)controller
+          didFinishWithResult:(MFMailComposeResult)result
+                        error:(NSError*)error {
+	UNUSED ( controller );
+	UNUSED ( result );
+	UNUSED ( error );
+
+	UIWindow* window = [[ UIApplication sharedApplication ] keyWindow ];
+	UIViewController* rootVC = [ window rootViewController ];
+	
+	if ( rootVC ) {
+		[ rootVC dismissViewControllerAnimated:YES completion:nil ];
+	}
+}
+
+@end

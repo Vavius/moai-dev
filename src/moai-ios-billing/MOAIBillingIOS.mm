@@ -317,11 +317,21 @@ void MOAIBillingIOS::PushPaymentTransaction ( lua_State* L, SKPaymentTransaction
 		lua_newtable ( L );
 		
 		lua_pushstring ( L, "productIdentifier" );
-		[ transaction.payment.productIdentifier toLua:L ];
+		if ( transaction.payment.productIdentifier ) {
+			[ transaction.payment.productIdentifier toLua:L ];
+		}
+		else {
+			lua_pushnil ( L );
+		}
 		lua_settable ( L, -3 );
 		
 		lua_pushstring ( L, "quantity" );
-		lua_pushnumber ( L, transaction.payment.quantity );
+		if ( transaction.payment.quantity ) {
+			lua_pushnumber ( L, transaction.payment.quantity );
+		}
+		else {
+			lua_pushnil ( L );
+		}
 		lua_settable ( L, -3 );
 		
 		lua_settable ( L, -3 );
@@ -330,7 +340,12 @@ void MOAIBillingIOS::PushPaymentTransaction ( lua_State* L, SKPaymentTransaction
 	if ( transaction.transactionState == SKPaymentTransactionStateFailed ) {
 		
 		lua_pushstring ( L, "error" );
-		[ transaction.error toLua:L ];
+		if ( transaction.error ) {
+			[ transaction.error toLua:L ];
+		}
+		else {
+			lua_pushnil ( L );
+		}
 		lua_settable ( L, -3 );
 	}
 	
@@ -368,11 +383,21 @@ void MOAIBillingIOS::PushPaymentTransaction ( lua_State* L, SKPaymentTransaction
 	if (( transaction.transactionState == SKPaymentTransactionStatePurchased ) || ( transaction.transactionState == SKPaymentTransactionStateRestored )) {
 		
 		lua_pushstring ( L, "transactionDate" );
-		[ transaction.transactionDate toLua:L ];
+		if ( transaction.transactionDate ) {
+			[ transaction.transactionDate toLua:L ];
+		}
+		else {
+			lua_pushnil ( L );
+		}
 		lua_settable ( L, -3 );
 
 		lua_pushstring ( L, "transactionIdentifier" );
-		[ transaction.transactionIdentifier toLua:L ];
+		if ( transaction.transactionIdentifier ) {
+			[ transaction.transactionIdentifier toLua:L ];
+		}
+		else {
+			lua_pushnil ( L );
+		}
 		lua_settable ( L, -3 );
 	}
 }
