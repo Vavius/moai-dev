@@ -582,8 +582,7 @@ MOAIFacebookIOS::MOAIFacebookIOS () {
 //----------------------------------------------------------------//
 MOAIFacebookIOS::~MOAIFacebookIOS () {
     
-	[ FBSession.activeSession close ];
-
+//	[ FBSession.activeSession close ];
 }
 
 //----------------------------------------------------------------//
