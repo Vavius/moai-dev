@@ -146,11 +146,11 @@ void MOAIHttpTaskCurl::AffirmHandle () {
 	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_PROGRESSFUNCTION, _progressFunction );
 	PrintError ( result );
 	
-	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_SSL_VERIFYPEER, 0 );
-	PrintError ( result );
+//	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_SSL_VERIFYPEER, 0 );
+//	PrintError ( result );
 	
-	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_SSL_VERIFYHOST, 0 );
-	PrintError ( result );
+//	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_SSL_VERIFYHOST, 0 );
+//	PrintError ( result );
 
 	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_CONNECTTIMEOUT, 0 );
 	PrintError ( result );
