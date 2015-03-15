@@ -202,6 +202,11 @@ void MOAIHttpTaskNaCl::SetFailOnError ( bool enable ) {
 }
 
 //----------------------------------------------------------------//
+void MOAIHttpTaskNaCl::SetSSLOptions ( bool verifyPeer, bool verifyHost, cc8* caBundlePath ) {
+	//unimplemented
+}
+
+//----------------------------------------------------------------//
 void MOAIHttpTaskNaCl::SetUrl ( cc8* url ) {
 	
 	this->mUrl = url;

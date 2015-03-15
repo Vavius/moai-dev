@@ -410,6 +410,27 @@ int MOAIHttpTaskBase::_setHeader ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/**	@lua	setSSLOptions
+	@text	SSL options for peer verification.
+ 
+	@in		MOAIHttpTaskBase self
+	@in		boolean		verifyPeer
+	@in		boolean		verifyHost
+	@in		string		path to ca-cert bundle (.crt)
+	@out	nil
+*/
+int MOAIHttpTaskBase::_setSSLOptions ( lua_State *L ) {
+	MOAI_LUA_SETUP ( MOAIHttpTaskBase, "U" )
+	
+	bool verifyPeer		= state.GetValue < bool >( 2, false );
+	bool verifyHost		= state.GetValue < bool >( 3, false );
+	cc8* caBundlePath	= state.GetValue < cc8* >( 4, 0 );
+	
+	self->SetSSLOptions ( verifyPeer, verifyHost, caBundlePath );
+	return 0;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	setStream
 	@text	Sets a custom stream to read data into.
  
@@ -612,6 +633,7 @@ void MOAIHttpTaskBase::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "setFailOnError",		_setFailOnError },
 		{ "setFollowRedirects",	_setFollowRedirects },
 		{ "setHeader",			_setHeader },
+		{ "setSSLOptions",		_setSSLOptions },
 		{ "setStream",			_setStream },
 		{ "setTimeout",			_setTimeout },
 		{ "setUrl",				_setUrl },

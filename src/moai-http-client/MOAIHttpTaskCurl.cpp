@@ -146,11 +146,11 @@ void MOAIHttpTaskCurl::AffirmHandle () {
 	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_PROGRESSFUNCTION, _progressFunction );
 	PrintError ( result );
 	
-//	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_SSL_VERIFYPEER, 0 );
-//	PrintError ( result );
+	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_SSL_VERIFYPEER, 0 );
+	PrintError ( result );
 	
-//	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_SSL_VERIFYHOST, 0 );
-//	PrintError ( result );
+	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_SSL_VERIFYHOST, 0 );
+	PrintError ( result );
 
 	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_CONNECTTIMEOUT, 0 );
 	PrintError ( result );
@@ -361,6 +361,21 @@ void MOAIHttpTaskCurl::SetFailOnError ( bool enable ) {
 	CURLcode result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_FAILONERROR, ( u32 ) enable );
 	PrintError ( result );
 	
+}
+
+//----------------------------------------------------------------//
+void MOAIHttpTaskCurl::SetSSLOptions ( bool verifyPeer, bool verifyHost, cc8* caBundlePath ) {
+	
+	CURLcode result;
+	
+	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_SSL_VERIFYPEER, verifyPeer ? 1 : 0 );
+	PrintError ( result );
+	
+	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_SSL_VERIFYHOST, verifyHost ? 2 : 0 );
+	PrintError ( result );
+	
+	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_CAINFO, caBundlePath );
+	PrintError ( result );
 }
 
 //----------------------------------------------------------------//

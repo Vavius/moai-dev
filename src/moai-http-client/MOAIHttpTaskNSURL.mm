@@ -248,6 +248,14 @@ void MOAIHttpTaskNSURL::SetCookieSrc	( const char *file ) {
 }
 
 //----------------------------------------------------------------//
+void MOAIHttpTaskNSURL::SetSSLOptions ( bool verifyPeer, bool verifyHost, cc8* caBundlePath ) {
+	
+	UNUSED(verifyPeer);
+	UNUSED(verifyHost);
+	UNUSED(caBundlePath);
+}
+
+//----------------------------------------------------------------//
 void MOAIHttpTaskNSURL::SetUrl ( cc8* url ) {
 	
 	this->mUrl = url;
