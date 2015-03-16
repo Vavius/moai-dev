@@ -75,6 +75,7 @@ public:
 	void			SetCookieSrc			( const char *file );
 	void			SetCookieDst			( const char *file );
 	void			SetFailOnError			( bool enable );
+	void			SetSSLOptions			( bool verifyPeer, bool verifyHost, cc8* caBundlePath );
 	void			SetUrl					( cc8* url );
 	void			SetUserAgent			( cc8* useragent );
 	void			SetVerb					( int verb );

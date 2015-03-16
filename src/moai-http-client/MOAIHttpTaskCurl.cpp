@@ -364,6 +364,21 @@ void MOAIHttpTaskCurl::SetFailOnError ( bool enable ) {
 }
 
 //----------------------------------------------------------------//
+void MOAIHttpTaskCurl::SetSSLOptions ( bool verifyPeer, bool verifyHost, cc8* caBundlePath ) {
+	
+	CURLcode result;
+	
+	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_SSL_VERIFYPEER, verifyPeer ? 1 : 0 );
+	PrintError ( result );
+	
+	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_SSL_VERIFYHOST, verifyHost ? 2 : 0 );
+	PrintError ( result );
+	
+	result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_CAINFO, caBundlePath );
+	PrintError ( result );
+}
+
+//----------------------------------------------------------------//
 void MOAIHttpTaskCurl::SetUrl ( cc8* url ) {
 
 	CURLcode result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_URL, url );
