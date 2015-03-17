@@ -8,7 +8,6 @@
 #import <moai-ios/NSDictionary+MOAILib.h>
 #import <moai-ios/NSString+MOAILib.h>
 
-#import <FacebookSDK/FacebookSDK.h>
 
 // Facebook SDK starting from 3.14 not showing native login dialog be default
 // The simpliest workaround is to call a private method on FBSession...
@@ -273,9 +272,12 @@ int MOAIFacebookIOS::_login ( lua_State* L ) {
 
             switch ( sessionState ) {
                 case FBSessionStateOpen:
-                case FBSessionStateOpenTokenExtended:
+                case FBSessionStateOpenTokenExtended: {
 
                     MOAIFacebookIOS::Get ().SessionDidLogin ();
+                    FBFrictionlessRecipientCache* cache = MOAIFacebookIOS::Get ().mFriendsCache;
+                    [ cache prefetchAndCacheForSession:nil ];
+                    }
                     break;
 
                 case FBSessionStateClosed:
@@ -494,12 +496,12 @@ int MOAIFacebookIOS::_requestReadPermissions( lua_State *L ) {
 
 //----------------------------------------------------------------//
 /**	@name	sendRequest
- @text	Send an app request to the logged in users' friends.
- 
- @opt	string	message			The message for the request. See Facebook documentation. Default is nil.
- @opt	table	params			Optional parameters
- @out 	nil
- */
+	@text	Send an app request to the logged in users' friends.
+	
+	@opt	string	message			The message for the request. See Facebook documentation. Default is nil.
+	@opt	table	params			Optional parameters
+	@out 	nil
+*/
 int MOAIFacebookIOS::_sendRequest ( lua_State* L ) {
 	
 	MOAILuaState state ( L );
@@ -514,6 +516,7 @@ int MOAIFacebookIOS::_sendRequest ( lua_State* L ) {
 		[ params initWithLua:state stackIndex:2 ];
 	}
 	
+    FBFrictionlessRecipientCache* cache = MOAIFacebookIOS::Get ().mFriendsCache;
     [ FBWebDialogs presentRequestsDialogModallyWithSession:nil
 		message:message
 		title:nil
@@ -532,6 +535,7 @@ int MOAIFacebookIOS::_sendRequest ( lua_State* L ) {
 				}
 			}
 		}
+		friendCache:cache
 	];
 	
 	return 0;
@@ -576,13 +580,15 @@ MOAIFacebookIOS::MOAIFacebookIOS () {
 	RTTI_SINGLE ( MOAILuaObject )
 	RTTI_SINGLE ( MOAIGlobalEventSource )
 	
-	
+	mFriendsCache = [[ FBFrictionlessRecipientCache alloc ] init ];
 }
 
 //----------------------------------------------------------------//
 MOAIFacebookIOS::~MOAIFacebookIOS () {
     
 //	[ FBSession.activeSession close ];
+    [ mFriendsCache release ];
+    mFriendsCache = nil;
 }
 
 //----------------------------------------------------------------//

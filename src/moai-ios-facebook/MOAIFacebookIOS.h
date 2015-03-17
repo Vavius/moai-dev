@@ -11,6 +11,7 @@
 
 #import <Foundation/Foundation.h> 
 #import <moai-core/headers.h>
+#import <FacebookSDK/FacebookSDK.h>
 
 @class MOAIFacebookIOSDialogDelegate;
 @class MOAIFacebookIOSRequestDelegate;
@@ -40,7 +41,8 @@ class MOAIFacebookIOS :
 	public MOAIGlobalEventSource {
 private:
 		
-	STLString					mAppId;
+	STLString						mAppId;
+	FBFrictionlessRecipientCache* 	mFriendsCache;
 		
 	//----------------------------------------------------------------//
     static int  _declinedPermissions        ( lua_State* L );
@@ -65,7 +67,7 @@ private:
 public:
     
 	DECL_LUA_SINGLETON ( MOAIFacebookIOS );
-		
+
 	STLString						mExpirationDate;
 	STLString						mToken;
 		
