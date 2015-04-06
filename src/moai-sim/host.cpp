@@ -250,6 +250,12 @@ int AKUIsGfxBufferOpaque () {
 }
 
 //----------------------------------------------------------------//
+int AKUIsRelaunchScheduled () {
+	
+	return MOAISim::Get ().IsRelaunchScheduled ();
+}
+
+//----------------------------------------------------------------//
 void AKUPause ( bool pause ) {
 
 	if ( pause ) {

@@ -100,6 +100,7 @@ private:
 	
 	u32					mGCActive;
 	u32					mGCStep;
+	bool				mRelaunchScheduled;
 	
 	MOAILuaMemberRef	mLuaGCFunc;
 	
@@ -129,6 +130,7 @@ private:
 	static int		_hideCursor					( lua_State* L );
 	static int		_openWindow					( lua_State* L );
 	static int		_pauseTimer					( lua_State* L );
+	static int		_scheduleRelaunch			( lua_State* L );
 	static int		_setBoostThreshold			( lua_State* L );
 	static int		_setCpuBudget				( lua_State* L );
 	static int		_setGCActive				( lua_State* L );
@@ -180,6 +182,7 @@ public:
 	GET ( double, SimTime, mSimTime )
 	GET ( u32, StepCount, mStepCount )
 	GET ( float, FrameRate, mFrameRate )
+	GET_BOOL ( IsRelaunchScheduled, mRelaunchScheduled )
 	
 	GET ( MOAIInputQueue&, InputMgr, *mInputMgr );
 	GET ( MOAIActionTree&, ActionMgr, *mActionMgr );

@@ -110,6 +110,20 @@ MOAIGfxResourceMgr::MOAIGfxResourceMgr () :
 
 //----------------------------------------------------------------//
 MOAIGfxResourceMgr::~MOAIGfxResourceMgr () {
+	
+	this->ProcessDeleters ();
+}
+
+bool MOAIGfxResourceMgr::ProcessDeleters () {
+	
+	u32 top = this->mDeleterStack.GetTop ();
+	for ( u32 i = 0; i < top; ++i ) {
+		MOAIGfxDeleter& deleter = this->mDeleterStack [ i ];
+		deleter.Delete ();
+	}
+	this->mDeleterStack.Reset ();
+	
+	return top;
 }
 
 //----------------------------------------------------------------//
@@ -179,14 +193,7 @@ void MOAIGfxResourceMgr::Update () {
 
 	zglBegin ();
 	
-	u32 top = this->mDeleterStack.GetTop ();
-	for ( u32 i = 0; i < top; ++i ) {
-		MOAIGfxDeleter& deleter = this->mDeleterStack [ i ];
-		deleter.Delete ();
-	}
-	this->mDeleterStack.Reset ();
-	
-	if ( top ) {
+	if ( this->ProcessDeleters ()) {
 		zglFlush ();
 	}
 	

@@ -604,7 +604,7 @@ void MOAIGfxDevice::OnGlobalsFinalize () {
 
 	// TODO: do we care about releasing resources on shutdown?
 	// commented out for now.
-	//this->ReleaseResources ();
+//	this->ReleaseResources ();
 }
 
 //----------------------------------------------------------------//

@@ -383,6 +383,22 @@ int MOAISim::_pauseTimer ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/** @lua	scheduleRelaunch
+	@text	Set relaunch flag. This value is fetch by host and full context
+			recreation is performed. Exact implementation is host-dependant. 
+			
+	@in		boolean	relaunch	Relaunch flag
+	@out	nil
+*/
+int MOAISim::_scheduleRelaunch ( lua_State *L ) {
+	MOAILuaState state ( L );
+	
+	MOAISim::Get ().mRelaunchScheduled = state.GetValue < bool >( 1, true );
+	
+	return 0;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	setBoostThreshold
 	@text	Sets the boost threshold, a scalar applied to step. If the gap
 			between simulation time and device time is greater than the step
@@ -656,7 +672,8 @@ MOAISim::MOAISim () :
 	mShowCursorFunc ( 0 ),
 	mHideCursorFunc ( 0 ),
 	mGCActive ( true ),
-	mGCStep ( 0 ) {
+	mGCStep ( 0 ),
+	mRelaunchScheduled ( false ) {
 	
 	RTTI_SINGLE ( MOAIGlobalEventSource )
 	
@@ -782,6 +799,7 @@ void MOAISim::RegisterLuaClass ( MOAILuaState& state ) {
 		{ "hideCursor",					_hideCursor },
 		{ "openWindow",					_openWindow },
 		{ "pauseTimer",					_pauseTimer },
+		{ "scheduleRelaunch",			_scheduleRelaunch },
 		{ "setBoostThreshold",			_setBoostThreshold },
 		{ "setCpuBudget",				_setCpuBudget},
 		{ "setGCActive",				_setGCActive },

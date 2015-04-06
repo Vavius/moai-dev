@@ -64,6 +64,7 @@ public:
 	//----------------------------------------------------------------//
 					MOAIGfxResourceMgr		();
 					~MOAIGfxResourceMgr		();
+	bool			ProcessDeleters			();
 	void			PurgeResources			( u32 age = 0 );
 	void			PushDeleter				( u32 type, u32 id );
 	void			RegisterLuaClass		( MOAILuaState& state );
