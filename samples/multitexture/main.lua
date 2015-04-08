@@ -26,20 +26,14 @@ file:close ()
 
 shader = MOAIShader.new ()
 
-program = MOAIShaderProgram.new()
+shader:reserveUniforms ( 2 )
+shader:declareUniformSampler ( 1, 'sampler0', 1 )
+shader:declareUniformSampler ( 2, 'sampler1', 2 )
 
-program:reserveUniforms ( 2 )
-program:declareUniform ( 1, 'sampler0', MOAIShaderProgram.UNIFORM_INDEX )
-program:declareUniform ( 2, 'sampler1', MOAIShaderProgram.UNIFORM_INDEX )
-
-program:setVertexAttribute ( 1, 'position' )
-program:setVertexAttribute ( 2, 'uv' )
-program:setVertexAttribute ( 3, 'color' )
-program:load ( vsh, fsh )
-
-shader:setProgram ( program )
-shader:setAttr ( 1, 1 )
-shader:setAttr ( 2, 2 )
+shader:setVertexAttribute ( 1, 'position' )
+shader:setVertexAttribute ( 2, 'uv' )
+shader:setVertexAttribute ( 3, 'color' )
+shader:load ( vsh, fsh )
 
 multitexture = MOAIMultiTexture.new ()
 multitexture:reserve ( 2 )
