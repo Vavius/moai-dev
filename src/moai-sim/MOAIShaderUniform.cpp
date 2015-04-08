@@ -278,7 +278,7 @@ bool MOAIShaderUniformBuffer::SetValue ( const ZLMatrix3x3& value, bool check ) 
 bool MOAIShaderUniformBuffer::SetValue ( const MOAIShaderUniformBuffer& uniformBuffer, bool check ) {
 
 	if ( this->mType == UNIFORM_FLOAT ) return this->SetValue ( uniformBuffer.mFloat );
-	if (( this->mType == UNIFORM_INDEX ) || ( this->mType == UNIFORM_INT )) return this->SetValue ( uniformBuffer.mInt );
+	if (( this->mType == UNIFORM_INDEX ) || ( this->mType == UNIFORM_INT )) return this->SetValue (( int )uniformBuffer.mFloat );
 	return this->SetBuffer ( uniformBuffer.mBuffer, this->mBuffer.Size (), check );
 }
 
