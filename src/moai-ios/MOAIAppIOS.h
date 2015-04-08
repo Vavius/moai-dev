@@ -99,6 +99,7 @@ public:
 	//----------------------------------------------------------------//
 					MOAIAppIOS					();
 					~MOAIAppIOS					();
+	void			OnLifecycleNotification		( STLString name );
 	void			OnGlobalsFinalize			();
 	void			OpenUrl						( NSURL* url, NSString* sourceApplication );
 	void			RegisterLuaClass			( MOAILuaState& state );

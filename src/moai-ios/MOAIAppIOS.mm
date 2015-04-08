@@ -316,6 +316,16 @@ MOAIAppIOS::~MOAIAppIOS () {
 }
 
 //----------------------------------------------------------------//
+void MOAIAppIOS::OnLifecycleNotification ( STLString name ) {
+	
+	NotificationListenerMapIt notif = mNotificationListenerMap.find ( name );
+	if ( notif != mNotificationListenerMap.end ()) {
+		
+		this->InvokeListener ( notif->second );
+	}
+}
+
+//----------------------------------------------------------------//
 void MOAIAppIOS::OnGlobalsFinalize () {
 
 	[ this->mReachabilityListener stopListener ];

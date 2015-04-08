@@ -82,6 +82,11 @@ void AKUIosContextInitialize () {
 	MOAIAppIOS::Get ().UpdateReachability ();
 }
 
+void AKUIosNotifyLifecycle ( NSString* name ) {
+
+	MOAIAppIOS::Get ().OnLifecycleNotification ([ name UTF8String ]);
+}
+
 //----------------------------------------------------------------//
 void AKUIosNotifyLocalNotificationReceived ( UILocalNotification* notification ) {
 

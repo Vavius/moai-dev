@@ -24,5 +24,6 @@ AKU_API void	AKUIosNotifyRemoteNotificationReceived				( NSDictionary* notificat
 AKU_API void	AKUIosNotifyRemoteNotificationRegistrationComplete	( NSData* deviceToken, NSError* error );
 AKU_API void	AKUIosOpenUrl										( NSURL* url, NSString* sourceApplication );
 AKU_API void	AKUIosSetFrameBuffer								( GLuint frameBuffer );
+AKU_API void	AKUIosNotifyLifecycle								( NSString* name );
 
 #endif
