@@ -92,16 +92,33 @@ int MOAIGameCenterIOS::_authenticatePlayer ( lua_State* L ) {
 //----------------------------------------------------------------//
 /**	@name	getPlayerAlias
 	@text	Returns the user visible player name string from GameCenter.
-
+	
 	@in 	nil
 	@out 	string	alias
- */
+*/
 int MOAIGameCenterIOS::_getPlayerAlias ( lua_State* L ) {
 	
 	MOAILuaState state ( L );
 	
 	cc8* alias = [ MOAIGameCenterIOS::Get ().mLocalPlayer.alias UTF8String ];
 	lua_pushstring ( state, alias );
+	
+	return 1;
+}
+
+//----------------------------------------------------------------//
+/**	@name	getPlayerId
+	@text	Returns the local playerid string from GameCenter.
+ 
+	@in 	nil
+	@out 	string	id
+*/
+int MOAIGameCenterIOS::_getPlayerId ( lua_State *L ) {
+	
+	MOAILuaState state ( L );
+	
+	cc8* playerId = [[ MOAIGameCenterIOS::Get ().mLocalPlayer playerID ] UTF8String ];
+	state.Push ( playerId );
 	
 	return 1;
 }
@@ -391,6 +408,7 @@ void MOAIGameCenterIOS::RegisterLuaClass ( MOAILuaState& state ) {
 	luaL_Reg regTable [] = {
 		{ "authenticatePlayer",			_authenticatePlayer },
 		{ "getPlayerAlias",				_getPlayerAlias },
+		{ "getPlayerId",				_getPlayerId },
 		{ "getScores",					_getScores },
 		{ "isSupported",				_isSupported },
 		{ "reportAchievementProgress",	_reportAchievementProgress },

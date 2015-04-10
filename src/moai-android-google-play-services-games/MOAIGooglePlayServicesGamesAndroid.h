@@ -7,6 +7,7 @@
 #ifndef DISABLE_PLAYSERVICESGAMES
 
 #include <moai-core/headers.h>
+#include <moai-android/JniUtils.h>
 
 //================================================================//
 // MOAIGooglePlayServicesGamesAndroid
@@ -15,12 +16,14 @@
 	@text	Wrapper for Google Play services.
 */
 class MOAIGooglePlayServicesGamesAndroid :
-	public MOAIGlobalClass < MOAIGooglePlayServicesGamesAndroid, MOAILuaObject > {
+	public MOAIGlobalClass < MOAIGooglePlayServicesGamesAndroid, MOAILuaObject >,
+	public JniUtils {
 private:
 
 	//----------------------------------------------------------------//
 	static int	_authenticatePlayer			( lua_State* L );
 	static int	_getPlayerAlias				( lua_State* L );
+	static int	_getPlayerId				( lua_State* L );
 	static int	_getAchievements			( lua_State* L );
 	static int	_getScores					( lua_State* L );
 	static int	_isSupported				( lua_State* L );

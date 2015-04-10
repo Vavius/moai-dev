@@ -104,8 +104,17 @@ public class MoaiGooglePlayServicesGames {
 		
 		sHelper.beginUserInitiatedSignIn ();
 	}
+
+	//----------------------------------------------------------------//
+	public static String getPlayerId () {
+
+		MoaiLog.i ( " -------------------------------------------------------- MoaiGooglePlayServicesGames: getPlayerId -------------------------------------------------------- " );
+		if ( sHelper.isSignedIn ()) {
+			return sHelper.mGamesClient.getCurrentPlayerId ();
+		}
+	}
 	
-	//----------------------------------------------------------------//	
+	//----------------------------------------------------------------//
 	public static void getScores () {
 		
 		MoaiLog.i ( " -------------------------------------------------------- MoaiGooglePlayServicesGames: getScores -------------------------------------------------------- " );
