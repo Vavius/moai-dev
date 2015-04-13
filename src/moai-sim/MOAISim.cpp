@@ -283,13 +283,17 @@ int MOAISim::_getMemoryUsage ( lua_State* L ) {
 			taken at every render.
 
 	@out	number fps		Estimated frames per second.
+	@out	number seconds	Last ActionTree update duration
+	@out	number seconds  Last NodeMgr update duration
 */
 int MOAISim::_getPerformance ( lua_State* L ) {
 
 	MOAISim& device = MOAISim::Get ();
 	lua_pushnumber ( L, device.mFrameRate );
+	lua_pushnumber ( L, device.mLastActionTreeTime );
+	lua_pushnumber ( L, device.mLastNodeMgrTime );
 
-	return 1;
+	return 3;
 }
 
 //----------------------------------------------------------------//
@@ -658,6 +662,10 @@ MOAISim::MOAISim () :
 	mStepCount ( 0 ),
 	mFrameRate ( 0.0f ),
 	mFrameRateIdx ( 0 ),
+	mNodeMgrTime ( 0.0f ),
+	mActionTreeTime ( 0.0f ),
+	mLastNodeMgrTime ( 0.0f ),
+	mLastActionTreeTime ( 0.0f ),
 	mLoopFlags ( LOOP_FLAGS_DEFAULT ),
 	mBoostThreshold ( DEFAULT_BOOST_THRESHOLD ),
 	mLongDelayThreshold ( DEFAULT_LONG_DELAY_THRESHOLD ),
@@ -739,6 +747,14 @@ void MOAISim::OnGlobalsRestore () {
 
 //----------------------------------------------------------------//
 void MOAISim::OnGlobalsRetire () {
+}
+
+void MOAISim::ResetPerformanceTimers () {
+
+	this->mLastNodeMgrTime = this->mNodeMgrTime;
+	this->mLastActionTreeTime = this->mActionTreeTime;
+	this->mNodeMgrTime = 0.0f;
+	this->mActionTreeTime = 0.0f;
 }
 
 //----------------------------------------------------------------//
@@ -888,8 +904,13 @@ double MOAISim::StepSim ( double step, u32 multiplier ) {
 		
 		lua_gc ( state, LUA_GCSTOP, 0 );
 		
+		double t = ZLDeviceTime::GetTimeInSeconds ();
 		this->mActionTree->Update ( step );
+		this->mActionTreeTime = this->mActionTreeTime + ZLDeviceTime::GetTimeInSeconds () - t;
+
+		t = ZLDeviceTime::GetTimeInSeconds ();
 		MOAINodeMgr::Get ().Update ();
+		this->mNodeMgrTime = this->mNodeMgrTime + ZLDeviceTime::GetTimeInSeconds () - t;
 		
 		this->mSimTime += step;
 		this->mStepCount++;
@@ -922,7 +943,8 @@ void MOAISim::Update () {
 	double simStartTime = ZLDeviceTime::GetTimeInSeconds ();
 
 	double interval = this->MeasureFrameRate ();
-	
+	this->ResetPerformanceTimers ();
+
 	MOAIMainThreadTaskSubscriber::Get ().Publish ();
 	
 	// try to account for timer error

@@ -82,6 +82,11 @@ private:
 	float			mFrameRateBuffer [ FPS_BUFFER_SIZE ];
 	u32				mFrameRateIdx;
 	
+	float			mNodeMgrTime;
+	float			mActionTreeTime;
+	float			mLastNodeMgrTime;
+	float			mLastActionTreeTime;
+
 	u32				mLoopFlags;
 	double			mBoostThreshold;
 	double			mLongDelayThreshold;
@@ -158,6 +163,7 @@ private:
 	void			OnGlobalsFinalize			();
 	void			OnGlobalsRestore			();
 	void			OnGlobalsRetire				();
+	void			ResetPerformanceTimers		();
 	void			SendPauseEvent				();
 	void			SendResumeEvent				();
 	double			StepSim						( double step, u32 multiplier );
