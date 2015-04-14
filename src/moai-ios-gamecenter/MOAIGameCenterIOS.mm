@@ -100,7 +100,7 @@ int MOAIGameCenterIOS::_getPlayerAlias ( lua_State* L ) {
 	
 	MOAILuaState state ( L );
 	
-	cc8* alias = [ MOAIGameCenterIOS::Get ().mLocalPlayer.alias UTF8String ];
+	cc8* alias = [[ GKLocalPlayer localPlayer ].alias UTF8String ];
 	lua_pushstring ( state, alias );
 	
 	return 1;
@@ -117,7 +117,7 @@ int MOAIGameCenterIOS::_getPlayerId ( lua_State *L ) {
 	
 	MOAILuaState state ( L );
 	
-	cc8* playerId = [[ MOAIGameCenterIOS::Get ().mLocalPlayer playerID ] UTF8String ];
+	cc8* playerId = [[ GKLocalPlayer localPlayer ].playerID UTF8String ];
 	state.Push ( playerId );
 	
 	return 1;
@@ -371,7 +371,7 @@ int MOAIGameCenterIOS::_showGameCenter ( lua_State *L ) {
 //================================================================//
 
 //----------------------------------------------------------------//
-MOAIGameCenterIOS::MOAIGameCenterIOS () :
+MOAIGameCenterIOS::MOAIGameCenterIOS ():
 	mIsGameCenterSupported ( false ) {
 
 	RTTI_SINGLE ( MOAILuaObject )
