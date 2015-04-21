@@ -257,7 +257,7 @@ int MOAIFacebookIOS::_login ( lua_State* L ) {
     
     BOOL result = [ FBSession openActiveSessionWithPermissions:permissions
         allowLoginUI:allowLoginUI
-        allowSystemAccount:YES
+        allowSystemAccount:NO
         isRead:YES
         defaultAudience:FBSessionDefaultAudienceNone
         completionHandler:^( FBSession *session, FBSessionState sessionState, NSError *error ) {
@@ -273,16 +273,18 @@ int MOAIFacebookIOS::_login ( lua_State* L ) {
             switch ( sessionState ) {
                 case FBSessionStateOpen:
                 case FBSessionStateOpenTokenExtended: {
-
-                    MOAIFacebookIOS::Get ().SessionDidLogin ();
-                    FBFrictionlessRecipientCache* cache = MOAIFacebookIOS::Get ().mFriendsCache;
-                    [ cache prefetchAndCacheForSession:nil ];
+					
+						[ FBSession setActiveSession:session ];
+						MOAIFacebookIOS::Get ().SessionDidLogin ();
+						FBFrictionlessRecipientCache* cache = MOAIFacebookIOS::Get ().mFriendsCache;
+						[ cache prefetchAndCacheForSession:nil ];
+						break;
                     }
-                    break;
 
                 case FBSessionStateClosed:
                 case FBSessionStateClosedLoginFailed:
-
+					
+					[ FBSession.activeSession closeAndClearTokenInformation ];
                     MOAIFacebookIOS::Get ().SessionDidNotLogin ();
                     break;
 
