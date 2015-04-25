@@ -4,6 +4,13 @@
 #include "pch.h"
 #include <moai-sim/MOAIScriptNode.h>
 
+class MOAIMemberTableAttr {
+protected:
+	friend class MOAIScriptNode;
+	MOAIScriptNode*		mSource;
+	cc8*				mFieldName;
+};
+
 //================================================================//
 // local
 //================================================================//
@@ -22,7 +29,10 @@ int MOAIScriptNode::_reserveAttrs ( lua_State* L ) {
 	u32 size = state.GetValue < u32 >( 2, 0 );
 	self->mAttributes.Init ( size );
 	self->mAttributes.Fill ( 0.0f );
-
+	
+	self->mAttrNames.Init ( size );
+	self->mAttrNames.Fill ( 0 );
+	
 	return 0;
 }
 
@@ -41,6 +51,16 @@ int MOAIScriptNode::_setCallback ( lua_State* L ) {
 	return 0;
 }
 
+
+int MOAIScriptNode::_setAttrName ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIScriptNode, "U" );
+	
+	u32 idx = state.GetValue < u32 >( 2, 1 ) - 1;
+	self->mAttrNames [ idx ] = state.GetValue < cc8* >( 3, 0 );
+	
+	return 0;
+}
+
 //================================================================//
 // MOAIScriptNode
 //================================================================//
@@ -48,12 +68,31 @@ int MOAIScriptNode::_setCallback ( lua_State* L ) {
 //----------------------------------------------------------------//
 bool MOAIScriptNode::ApplyAttrOp ( u32 attrID, MOAIAttrOp& attrOp, u32 op ) {
 	attrID = UNPACK_ATTR(attrID);
-
-	if ( attrID < this->mAttributes.Size ()) {
+	
+	if ( attrID >= this->mAttributes.Size()) {
+		return false;
+	}
+	
+	if ( this->mAttrNames [ attrID ] == 0 ) {
 		this->mAttributes [ attrID ] = attrOp.Apply ( this->mAttributes [ attrID ], op, MOAIAttrOp::ATTR_READ_WRITE, MOAIAttrOp::ATTR_TYPE_FLOAT );
 		return true;
 	}
-	return false;
+	else {
+		switch ( op ) {
+			case MOAIAttrOp::ADD:
+				this->NamedAttrAdd ( attrID, attrOp );
+				break;
+				
+			case MOAIAttrOp::SET:
+				this->NamedAttrSet ( attrID, attrOp );
+				break;
+				
+			case MOAIAttrOp::GET:
+				this->NamedAttrGet ( attrID, attrOp );
+				break;
+		}
+		return true;
+	}
 }
 
 //----------------------------------------------------------------//
@@ -64,6 +103,114 @@ MOAIScriptNode::MOAIScriptNode () {
 
 //----------------------------------------------------------------//
 MOAIScriptNode::~MOAIScriptNode () {
+}
+
+//----------------------------------------------------------------//
+void MOAIScriptNode::NamedAttrAdd ( u32 attrID, MOAIAttrOp &attrOp ) {
+	
+	cc8* attrName = this->mAttrNames [ attrID ];
+	switch ( attrOp.GetTypeHint ()) {
+		case MOAIAttrOp::ATTR_TYPE_FLOAT: {
+			float value = attrOp.GetValue ( 0.0f );
+			
+			if ( value != 0.0f ) {
+				
+				MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
+				this->PushMemberTable ( state );
+				float cur = state.GetField < float >( -1, attrName, 0.0f );
+				state.SetField ( -1, attrName, cur + value );
+			}
+			break;
+		}
+		case MOAIAttrOp::ATTR_TYPE_INT: {
+			int value = ( int )attrOp.GetValue ( 0 );
+			
+			if ( value != 0 ) {
+				MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
+				this->PushMemberTable ( state );
+				int cur = state.GetField < int >( -1, attrName, 0 );
+				state.SetField ( -1, attrName, cur + value );
+			}
+			break;
+		}
+	}
+}
+
+//----------------------------------------------------------------//
+void MOAIScriptNode::NamedAttrGet ( u32 attrID, MOAIAttrOp &attrOp ) {
+	
+	cc8* attrName = this->mAttrNames [ attrID ];
+	switch ( attrOp.GetTypeHint ()) {
+		case MOAIAttrOp::ATTR_TYPE_FLOAT: {
+			
+			MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
+			this->PushMemberTable ( state );
+			float value = state.GetField < float >( -1, attrName, 0.0f );
+			attrOp.SetValue ( value, MOAIAttrOp::ATTR_TYPE_FLOAT );
+			
+			break;
+		}
+		case MOAIAttrOp::ATTR_TYPE_INT: {
+			
+			MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
+			this->PushMemberTable ( state );
+			int value = state.GetField < int >( -1, attrName, 0 );
+			attrOp.SetValue ( value, MOAIAttrOp::ATTR_TYPE_INT );
+			
+			break;
+		}
+		case MOAIAttrOp::ATTR_TYPE_VARIANT: {
+			
+			MOAIMemberTableAttr value;
+			value.mSource = this;
+			value.mFieldName = attrName;
+			attrOp.SetValue ( value, MOAIAttrOp::ATTR_TYPE_VARIANT );
+			
+			break;
+		}
+	}
+}
+
+//----------------------------------------------------------------//
+void MOAIScriptNode::NamedAttrSet ( u32 attrID, MOAIAttrOp &attrOp ) {
+	
+	cc8* attrName = this->mAttrNames [ attrID ];
+	switch ( attrOp.GetTypeHint ()) {
+		case MOAIAttrOp::ATTR_TYPE_FLOAT: {
+
+			float value = attrOp.GetValue ( 0.0f );
+			MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
+			this->PushMemberTable ( state );
+			state.SetField ( -1, attrName, value );
+			
+			break;
+		}
+		case MOAIAttrOp::ATTR_TYPE_INT: {
+			
+			int value = attrOp.GetValue ( 0 );
+			MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
+			this->PushMemberTable ( state );
+			state.SetField ( -1, attrName, value );
+			
+			break;
+		}
+		case MOAIAttrOp::ATTR_TYPE_VARIANT: {
+			
+			MOAIMemberTableAttr value;
+			value = attrOp.GetValue < MOAIMemberTableAttr >( value );
+			MOAIScriptNode* source = value.mSource;
+			cc8* sourceField = value.mFieldName;
+			
+			MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
+			source->PushMemberTable ( state );
+			this->PushMemberTable ( state );
+			state.GetField ( -2, sourceField );
+			
+			lua_setfield ( state, -2, attrName );
+			
+			break;
+		}
+	}
 }
 
 //----------------------------------------------------------------//
