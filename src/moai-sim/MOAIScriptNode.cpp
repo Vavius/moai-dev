@@ -67,7 +67,7 @@ int MOAIScriptNode::_setAttrName ( lua_State* L ) {
 
 //----------------------------------------------------------------//
 bool MOAIScriptNode::ApplyAttrOp ( u32 attrID, MOAIAttrOp& attrOp, u32 op ) {
-	attrID = UNPACK_ATTR(attrID);
+	attrID = UNPACK_ATTR(attrID) - 1;
 	
 	if ( attrID >= this->mAttributes.Size()) {
 		return false;
@@ -79,6 +79,10 @@ bool MOAIScriptNode::ApplyAttrOp ( u32 attrID, MOAIAttrOp& attrOp, u32 op ) {
 	}
 	else {
 		switch ( op ) {
+			case MOAIAttrOp::CHECK:
+				attrOp.SetFlags ( MOAIAttrOp::ATTR_READ_WRITE );
+				break;
+				
 			case MOAIAttrOp::ADD:
 				this->NamedAttrAdd ( attrID, attrOp );
 				break;
@@ -140,34 +144,22 @@ void MOAIScriptNode::NamedAttrAdd ( u32 attrID, MOAIAttrOp &attrOp ) {
 void MOAIScriptNode::NamedAttrGet ( u32 attrID, MOAIAttrOp &attrOp ) {
 	
 	cc8* attrName = this->mAttrNames [ attrID ];
-	switch ( attrOp.GetTypeHint ()) {
-		case MOAIAttrOp::ATTR_TYPE_FLOAT: {
-			
-			MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
-			this->PushMemberTable ( state );
-			float value = state.GetField < float >( -1, attrName, 0.0f );
-			attrOp.SetValue ( value, MOAIAttrOp::ATTR_TYPE_FLOAT );
-			
-			break;
-		}
-		case MOAIAttrOp::ATTR_TYPE_INT: {
-			
-			MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
-			this->PushMemberTable ( state );
-			int value = state.GetField < int >( -1, attrName, 0 );
-			attrOp.SetValue ( value, MOAIAttrOp::ATTR_TYPE_INT );
-			
-			break;
-		}
-		case MOAIAttrOp::ATTR_TYPE_VARIANT: {
-			
-			MOAIMemberTableAttr value;
-			value.mSource = this;
-			value.mFieldName = attrName;
-			attrOp.SetValue ( value, MOAIAttrOp::ATTR_TYPE_VARIANT );
-			
-			break;
-		}
+	
+	MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
+	this->PushMemberTable ( state );
+	state.GetField ( -1, attrName );
+	
+	if ( state.IsType ( -1, LUA_TNUMBER )) {
+		
+		float value = state.GetValue < float >( -1, 0.0f );
+		attrOp.Apply ( value, MOAIAttrOp::GET, MOAIAttrOp::ATTR_WRITE, MOAIAttrOp::ATTR_TYPE_FLOAT );
+	}
+	else {
+		
+		MOAIMemberTableAttr value;
+		value.mSource = this;
+		value.mFieldName = attrName;
+		attrOp.ApplyNoAdd ( value, MOAIAttrOp::GET, MOAIAttrOp::ATTR_WRITE, MOAIAttrOp::ATTR_TYPE_VARIANT );
 	}
 }
 
@@ -239,6 +231,7 @@ void MOAIScriptNode::RegisterLuaFuncs ( MOAILuaState& state ) {
 	
 	luaL_Reg regTable [] = {
 		{ "reserveAttrs",			_reserveAttrs },
+		{ "setAttrName",			_setAttrName },
 		{ "setCallback",			_setCallback },
 		{ NULL, NULL }
 	};

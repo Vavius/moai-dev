@@ -111,7 +111,9 @@ MOAIGfxResourceMgr::MOAIGfxResourceMgr () :
 //----------------------------------------------------------------//
 MOAIGfxResourceMgr::~MOAIGfxResourceMgr () {
 	
+	zglBegin ();
 	this->ProcessDeleters ();
+	zglEnd ();
 }
 
 bool MOAIGfxResourceMgr::ProcessDeleters () {
