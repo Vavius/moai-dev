@@ -55,6 +55,7 @@ private:
 	static int		_setMix					( lua_State* L );
 	static int		_setSkin				( lua_State* L );
 	static int		_setSlotsToSetupPose	( lua_State* L );
+	static int		_setSlotColor			( lua_State* L );
 	static int		_setTime				( lua_State* L );
 	static int		_setToSetupPose			( lua_State* L );
         
