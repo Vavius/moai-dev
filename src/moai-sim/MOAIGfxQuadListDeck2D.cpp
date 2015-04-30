@@ -290,6 +290,17 @@ int MOAIGfxQuadListDeck2D::_setUVRect ( lua_State* L ) {
 int MOAIGfxQuadListDeck2D::_transform ( lua_State* L ) {
 	MOAI_LUA_SETUP ( MOAIGfxQuadListDeck2D, "UU" )
 	
+	if ( state.IsType ( 2, LUA_TNUMBER )) {
+		
+		MOAITransform* transform = state.GetLuaObject < MOAITransform >( 3, true );
+		if ( transform ) {
+			transform->ForceUpdate ();
+			self->Transform ( transform->GetLocalToWorldMtx (), state.GetValue < u32 >( 2, 1 ));
+			self->SetBoundsDirty ();
+		}
+		return 0;
+	}
+	
 	MOAITransform* transform = state.GetLuaObject < MOAITransform >( 2, true );
 	if ( transform ) {
 		transform->ForceUpdate ();
@@ -310,8 +321,19 @@ int MOAIGfxQuadListDeck2D::_transform ( lua_State* L ) {
 int MOAIGfxQuadListDeck2D::_transformUV ( lua_State* L ) {
 	MOAI_LUA_SETUP ( MOAIGfxQuadListDeck2D, "UU" )
 	
+	if ( state.IsType ( 2, LUA_TNUMBER )) {
+		
+		MOAITransform* transform = state.GetLuaObject < MOAITransform >( 3, true );
+		if ( transform ) {
+			transform->ForceUpdate ();
+			self->TransformUV ( transform->GetLocalToWorldMtx (), state.GetValue < u32 >( 2, 1 ));
+		}
+		return 0;
+	}
+	
 	MOAITransform* transform = state.GetLuaObject < MOAITransform >( 2, true );
 	if ( transform ) {
+		
 		transform->ForceUpdate ();
 		self->TransformUV ( transform->GetLocalToWorldMtx ());
 	}
@@ -588,10 +610,24 @@ void MOAIGfxQuadListDeck2D::Transform ( const ZLAffine3D& mtx ) {
 }
 
 //----------------------------------------------------------------//
+void MOAIGfxQuadListDeck2D::Transform ( const ZLAffine3D& mtx, u32 idx ) {
+	
+	u32 total = this->mQuads.Size ();
+	this->mQuads [ idx % total ].Transform ( mtx );
+}
+
+//----------------------------------------------------------------//
 void MOAIGfxQuadListDeck2D::TransformUV ( const ZLAffine3D& mtx ) {
 
 	u32 total = this->mQuads.Size ();
 	for ( u32 i = 0; i < total; ++i ) {
 		this->mUVQuads [ i ].Transform ( mtx );
 	}
+}
+
+//----------------------------------------------------------------//
+void MOAIGfxQuadListDeck2D::TransformUV ( const ZLAffine3D& mtx, u32 idx ) {
+	
+	u32 total = this->mQuads.Size ();
+	this->mUVQuads [ idx % total ].Transform ( mtx );
 }

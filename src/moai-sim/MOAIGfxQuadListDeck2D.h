@@ -91,6 +91,8 @@ public:
 	void			SetUVRect				( u32 idx, ZLRect& rect );
 	void			Transform				( const ZLAffine3D& mtx );
 	void			TransformUV				( const ZLAffine3D& mtx );
+	void			Transform				( const ZLAffine3D& mtx, u32 idx );
+	void			TransformUV				( const ZLAffine3D& mtx, u32 idx );
 };
 
 #endif
