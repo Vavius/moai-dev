@@ -18,6 +18,7 @@ import com.flurry.android.FlurryAgent;
 public class MoaiFlurry {
 
 	private static Activity sActivity = null;
+	private static String sAPIKey = null;
 
 	//----------------------------------------------------------------//
 	public static void onCreate ( Activity activity ) {
@@ -25,10 +26,18 @@ public class MoaiFlurry {
 		sActivity = activity;
 	}
 
-	//----------------------------------------------------------------//
-	public static void onStop () {
-		MoaiLog.i ( "MoaiFlurry: onStop" );
-		FlurryAgent.onEndSession ( sActivity );
+	public static void onStart( ) {
+		MoaiLog.i ( "MoaiFlurry onStart: " );
+		if ( sAPIKey != null ) {
+			FlurryAgent.onStartSession( sActivity, sAPIKey );
+		}
+	}
+
+	public static void onStop ( ) {
+		MoaiLog.i ( "MoaiFlurry onStop: Ending Flurry Session" );
+		if ( sAPIKey != null ) {
+			FlurryAgent.onEndSession( sActivity );
+		}
 	}
 
 	//================================================================//
@@ -54,14 +63,6 @@ public class MoaiFlurry {
 	}
 
 	//----------------------------------------------------------------//
-	public static void init ( String apiKey ) {
-		
-		MoaiLog.i ( String.format ( "MoaiFlurry: init %s", apiKey ));
-		
-		FlurryAgent.onStartSession ( sActivity, apiKey );
-	}
-	
-	//----------------------------------------------------------------//
 	public static void logEvent ( String eventId, Map < String, String > parameters, boolean timed ) {
 		
 		MoaiLog.i ( String.format ( "MoaiFlurry: logEvent %s%s", eventId, timed ? " (timed)" : "" ));
@@ -77,6 +78,25 @@ public class MoaiFlurry {
 		}
 		else {
 			FlurryAgent.logEvent ( eventId, timed );
+		}
+	}
+
+	//----------------------------------------------------------------//	
+	public static void startSession ( String apikey ) {
+
+		MoaiLog.i ( "MoaiFlurry startSession: " );
+		if ( sAPIKey == null ) {
+			sAPIKey = apikey;
+			FlurryAgent.onStartSession( sActivity, sAPIKey );
+		}
+	}
+
+	//----------------------------------------------------------------//	
+	public static void setAppVersion ( String version ) {
+
+		MoaiLog.i ( "MoaiFlurry setAppVersion: "+version );
+		if ( version != null ) {
+			FlurryAgent.setVersionName ( version );
 		}
 	}
 }
