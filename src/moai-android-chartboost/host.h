@@ -9,8 +9,8 @@
 
 #include <moai-core/host.h>
 
-AKU_API void	AKUAndroidChartBoostAppFinalize			();
-AKU_API void	AKUAndroidChartBoostAppInitialize		();
-AKU_API void	AKUAndroidChartBoostContextInitialize	();
+AKU_API void	AKUAndroidChartboostAppFinalize				();
+AKU_API void	AKUAndroidChartboostAppInitialize				();
+AKU_API void	AKUAndroidChartboostContextInitialize			();
 
 #endif

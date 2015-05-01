@@ -2,24 +2,23 @@
 // http://getmoai.com
 
 #include <moai-android-chartboost/host.h>
-#include <moai-android/JniUtils.h>
-#include <host-modules/aku_modules_android_config.h>
-#include <moai-android-chartboost/MOAIChartBoostAndroid.h>
+#include <moai-android-chartboost/MOAIChartboostAndroid.h>
 
 //================================================================//
 // aku
 //================================================================//
 
 //----------------------------------------------------------------//
-void AKUAndroidChartBoostAppFinalize () {
+void AKUAndroidChartboostAppFinalize () {
 }
 
 //----------------------------------------------------------------//
-void AKUAndroidChartBoostAppInitialize () {
+void AKUAndroidChartboostAppInitialize () {
 }
 
 //----------------------------------------------------------------//
-void AKUAndroidChartBoostContextInitialize () {
+void AKUAndroidChartboostContextInitialize () {
 
-	REGISTER_LUA_CLASS ( MOAIChartBoostAndroid );
+	REGISTER_LUA_CLASS ( MOAIChartboostAndroid );
+	
 }
