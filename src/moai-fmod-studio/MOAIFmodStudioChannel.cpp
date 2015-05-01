@@ -96,7 +96,7 @@ int MOAIFmodStudioChannel::_moveVolume ( lua_State* L ) {
 	action->SetLink ( 0, self, MOAIFmodStudioChannelAttr::Pack ( ATTR_VOLUME ), delta, mode );
 
 	action->SetSpan ( length );
-	action->Start ( MOAISim::Get ().GetActionMgr ());
+	action->Start ( MOAISim::Get ().GetActionMgr (), false );
 	action->PushLuaUserdata ( state );
 
 	return 1;
@@ -148,7 +148,7 @@ int MOAIFmodStudioChannel::_seekVolume ( lua_State* L ) {
 	action->SetLink ( 0, self, MOAIFmodStudioChannelAttr::Pack ( ATTR_VOLUME ), target - self->mVolume, mode );
 
 	action->SetSpan ( length );
-	action->Start ( MOAISim::Get ().GetActionMgr ());
+	action->Start ( MOAISim::Get ().GetActionMgr (), false );
 	action->PushLuaUserdata ( state );
 
 	return 1;

@@ -541,7 +541,7 @@ void MOAISpineSkeleton::ClearTrack ( int trackId ) {
 void MOAISpineSkeleton::Draw ( int subPrimID, float lod ) {
 	UNUSED ( subPrimID );
 	
-	if ( !this->IsVisible () ) return;
+	if ( !this->IsVisible ( lod )) return;
 	if ( !this->mSkeleton ) return;
     
     this->LoadGfxState ();
@@ -550,10 +550,14 @@ void MOAISpineSkeleton::Draw ( int subPrimID, float lod ) {
     
     MOAIGfxDevice& gfxDevice = MOAIGfxDevice::Get ();
     
-    if ( !this->mShader ) {
-        gfxDevice.SetShaderPreset ( MOAIShaderMgr::DECK2D_SHADER );
-    }
-    
+	MOAIShader* shader = this->mMaterialBatch ? this->mMaterialBatch->RawGetShader ( 0 ) : 0;
+	if ( shader ) {
+		gfxDevice.SetShader ( shader );
+	}
+	else {
+		gfxDevice.SetShaderPreset ( MOAIShaderMgr::DECK2D_SHADER );
+	}
+	    
     gfxDevice.SetVertexMtxMode ( MOAIGfxDevice::VTX_STAGE_MODEL, MOAIGfxDevice::VTX_STAGE_PROJ );
     gfxDevice.SetUVMtxMode ( MOAIGfxDevice::UV_STAGE_MODEL, MOAIGfxDevice::UV_STAGE_TEXTURE );
     
