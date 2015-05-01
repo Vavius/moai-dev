@@ -7,7 +7,6 @@
 
 #include <moai-core/host.h>
 #include <host-modules/aku_modules.h>
-#include "SDLHost.h"
 
 #ifdef MOAI_OS_WINDOWS
     #include <windows.h>
@@ -20,7 +19,9 @@
 
 #include <SDL.h>
 
-#include "Joystick.h"
+#include "SDLHost.h"
+#include "SDLJoystick.h"
+#include "SDLKeyCodeMapping.h"
 
 #ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
@@ -45,7 +46,7 @@ namespace InputSensorID {
 		MOUSE_RIGHT,
 		MOUSE_WHEEL,
 		JOYSTICK,
-		TOUCH,
+//		TOUCH,
 		TOTAL,
 	};
 }
@@ -63,9 +64,9 @@ static void SetScreenSize ( DisplayModeFunc func);
 void	_AKUEnterFullscreenModeFunc		();
 void	_AKUExitFullscreenModeFunc		();
 void	_AKUOpenWindowFunc				( const char* title, int width, int height );
-void    _AKUShowCursor ();
-void    _AKUHideCursor ();
-
+void    _AKUShowCursor					();
+void    _AKUHideCursor					();
+void	_AKUSetTextInputRectFunc		( int xMin, int yMin, int xMax, int yMax );
 
 //----------------------------------------------------------------//
 void _AKUShowCursor () {
@@ -76,7 +77,6 @@ void _AKUShowCursor () {
 void _AKUHideCursor () {
 	SDL_ShowCursor(0);
 }
-
 
 //----------------------------------------------------------------//
 void _AKUEnterFullscreenModeFunc () {
@@ -103,8 +103,29 @@ void _AKUOpenWindowFunc ( const char* title, int width, int height ) {
 		SDL_GL_SetSwapInterval ( 1 );
 		AKUDetectGfxContext ();
 		AKUSetViewSize ( width, height );
+		AKUSdlSetWindow ( sWindow );
+
+		// Enable keyboard text input.
+		// According to the SDL documentation, this will open an on-screen keyboard on some platforms.
+		// Currently we're using the SDL host for desktop platforms only, so this should not be a problem.
+		SDL_StartTextInput ();
+	}
+	else {
+		SDL_SetWindowSize ( sWindow, width, height );
 	}
 }
+
+//----------------------------------------------------------------//
+void _AKUSetTextInputRectFunc ( int xMin, int yMin, int xMax, int yMax ) {
+	SDL_Rect sdlRect;
+	sdlRect.x = xMin;
+	sdlRect.y = yMin;
+	sdlRect.w = xMax - xMin;
+	sdlRect.h = yMax - yMin;
+	
+	SDL_SetTextInputRect ( &sdlRect );
+}
+
 
 //================================================================//
 // helpers
@@ -168,12 +189,14 @@ void Init ( int argc, char** argv ) {
 
 	AKUSetFunc_OpenWindow ( _AKUOpenWindowFunc );
 	
+	AKUSetFunc_SetTextInputRect( _AKUSetTextInputRectFunc );
+	
 	#ifdef __APPLE__
 			//are we a bundle?
 			CFBundleRef bref = CFBundleGetMainBundle();
 			if (bref == NULL || CFBundleGetIdentifier(bref) == NULL) {
-					AKUModulesParseArgs(argc, argv);
-					
+	AKUModulesParseArgs ( argc, argv );
+	
 			} else {
 			
 					CFURLRef bundleurl = CFBundleCopyResourcesDirectoryURL(bref);
@@ -197,18 +220,18 @@ void Init ( int argc, char** argv ) {
 }
 
 // based on host-glut 
-void _onMultiButton( int touch_id, float x, float y, int state );
-void _onMultiButton( int touch_id, float x, float y, int state ) {
-
-	AKUEnqueueTouchEvent (
-		InputDeviceID::DEVICE,
-		InputSensorID::TOUCH,
-		touch_id,
-		state == SDL_FINGERDOWN,
-		( float )x,
-		( float )y
-	);
-}
+//void _onMultiButton( int touch_id, float x, float y, int state );
+//void _onMultiButton( int touch_id, float x, float y, int state ) {
+//
+//	AKUEnqueueTouchEvent (
+//		InputDeviceID::DEVICE,
+//		InputSensorID::TOUCH,
+//		touch_id,
+//		state == SDL_FINGERDOWN,
+//		( float )x,
+//		( float )y
+//	);
+//}
 
 
 
@@ -260,7 +283,7 @@ void SetScreenDpi() {
 void MainLoop () {
 
 	// TODO: array's of Joysticks
-	Joystick * joystick0 = nullptr;
+	Joystick * joystick0 = NULL;
 
 	if ( SDL_NumJoysticks() < 1 ) {
 		
@@ -273,7 +296,7 @@ void MainLoop () {
 		if ( joystick0->isOpen() || !joystick0->Open() )
 		{
 			delete joystick0;
-			joystick0 = nullptr;
+			joystick0 = NULL;
 		}
 	}
 
@@ -281,7 +304,7 @@ void MainLoop () {
 	
 	bool running = true;
 	while ( running ) {
-	
+		
 		SDL_Event sdlEvent;
 		
 		while ( SDL_PollEvent ( &sdlEvent )) {  
@@ -295,9 +318,22 @@ void MainLoop () {
 				
 				case SDL_KEYDOWN:
 				case SDL_KEYUP:	{
-					int key = sdlEvent.key.keysym.sym;
-					if (key & 0x40000000) key = (key & 0x3FFFFFFF) + 256;
-					AKUEnqueueKeyboardEvent ( InputDeviceID::DEVICE, InputSensorID::KEYBOARD, key, sdlEvent.key.type == SDL_KEYDOWN );
+					if ( sdlEvent.key.repeat ) break;
+					int moaiKeyCode = GetMoaiKeyCode ( sdlEvent );
+					AKUEnqueueKeyboardKeyEvent ( InputDeviceID::DEVICE, InputSensorID::KEYBOARD, moaiKeyCode, sdlEvent.key.type == SDL_KEYDOWN );
+					break;
+				}
+				
+				case SDL_TEXTINPUT: {
+					AKUEnqueueKeyboardTextEvent ( InputDeviceID::DEVICE, InputSensorID::KEYBOARD, sdlEvent.text.text );
+					break;
+				}
+				case SDL_TEXTEDITING: {
+					char *text = sdlEvent.edit.text;
+					int start = sdlEvent.edit.start;
+					int length = sdlEvent.edit.length;
+					
+					AKUEnqueueKeyboardEditEvent ( InputDeviceID::DEVICE, InputSensorID::KEYBOARD, text, start, length, SDL_TEXTEDITINGEVENT_TEXT_SIZE );
 					break;
 				}
 				
@@ -345,7 +381,7 @@ void MainLoop () {
 						
 						//TODO: array's of Joysticks
 
-						if ( sdlEvent.jaxis.which == 0 /* what joystick? */  && joystick0 != nullptr ) {
+						if ( sdlEvent.jaxis.which == 0 /* what joystick? */  && joystick0 != NULL ) {
 
                             const Joystick::AXIS_MOTION & axis = joystick0->HandleAxisMotion(sdlEvent);
 					        AKUEnqueueJoystickEvent ( InputDeviceID::DEVICE, InputSensorID::JOYSTICK, axis.x, axis.y );
@@ -364,20 +400,30 @@ void MainLoop () {
 							sdlEvent.window.event == SDL_WINDOWEVENT_RESIZED ) {
 						
 						AKUSetViewSize(sdlEvent.window.data1, sdlEvent.window.data2);
+					} else if ( sdlEvent.window.event == SDL_WINDOWEVENT_FOCUS_LOST ) {
+						// If the focus is lost, it must be stopped.
+						SDL_StopTextInput();
+						
+						// Clear Editing text.
+						AKUEnqueueKeyboardEditEvent ( InputDeviceID::DEVICE, InputSensorID::KEYBOARD, "", 0, 0, SDL_TEXTEDITINGEVENT_TEXT_SIZE );
+					} else if ( sdlEvent.window.event == SDL_WINDOWEVENT_FOCUS_GAINED ) {
+						// Start when the focus is given.
+						// TODO:Restored the edit text.
+						SDL_StartTextInput();
 					}
 					break;
 
-                case SDL_FINGERDOWN:
-                case SDL_FINGERUP:
-                case SDL_FINGERMOTION:
-                    const int id    = ( int )sdlEvent.tfinger.fingerId;
-					const float x   = sdlEvent.tfinger.x;
-					const float y   = sdlEvent.tfinger.y;
-					const int state = ( sdlEvent.type == SDL_FINGERDOWN || sdlEvent.type == SDL_FINGERMOTION ) ? SDL_FINGERDOWN : SDL_FINGERUP;
-
-					_onMultiButton(id, x, y, state);
-
-					break;
+//                case SDL_FINGERDOWN:
+//                case SDL_FINGERUP:
+//                case SDL_FINGERMOTION:
+//                    const int id    = ( int )sdlEvent.tfinger.fingerId;
+//					const float x   = sdlEvent.tfinger.x;
+//					const float y   = sdlEvent.tfinger.y;
+//					const int state = ( sdlEvent.type == SDL_FINGERDOWN || sdlEvent.type == SDL_FINGERMOTION ) ? SDL_FINGERDOWN : SDL_FINGERUP;
+//
+//					_onMultiButton(id, x, y, state);
+//
+//					break;
 			} //end_switch
 		}//end_while
 		

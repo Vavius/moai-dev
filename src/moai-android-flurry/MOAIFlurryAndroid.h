@@ -16,11 +16,11 @@ class MOAIFlurryAndroid :
 private:
 
 	//----------------------------------------------------------------//
-	static int _logEvent			( lua_State* L );
-	static int _logTimedEvent		( lua_State* L );
-	static int _endTimedEvent		( lua_State* L );
-	static int _setAppVersion		( lua_State* L );
-	static int _startSession		( lua_State* L );
+	static int	_enableLogging						( lua_State* L );
+	static int	_endEvent							( lua_State* L );
+	static int	_init								( lua_State* L );
+	static int	_logEvent							( lua_State* L );
+	static int	_setUserID							( lua_State* L );
 
 public:
 
@@ -32,4 +32,4 @@ public:
 	void	RegisterLuaClass		( MOAILuaState& state );
 };
 
-#endif
+#endif  //MOAIFLURRY_H

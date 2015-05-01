@@ -122,7 +122,7 @@ int MOAIParticlePexPlugin::_load( lua_State* L ){
 			doc.LoadFile ( xml );
 			MOAIParticlePexPlugin *particle = new MOAIParticlePexPlugin();
 			MOAIParticlePexPlugin::Parse ( xml, *particle, doc.RootElement ());
-			particle->PushLuaUserdata( state );
+			particle->PushLuaUserdata ( state );
 			return 1;
 		}
 	#endif	
@@ -173,7 +173,7 @@ void MOAIParticlePexPlugin::Parse( cc8* filename, MOAIParticlePexPlugin& plugin,
 		for ( ; childElement; childElement = childElement->NextSiblingElement ()) {
 			STLString text = childElement->Value ();
 			TiXmlAttribute* attribute = childElement->FirstAttribute ();
-			int i = 0;
+
 			if(!attribute || !text || text == "")
 				continue;
 

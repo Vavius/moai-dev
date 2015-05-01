@@ -7,8 +7,11 @@
 
 #import <contrib/MOAIOpenUDID.h>
 #import <AdSupport/ASIdentifierManager.h>
-#import <moai-sim/MOAIEnvironment.h>
 #import <moai-sim/MOAIGfxDevice.h>
+
+#include <sys/types.h>
+#include <sys/sysctl.h>
+
 //================================================================//
 // aku-util
 //================================================================//
@@ -19,15 +22,6 @@ void AKUIosAppFinalize () {
 
 //----------------------------------------------------------------//
 void AKUIosAppInitialize () {
-
-	loadMoaiLib_NSArray ();
-	loadMoaiLib_NSData ();
-	loadMoaiLib_NSDate ();
-	loadMoaiLib_NSDictionary ();
-	loadMoaiLib_NSError ();
-	loadMoaiLib_NSNumber ();
-	loadMoaiLib_NSObject ();
-	loadMoaiLib_NSString ();
 }
 
 //----------------------------------------------------------------//
@@ -37,7 +31,6 @@ void AKUIosContextInitialize () {
 	
 	// MOAI
 	REGISTER_LUA_CLASS ( MOAIAppIOS )
-	REGISTER_LUA_CLASS ( MOAIBrowserIOS )
 	REGISTER_LUA_CLASS ( MOAIDialogIOS )
 	REGISTER_LUA_CLASS ( MOAIKeyboardIOS )
 	REGISTER_LUA_CLASS ( MOAINotificationsIOS )
@@ -54,7 +47,7 @@ void AKUIosContextInitialize () {
 	environment.SetValue ( MOAI_ENV_devName,				[[ UIDevice currentDevice ].name UTF8String ] );
 	environment.SetValue ( MOAI_ENV_devModel,				[[ UIDevice currentDevice ].model UTF8String ] );
 	environment.SetValue ( MOAI_ENV_horizontalResolution,	[[ UIScreen mainScreen ] bounds ].size.width * [[ UIScreen mainScreen ] scale ] );	
-	environment.SetValue ( MOAI_ENV_iosRetinaDisplay,		[[ UIScreen mainScreen ] scale ] == 2.0 );
+	environment.SetValue ( MOAI_ENV_iosRetinaDisplay,		[[ UIScreen mainScreen ] scale ] >= 2.0 );
 	environment.SetValue ( MOAI_ENV_languageCode,			[[[ NSLocale currentLocale ] objectForKey: NSLocaleLanguageCode ] UTF8String ]);
 	environment.SetValue ( MOAI_ENV_osBrand,				"iOS" );
 	environment.SetValue ( MOAI_ENV_osVersion,				[[ UIDevice currentDevice ].systemVersion UTF8String ]);
@@ -79,7 +72,15 @@ void AKUIosContextInitialize () {
 		}
     }
 	
-	MOAIAppIOS::Get ().UpdateReachability ();
+    int name [] = { CTL_HW, HW_MACHINE };
+	
+	size_t size = 0;
+    sysctl ( name, 2, NULL, &size, NULL, 0 );
+	
+    char *devPlatform = ( char* )alloca ( size );
+    sysctl ( name, 2, devPlatform, &size, NULL, 0 );
+	
+    environment.SetValue ( MOAI_ENV_devPlatform, devPlatform );
 }
 
 void AKUIosNotifyLifecycle ( NSString* name ) {

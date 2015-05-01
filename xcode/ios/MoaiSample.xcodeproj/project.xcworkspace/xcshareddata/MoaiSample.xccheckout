@@ -11,9 +11,7 @@
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>63C4897045D0EF88507AD257AEF500CB53038CE0</key>
-		<string>git.cloudteam.pro:moai/moai.git</string>
-		<key>705D2878A161BC058FC8D0E975F01B681C59C50E</key>
-		<string>git.cloudteam.pro:miner/miner.git</string>
+		<string>https://github.com/patrickmeehan/moai-dev.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>xcode/ios/MoaiSample.xcodeproj</string>
@@ -21,11 +19,9 @@
 	<dict>
 		<key>63C4897045D0EF88507AD257AEF500CB53038CE0</key>
 		<string>../../../..</string>
-		<key>705D2878A161BC058FC8D0E975F01B681C59C50E</key>
-		<string>../../../../../projects/digger</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>git.cloudteam.pro:moai/moai.git</string>
+	<string>https://github.com/patrickmeehan/moai-dev.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
@@ -36,17 +32,9 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>705D2878A161BC058FC8D0E975F01B681C59C50E</string>
-			<key>IDESourceControlWCCName</key>
-			<string>digger</string>
-		</dict>
-		<dict>
-			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
-			<string>public.vcs.git</string>
-			<key>IDESourceControlWCCIdentifierKey</key>
 			<string>63C4897045D0EF88507AD257AEF500CB53038CE0</string>
 			<key>IDESourceControlWCCName</key>
-			<string>moai-new</string>
+			<string>moai-dev</string>
 		</dict>
 	</array>
 </dict>

@@ -11,4 +11,4 @@ if [ ! -e "$ndkdir" ]; then
 	exit 1;
 fi
 
-./gradlew assembleRelease
+bash ./gradlew assembleDebug

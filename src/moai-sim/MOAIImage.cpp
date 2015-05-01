@@ -8,6 +8,7 @@
 #endif
 
 #include <moai-sim/MOAIImage.h>
+#include <moai-sim/MOAIImageFormatMgr.h>
 #include <moai-sim/MOAIGfxDevice.h>
 #include <float.h>
 #include <contrib/edtaa3func.h>
@@ -15,6 +16,21 @@
 //================================================================//
 // local
 //================================================================//
+
+//----------------------------------------------------------------//
+// TODO: doxygen
+int MOAIImage::_average ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIImage, "U" )
+	
+	ZLColorVec average = self->Average ();
+	
+	lua_pushnumber ( state, average.mR );
+	lua_pushnumber ( state, average.mG );
+	lua_pushnumber ( state, average.mB );
+	lua_pushnumber ( state, average.mA );
+	
+	return 4;
+}
 
 //----------------------------------------------------------------//
 /**	@lua	bleedRect
@@ -551,7 +567,7 @@ int MOAIImage::_init ( lua_State* L ) {
 	else {
 
 		u32 width		= state.GetValue < u32 >( 2, 0 );
-		u32 height		= state.GetValue < u32 >( 3, 0 );
+		u32 height		= state.GetValue < u32 >( 3, width );
 		u32 colorFmt	= state.GetValue < u32 >( 4, ZLColor::RGBA_8888 );
 
 		self->Init ( width, height, ( ZLColor::ColorFormat )colorFmt, TRUECOLOR );
@@ -707,10 +723,10 @@ int MOAIImage::_padToPow2 ( lua_State* L ) {
 	@out	MOAIImage image
 */
 int MOAIImage::_resize ( lua_State* L ) {
-	MOAI_LUA_SETUP ( MOAIImage, "UNN" )
+	MOAI_LUA_SETUP ( MOAIImage, "UN" )
 	
 	u32 width	= state.GetValue < u32 >( 2, 0 );
-	u32 height	= state.GetValue < u32 >( 3, 0 );
+	u32 height	= state.GetValue < u32 >( 3, width );
 	u32 filter	= state.GetValue < u32 >( 4, MOAIImage::FILTER_LINEAR );
 	
 	ZLIntRect srcRect;
@@ -856,25 +872,26 @@ int MOAIImage::_simpleThreshold ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
-/**	@lua	writePNG
-	@text	Write image to a PNG file.
+/**	@lua	write
+	@text	Write image to a file.
 
 	@in		MOAIImage self
 	@in		string filename
-	@out	nil
+	@opt	string format
+	@out	boolean
 */
-int MOAIImage::_writePNG ( lua_State* L ) {
+int MOAIImage::_write ( lua_State* L ) {
 	MOAI_LUA_SETUP ( MOAIImage, "US" )
 	
-	#if MOAI_WITH_LIBPNG
-		cc8* filename = state.GetValue < cc8* >( 2, "" );
-		
-		ZLFileStream stream;
-		stream.OpenWrite ( filename );
-		self->WritePNG ( stream );
-	#endif
+	cc8* filename = state.GetValue < cc8* >( 2, "" );
+	cc8* format = state.GetValue < cc8* >( 3, "png" );
 	
-	return 0;
+	ZLFileStream stream;
+	stream.OpenWrite ( filename );
+	bool result = self->Write ( stream, format );
+	
+	state.Push ( result );
+	return 1;
 }
 
 //================================================================//
@@ -929,6 +946,26 @@ void MOAIImage::Alloc () {
 		this->mPalette = malloc ( paletteSize );
 		memset ( this->mPalette, 0, paletteSize );
 	}
+}
+
+//----------------------------------------------------------------//
+ZLColorVec MOAIImage::Average () const {
+
+	ZLColorVec average;
+	average.Set ( 0.0f, 0.0f, 0.0f, 0.0f );
+	
+	u32 width = this->mWidth;
+	u32 height = this->mHeight;
+	
+	for ( u32 y = 0; y < height; ++y ) {
+		for ( u32 x = 0; x < width; ++x ) {
+			average.Add ( ZLColorVec ( this->GetColor ( x, y )));
+		}
+	}
+	
+	float scale = 1.0f / ( float )( width * height );
+	average.Scale ( scale );
+	return average;
 }
 
 //----------------------------------------------------------------//
@@ -1348,6 +1385,8 @@ bool MOAIImage::Compare ( const MOAIImage& image ) {
 //----------------------------------------------------------------//
 void MOAIImage::Copy ( const MOAIImage& image ) {
 
+	if ( this == &image ) return;
+
 	this->Init ( image.mWidth, image.mHeight, image.mColorFormat, image.mPixelFormat );
 	
 	size_t bitmapSize = this->GetBitmapSize ();
@@ -1372,7 +1411,7 @@ void MOAIImage::CopyRect ( const MOAIImage& image, ZLIntRect srcRect, ZLIntRect 
 //----------------------------------------------------------------//
 void MOAIImage::CopyRect ( const MOAIImage& image, ZLIntRect srcRect, ZLIntRect destRect, u32 filter, const ZLColorBlendFunc& blendFunc ) {
 
-	if (( this->mPixelFormat != TRUECOLOR ) && ( this->mPixelFormat != TRUECOLOR )) return; // TODO: warn about this case
+	if (( this->mPixelFormat != TRUECOLOR ) && ( image.mPixelFormat != TRUECOLOR )) return; // TODO: warn about this case
 
 	float scale;
 
@@ -1616,7 +1655,7 @@ void MOAIImage::Desaturate ( const MOAIImage& image, float rY, float gY, float b
 		}
 	}
 	else {
-		ZLColor::Desaturate ( this->GetPalette (), this->mColorFormat, this->GetPaletteCount (), rY, gY, bY, K );
+		ZLColor::Desaturate ( this->mPalette, this->mColorFormat, this->GetPaletteCount (), rY, gY, bY, K );
 	}
 }
 
@@ -1880,7 +1919,7 @@ void MOAIImage::GammaCorrection ( const MOAIImage& image, float gamma ) {
 		}
 	}
 	else {
-		ZLColor::GammaCorrection ( this->GetPalette (), this->mColorFormat, this->GetPaletteCount (), gamma );
+		ZLColor::GammaCorrection ( this->mPalette, this->mColorFormat, this->GetPaletteCount (), gamma );
 	}
 }
 
@@ -2086,13 +2125,21 @@ void MOAIImage::GenerateSDFDeadReckoning( ZLIntRect rect, int threshold ) {
 	
 	// Treating 1d array as 2d
 	float* distanceMap = ( float * ) malloc ( sizeof ( float ) * size );
-	int* binaryMap = ( int * ) malloc ( sizeof ( int ) * size );
-	
-	if ( distanceMap == NULL || binaryMap == NULL ) {
+
+	if ( distanceMap == NULL ) {
 		printf("ERROR: Out of memory\n");
-		return;
+    	return;
+	} 
+
+	// Treating 1d array as 2d
+	int* binaryMap = ( int * ) malloc ( sizeof ( int ) * size );
+
+	if ( binaryMap == NULL ) {
+		free ( distanceMap );
+		printf("ERROR: Out of memory\n");
+    	return;
 	}
-	
+
 	// Init the binary map and distance map
 	for ( int y = 0; y < height; ++y ) {
 		for ( int x = 0; x < width; ++x ) {
@@ -2410,29 +2457,12 @@ bool MOAIImage::Load ( ZLStream& stream, u32 transform ) {
 
 	this->Clear ();
 	
-	#if MOAI_WITH_LIBPNG
-		if ( MOAIImage::IsPng ( stream )) {
-			this->LoadPng ( stream, transform );
-			this->OnImageStatusChanged ( this->IsOK ());
-			return this->IsOK ();
-		}
-	#endif
-	
-	#if MOAI_WITH_LIBJPG
-		if ( MOAIImage::IsJpg ( stream )) {
-			this->LoadJpg ( stream, transform );
-			this->OnImageStatusChanged ( this->IsOK ());
-			return this->IsOK ();
-		}
-	#endif
-	
-	#if MOAI_WITH_LIBWEBP
-		if ( MOAIImage::IsWebP ( stream )) {
-			this->LoadWebP ( stream, transform );
-			this->OnImageStatusChanged ( this->IsOK ());
-			return this->IsOK ();
-		}
-	#endif
+	MOAIImageFormat* format = MOAIImageFormatMgr::Get ().FindFormat ( stream );
+	if ( format ) {
+		format->ReadImage ( *this, stream, transform );
+		this->OnImageStatusChanged ( this->IsOK ());
+		return this->IsOK ();
+	}
 	
 	return false;
 }
@@ -2517,7 +2547,7 @@ void MOAIImage::Mix ( const MOAIImage& image, const ZLMatrix4x4& mtx, float K ) 
 		}
 	}
 	else {
-		ZLColor::Mix ( this->GetPalette (), this->mColorFormat, this->GetPaletteCount (), mtx, K );
+		ZLColor::Mix ( this->mPalette, this->mColorFormat, this->GetPaletteCount (), mtx, K );
 	}
 }
 
@@ -2599,7 +2629,8 @@ void MOAIImage::RegisterLuaClass ( MOAILuaState& state ) {
 	
 	state.SetField ( -1, "BLEND_EQ_ADD",						( u32 )ZLColor::BLEND_EQ_ADD );
 	state.SetField ( -1, "BLEND_EQ_NONE",						( u32 )ZLColor::BLEND_EQ_NONE );
-	state.SetField ( -1, "BLEND_EQ_SUBTRACT",					( u32 )ZLColor::BLEND_EQ_SUBTRACT );
+	state.SetField ( -1, "BLEND_EQ_SUB",						( u32 )ZLColor::BLEND_EQ_SUB );
+	state.SetField ( -1, "BLEND_EQ_SUB_INV",					( u32 )ZLColor::BLEND_EQ_SUB_INV );
 	
 	state.SetField ( -1, "BLEND_FACTOR_0001",					( u32 )ZLColor::BLEND_FACTOR_0001 );
 	state.SetField ( -1, "BLEND_FACTOR_1110",					( u32 )ZLColor::BLEND_FACTOR_1110 );
@@ -2620,6 +2651,7 @@ void MOAIImage::RegisterLuaFuncs ( MOAILuaState& state ) {
 	UNUSED ( state );
 
 	luaL_Reg regTable [] = {
+		{ "average",					_average },
 		{ "bleedRect",					_bleedRect },
 		{ "blur",						_blur },
 		{ "compare",					_compare },
@@ -2651,7 +2683,8 @@ void MOAIImage::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "setColor32",					_setColor32 },
 		{ "setRGBA",					_setRGBA },
 		{ "simpleThreshold",			_simpleThreshold },
-		{ "writePNG",					_writePNG },
+		{ "write",						_write },
+		{ "writePNG",					_write }, // back compat
 		{ NULL, NULL }
 	};
 
@@ -2898,4 +2931,11 @@ void MOAIImage::Transform ( u32 transform ) {
 	if ( transform & MOAIImageTransform::POW_TWO ) {
 		this->PadToPow2 ( *this );
 	}
+}
+
+//----------------------------------------------------------------//
+bool MOAIImage::Write ( ZLStream& stream, cc8* formatName ) {
+
+	MOAIImageFormat* format = MOAIImageFormatMgr::Get ().FindFormat ( formatName );
+	return format && format->WriteImage ( *this, stream );
 }

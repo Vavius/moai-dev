@@ -668,7 +668,7 @@ int MOAITextLabel::_spool ( lua_State* L ) {
 	self->mReveal = state.GetValue < u32 >( 2, 0 );
 	self->mSpool = ( float )self->mReveal;
 
-	self->Start ( MOAISim::Get ().GetActionMgr ());
+	self->Start ( MOAISim::Get ().GetActionMgr (), false );
 
 	return 1;
 }
@@ -751,15 +751,19 @@ void MOAITextLabel::Draw ( int subPrimID, float lod ) {
 		this->LoadVertexTransform ();
 		this->LoadUVTransform ();
 	
+		gfxDevice.SetVertexMtxMode ( MOAIGfxDevice::VTX_STAGE_MODEL, MOAIGfxDevice::VTX_STAGE_PROJ );
+		gfxDevice.SetUVMtxMode ( MOAIGfxDevice::UV_STAGE_MODEL, MOAIGfxDevice::UV_STAGE_TEXTURE );
+	
+		MOAIShader* shader = this->mMaterialBatch ? this->mMaterialBatch->RawGetShader ( 0 ) : 0;
 
-		if ( !this->mShader ) {
+		if ( shader ) {
+			gfxDevice.SetShader ( shader );
+		}
+		else {
 			// TODO: this should really come from MOAIFont, which should really be a
 			// specialized implementation of MOAIDeck...
 			gfxDevice.SetShaderPreset ( MOAIShaderMgr::FONT_SNAPPING_SHADER );
 		}
-
-		gfxDevice.SetVertexMtxMode ( MOAIGfxDevice::VTX_STAGE_MODEL, MOAIGfxDevice::VTX_STAGE_PROJ );
-		gfxDevice.SetUVMtxMode ( MOAIGfxDevice::UV_STAGE_MODEL, MOAIGfxDevice::UV_STAGE_TEXTURE );
 		
 		this->mLayout.Draw ( this->mReveal );
 	}
@@ -832,12 +836,12 @@ ZLMatrix4x4 MOAITextLabel::GetWorldDrawingMtx () {
 		
 			MOAIViewport* viewport = renderMgr.GetViewport ();
 			assert ( viewport );
-			
-			ZLMatrix4x4 viewProj = camera->GetWorldToWndMtx ( *viewport );
-		
-			ZLVec3D upVec = worldDrawingMtx.GetYAxis ();
-			viewProj.TransformVec ( upVec );
-			
+
+			ZLMatrix4x4 view = camera->GetViewMtx ();
+
+			ZLVec3D upVec = view.GetYAxis ();
+
+			// For text flipping when orbiting around the map. Tilting should not affect this
 			if ( upVec.mY < 0.0f ) {
 				ZLMatrix4x4 scale;
 				scale.Scale ( -1.0f, -1.0f, 1.0f );
@@ -879,7 +883,7 @@ MOAITextLabel::MOAITextLabel () :
 	this->mStyleCache.SetOwner ( this );
 	this->mDesigner.SetOwner ( this );
 
-	this->SetMask ( MOAIProp::CAN_DRAW | MOAIProp::CAN_DRAW_DEBUG );
+	//this->SetMask ( MOAIProp::CAN_DRAW | MOAIProp::CAN_DRAW_DEBUG );
 	this->mBlendMode.SetBlend ( ZGL_BLEND_FACTOR_SRC_ALPHA, ZGL_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA );
 }
 
@@ -953,7 +957,7 @@ u32 MOAITextLabel::OnGetModelBounds ( ZLBox& bounds ) {
 	else {
 	
 		// if the text bounds are empty, then *both* frame axis must be in use for the rect to be valid
-		if ( limitWidth && limitWidth ) {
+		if ( limitWidth && limitHeight ) {
 			bounds.Init ( textFrame.mXMin, textFrame.mYMax, textFrame.mXMax, textFrame.mYMin, 0.0f, 0.0f );
 			return MOAIProp::BOUNDS_OK;
 		}

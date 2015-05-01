@@ -8,6 +8,7 @@
 #include <moai-sim/MOAITextureBase.h>
 
 class MOAIDataBuffer;
+class MOAIImageFormat;
 
 //================================================================//
 // MOAITexture
@@ -25,18 +26,21 @@ private:
 	
 	// for loading from image
 	MOAILuaSharedPtr < MOAIImage> mImage;
+	bool				mAutoClearImage;
 	
 	// for loading compressed data
-	void*				mData;
-	size_t				mDataSize;
+	void*				mTextureData;
+	size_t				mTextureDataSize;
+	MOAIImageFormat*	mTextureDataFormat;
 
 	//----------------------------------------------------------------//
 	static int			_load					( lua_State* L );
 
 	//----------------------------------------------------------------//
-	bool				OnCPUCreate				();
-	void				OnCPUDestroy			();
-	bool				OnGPUCreate				();
+	bool				LoadFromStream				( ZLStream& stream, u32 transform );
+	bool				OnCPUCreate					();
+	void				OnCPUDestroy				();
+	bool				OnGPUCreate					();
 
 public:
 	
@@ -48,13 +52,12 @@ public:
 	static MOAIGfxState*	AffirmTexture			( MOAILuaState& state, int idx );
 	void					Clear					();
 	bool					Init					( MOAILuaState& state, int idx );
-	void					Init					( MOAIImage& image, cc8* debugname );
+	void					Init					( MOAIImage& image, cc8* debugname, bool autoClear );
 	void					Init					( MOAIImage& image, int srcX, int srcY, int width, int height, cc8* debugname );
 	void					Init					( cc8* filename, u32 transform, cc8* debugname = 0 );
 	void					Init					( ZLStream& stream, u32 transform, cc8* debugname );
 	void					Init					( MOAIDataBuffer& data, u32 transform, cc8* debugname );
 	void					Init					( const void* data, u32 size, u32 transform, cc8* debugname );
-	
 							MOAITexture				();
 							~MOAITexture			();
 	void					RegisterLuaClass		( MOAILuaState& state );

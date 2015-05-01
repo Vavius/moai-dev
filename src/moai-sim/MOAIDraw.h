@@ -9,6 +9,8 @@ class MOAITextureBase;
 class MOAITexture;
 class MOAIFont;
 class MOAIGlyph;
+class MOAIGfxBuffer;
+class MOAIVertexFormat;
 
 //================================================================//
 // MOAIDraw
@@ -27,18 +29,20 @@ private:
 	static int				_drawBezierCurve	( lua_State* L );
 	static int				_drawBoxOutline		( lua_State* L );
 	static int				_drawCircle			( lua_State* L );
+	static int				_drawElements		( lua_State* L );
 	static int				_drawEllipse		( lua_State* L );
 	static int				_drawGrid			( lua_State* L );
 	static int				_drawLine			( lua_State* L );
 	static int				_drawPoints			( lua_State* L );
 	static int				_drawRay			( lua_State* L );
 	static int				_drawRect			( lua_State* L );
+	static int				_drawTexture		( lua_State* L );
+	static int				_drawText			( lua_State* L );
 	static int				_fillCircle			( lua_State* L );
 	static int				_fillEllipse		( lua_State* L );
 	static int				_fillFan			( lua_State* L );
 	static int				_fillRect			( lua_State* L );
-	static int				_drawTexture		( lua_State* L );
-	static int				_drawText			( lua_State* L );
+	static int				_setBlendMode		( lua_State* L );
 	
 	//----------------------------------------------------------------//
 	static void			DrawLuaParams			( lua_State* L, u32 primType );
@@ -57,6 +61,7 @@ public:
 	static void			DrawBoxAxis				( const ZLBox& box );
 	static void			DrawBoxDiagonals		( const ZLBox& box );
 	static void			DrawBoxOutline			( const ZLBox& box );
+	static void			DrawElements			( MOAIGfxBuffer* vtxBuffer, MOAIVertexFormat* vtxFormat, u32 count );
 	static void			DrawEllipseFill			( const ZLRect& rect, u32 steps );
 	static void			DrawEllipseFill			( float x, float y, float xRad, float yRad, u32 steps );
 	static void			DrawEllipseOutline		( const ZLRect& rect, u32 steps );

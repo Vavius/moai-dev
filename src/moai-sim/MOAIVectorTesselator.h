@@ -7,9 +7,8 @@
 #include <moai-sim/MOAIRegion.h>
 #include <moai-sim/MOAIVectorUtil.h>
 
-class MOAIIndexBuffer;
+class MOAIGfxBuffer;
 class MOAIVectorShape;
-class MOAIVertexBuffer;
 
 class SafeTesselator;
 
@@ -105,7 +104,7 @@ private:
 	//----------------------------------------------------------------//
 	u32				PushShape				( MOAIVectorShape* shape );
 	int				Tesselate				();
-	void			WriteVertex				( float x, float y, float z, u32 color, u32 vertexExtraID );
+	void			WriteVertex				( float x, float y, float z, const ZLAffine2D& transform2D, u32 color, u32 vertexExtraID );
 	
 public:
 	
@@ -122,7 +121,6 @@ public:
 	u32					CountVertices				();
 	int					Finish						( bool generateMask );
 	SafeTesselator*		GetMaskTesselator			();
-	void				GetTriangles				( MOAIVertexBuffer& vtxBuffer, MOAIIndexBuffer& idxBuffer );
 						MOAIVectorTesselator		();
 						~MOAIVectorTesselator		();
 	void				PopTransform				();
@@ -145,7 +143,7 @@ public:
 	void				WriteContourIndices			( SafeTesselator* tess, u32 base );
 	void				WriteSkirt					( SafeTesselator* tess, const MOAIVectorStyle& style, const ZLColorVec& fillColor, u32 vertexExtraID );
 	void				WriteTriangleIndices		( SafeTesselator* tess, u32 base );
-	void				WriteVertices				( SafeTesselator* tess, float z, u32 color, u32 vertexExtraID );
+	void				WriteVertices				( SafeTesselator* tess, const MOAIVectorStyle& style, float z, u32 color, u32 vertexExtraID );
 };
 
 #endif

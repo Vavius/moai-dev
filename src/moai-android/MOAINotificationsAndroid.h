@@ -4,8 +4,6 @@
 #ifndef	MOAINOTIFICATIONSANDROID_H
 #define	MOAINOTIFICATIONSANDROID_H
 
-#ifndef DISABLE_NOTIFICATIONS
-
 #include <moai-core/headers.h>
 
 //================================================================//
@@ -34,15 +32,14 @@ class MOAINotificationsAndroid :
 private:
 
 	//----------------------------------------------------------------//
-	static int  _cancelAllLocalNotifications		( lua_State* L );
 	static int	_getAppIconBadgeNumber				( lua_State* L );
 	static int	_localNotificationInSeconds			( lua_State* L );
-	static int	_removeLocalNotification			( lua_State* L );
 	static cc8*	_luaParseTable 						( lua_State* L, int idx );
 	static int	_registerForRemoteNotifications		( lua_State* L );
 	static int	_setAppIconBadgeNumber				( lua_State* L );
 	static int	_setListener						( lua_State* L );
 	static int	_unregisterForRemoteNotifications	( lua_State* L );
+
 public:
 
 	DECL_LUA_SINGLETON ( MOAINotificationsAndroid );
@@ -69,7 +66,5 @@ public:
 	void	NotifyRemoteRegistrationComplete	( int code, cc8* registration );
 	void	RegisterLuaClass					( MOAILuaState& state );
 };
-
-#endif  //DISABLE_NOTIFICATIONS
 
 #endif  //MOAINOTIFICATIONS_H

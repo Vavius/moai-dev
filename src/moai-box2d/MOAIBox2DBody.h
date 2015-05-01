@@ -39,6 +39,7 @@ private:
 	static int		_destroy				( lua_State* L );
 	static int		_getAngle				( lua_State* L );
 	static int		_getAngularVelocity		( lua_State* L );
+	static int 		_getContactList			( lua_State* L );
 	static int		_getInertia				( lua_State* L );
 	static int		_getGravityScale		( lua_State* L );
 	static int		_getLinearVelocity		( lua_State* L );
@@ -66,6 +67,7 @@ private:
 	
 	//----------------------------------------------------------------//
 	bool			ApplyAttrOp				( u32 attrID, MOAIAttrOp& attrOp, u32 op );
+	void			BuildLocalToWorldMtx	( ZLAffine3D& localToWorldMtx );
 	void			Clear					();
 	void			SetBody					( b2Body* body );
 	void			OnDepNodeUpdate			();

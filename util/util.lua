@@ -12,6 +12,7 @@ local osx = MOAIEnvironment.osBrand == 'OSX'
 			dofileWithEnvironment			= nil
 			escape							= nil
 local		exec							= nil
+			getAbsoluteDirPath				= nil
 			getFilenameFromPath				= nil
 			getFilenameExt					= nil
 			getFolderFromPath				= nil
@@ -25,10 +26,12 @@ local		exec							= nil
 			iterateFiles					= nil
 			iterateFilesAbsPath				= nil
 local  		iterateFilesImplementation		= nil
+			iterateSingleOrArray			= nil
 			joinTables						= nil
 			listDirectories					= nil
 			listFiles						= nil
 local		makeDlcResourceSig				= nil
+			makeExecutable					= nil
 			makeStoreEntryFunc				= nil
 			mergeTables						= nil
 			move							= nil
@@ -37,6 +40,7 @@ local		makeDlcResourceSig				= nil
 			onEntryStore					= nil
 			pack							= nil
 			package							= nil
+			pairsByKeys						= nil
 			powerIter						= nil
 			printTable						= nil
 			pruneEmptyDirs					= nil
@@ -131,6 +135,16 @@ exec = function ( cmd, path1, path2 )
 end
 
 ----------------------------------------------------------------
+getAbsoluteDirPath = function ( path, base )
+
+	if base and not ( string.match ( path, '^/' ) or string.match ( path, '^\\' )) then
+		path = base .. path
+	end
+
+	return MOAIFileSystem.getAbsoluteDirectoryPath ( path )
+end
+
+----------------------------------------------------------------
 getFilenameFromPath = function ( path )
 
 	return string.match ( path, "[/]?([^/]+)$" )
@@ -218,7 +232,8 @@ end
 ----------------------------------------------------------------
 isAbsPath = function ( path )
 
-	return ( path [ 1 ] ~= 0x5C ) or ( path [ 1 ] ~= 0x2F ) -- hex codes for '/' and '\'
+	local c = string.byte ( path )
+	return ( c == 0x5C ) or ( c == 0x2F ) -- hex codes for '/' and '\'
 end
 
 ----------------------------------------------------------------
@@ -355,6 +370,22 @@ iterateFilesImplementation = function ( path, fileFilter, absPath, recurse )
 end
 
 ----------------------------------------------------------------
+iterateSingleOrArray = function ( item )
+
+	if type ( item ) == 'table' then
+		return ipairs ( item )
+	end
+
+	return function ()
+		if item then
+			local temp = item
+			item = nil
+			return 1, temp
+		end 
+	end
+end
+
+----------------------------------------------------------------
 joinTables = function ( t1, t2 )
 	
 	local t = {}
@@ -417,6 +448,13 @@ loadFileAsString = function ( filename )
 	
 	return str
 end
+----------------------------------------------------------------
+makeExecutable = function ( path )
+	if MOAIEnvironment.osBrand ~= 'Windows' then
+		os.execute("chmod a+x "..path)
+	end
+end 
+
 
 ----------------------------------------------------------------
 makeDlcResourceSig = function ( path, md5 )
@@ -477,6 +515,26 @@ package = function ( dstpath, srcpath )
 	else
 		util.copy ( dstpath, srcpath )
 	end
+end
+
+----------------------------------------------------------------
+pairsByKeys = function ( t, f )
+
+	local a = {}
+	for n in pairs ( t ) do table.insert ( a, n ) end
+	table.sort ( a, f )
+
+	local i = 0      -- iterator variable
+	local iter = function ()   -- iterator function
+		i = i + 1
+		if a [ i ] == nil then
+			return nil
+		else
+			return a [ i ], t [ a [ i ]]
+		end
+	end
+
+	return iter
 end
 
 ----------------------------------------------------------------

@@ -4,8 +4,6 @@
 #ifndef	MOAIGOOGLEPLAYSERVICESANDROID_H
 #define	MOAIGOOGLEPLAYSERVICESANDROID_H
 
-#ifndef DISABLE_PLAYSERVICES
-
 #include <moai-core/headers.h>
 
 //================================================================//
@@ -43,7 +41,5 @@ public:
 	void 	NotifyConnectionComplete			();
 	void	RegisterLuaClass					( MOAILuaState& state );
 };
-
-#endif  //DISABLE_PLAYSERVICES
 
 #endif  //MOAIGOOGLEPLAYSERVICESANDROID_H

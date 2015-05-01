@@ -44,7 +44,7 @@ void MOAIShaderUniformBuffer::Clear () {
 
 //----------------------------------------------------------------//
 void MOAIShaderUniformBuffer::ClearValue () {
-	
+
 	this->SetType ( this->mType );
 }
 

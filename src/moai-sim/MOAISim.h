@@ -6,7 +6,7 @@
 
 #include <moai-sim/MOAIActionTree.h>
 #include <moai-sim/MOAIEaseDriver.h>
-#include <moai-sim/MOAIInputQueue.h>
+#include <moai-sim/MOAIInputMgr.h>
 #include <moai-util/MOAITaskSubscriber.h>
 #include <moai-util/MOAITaskThread.h>
 
@@ -50,6 +50,7 @@ public:
 	typedef void ( *HideCursorFunc )				();
 	typedef void ( *OpenWindowFunc )				( const char* title, int width, int height );
 	typedef void ( *SetSimStepFunc )				( double step );
+	typedef void ( *SetTextInputRectFunc )			( int xMin, int yMin, int xMax, int yMax );
 
 private:
 
@@ -65,6 +66,7 @@ private:
 		EVENT_FINALIZE,
 		EVENT_PAUSE,
 		EVENT_RESUME,
+		EVENT_STEP,
 	};
 
 	u32				mLoopState;
@@ -100,6 +102,7 @@ private:
 	ExitFullscreenModeFunc		mExitFullscreenModeFunc;
 	OpenWindowFunc				mOpenWindowFunc;
 	SetSimStepFunc				mSetSimStepFunc;
+	SetTextInputRectFunc		mSetTextInputRectFunc;
 	ShowCursorFunc				mShowCursorFunc;
 	HideCursorFunc				mHideCursorFunc;
 	
@@ -109,7 +112,6 @@ private:
 	
 	MOAILuaMemberRef	mLuaGCFunc;
 	
-	MOAILuaSharedPtr < MOAIInputQueue >		mInputMgr;
 	MOAILuaSharedPtr < MOAIActionTree >		mActionMgr; // this is a sub-tree
 	MOAILuaSharedPtr < MOAIActionTree >		mActionTree; // the sim's main action tree
 	
@@ -124,7 +126,6 @@ private:
 	static int		_getActionMgr				( lua_State* L );
 	static int		_getDeviceTime				( lua_State* L );
 	static int		_getElapsedTime				( lua_State* L );
-	static int		_getInputMgr				( lua_State* L );
 	static int		_getLoopFlags				( lua_State* L );
 	static int		_getLuaObjectCount			( lua_State* L );
 	static int		_getMemoryUsage				( lua_State* L );
@@ -147,6 +148,7 @@ private:
 	static int		_setStepMultiplier			( lua_State* L );
 	static int		_setTimerError				( lua_State* L );
 	static int		_setTraceback				( lua_State* L );
+	static int		_setTextInputRect			( lua_State* L );
 	static int		_showCursor					( lua_State* L );
 	static int		_timeToFrames				( lua_State* L );
 
@@ -161,11 +163,7 @@ private:
 	//----------------------------------------------------------------//
 	double			MeasureFrameRate			();
 	void			OnGlobalsFinalize			();
-	void			OnGlobalsRestore			();
-	void			OnGlobalsRetire				();
 	void			ResetPerformanceTimers		();
-	void			SendPauseEvent				();
-	void			SendResumeEvent				();
 	double			StepSim						( double step, u32 multiplier );
 
 public:
@@ -190,7 +188,6 @@ public:
 	GET ( float, FrameRate, mFrameRate )
 	GET_BOOL ( IsRelaunchScheduled, mRelaunchScheduled )
 	
-	GET ( MOAIInputQueue&, InputMgr, *mInputMgr );
 	GET ( MOAIActionTree&, ActionMgr, *mActionMgr );
 	GET ( MOAIActionTree&, ActionTree, *mActionTree );
 	
@@ -200,6 +197,7 @@ public:
 	GET_SET ( OpenWindowFunc, OpenWindowFunc, mOpenWindowFunc );
 	GET_SET ( SetSimStepFunc, SetSimStepFunc, mSetSimStepFunc );
 	GET_SET ( ShowCursorFunc, ShowCursorFunc, mShowCursorFunc );
+	GET_SET ( SetTextInputRectFunc, SetTextInputRectFunc, mSetTextInputRectFunc );
 	
 	static const u32 LOOP_FLAGS_DEFAULT		= SIM_LOOP_ALLOW_SPIN | SIM_LOOP_LONG_DELAY;
 	static const u32 LOOP_FLAGS_FIXED		= SIM_LOOP_FORCE_STEP | SIM_LOOP_NO_DEFICIT | SIM_LOOP_NO_SURPLUS;
@@ -219,7 +217,6 @@ public:
 	void			RegisterLuaClass			( MOAILuaState& state );
 	void			RegisterLuaFuncs			( MOAILuaState& state );
 	void			Resume						();
-	void			SendFinalizeEvent			();
 	void			SetStep						( double step );
 	void			Update						();
 };

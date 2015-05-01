@@ -81,6 +81,73 @@ int MOAILayer::_getFitting ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+// TODO: doxygen
+int MOAILayer::_getFitting3D ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAILayer, "UT" )
+
+	if (( !self->mViewport ) || ( !self->mCamera ) || ( self->mCamera->GetType () != MOAICamera::CAMERA_TYPE_3D )) return 0;
+	
+	ZLRect fitRect = state.GetValue < ZLRect >( 3, *self->mViewport );
+	
+	self->mCamera->ForceUpdate ();
+	
+	ZLFrustumFitter fitter;
+	
+	fitter.Init (
+		*self->mViewport,
+		fitRect,
+		self->mCamera->GetFieldOfView (),
+		self->mCamera->GetLocalToWorldMtx ()
+	);
+
+	u32 itr = state.PushTableItr ( 2 );
+	while ( state.TableItrNext ( itr )) {
+	
+		int type = lua_type ( state, -1 );
+		
+		switch ( type ) {
+		
+			case LUA_TTABLE: {
+			
+				ZLVec3D loc;
+				
+				loc.mX = state.GetField < float >( -1, "x", 0.0f );
+				loc.mY = state.GetField < float >( -1, "y", 0.0f );
+				loc.mZ = state.GetField < float >( -1, "z", 0.0f );
+				
+				float r = state.GetField < float >( -1, "r", 0.0f );
+				
+				fitter.FitPoint( loc, r );
+				
+				break;
+			}
+			
+			case LUA_TUSERDATA: {
+			
+				MOAIProp* prop = state.GetLuaObject < MOAIProp >( -1, true );
+		
+				if ( prop ) {
+					ZLBox bounds = prop->GetBounds ();
+					
+					ZLVec3D center;
+					bounds.GetCenter ( center );
+					fitter.FitBox ( bounds, 0.0f );
+				}
+				break;
+			}
+		}
+	}
+	
+	ZLVec3D position = fitter.GetPosition ();
+	
+	state.Push ( position.mX );
+	state.Push ( position.mY );
+	state.Push ( position.mZ );
+
+	return 3;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	getPartition
 	@text	Returns the partition currently attached to this layer.
 	
@@ -101,6 +168,9 @@ int	MOAILayer::_getPropViewList ( lua_State* L ) {
 	MOAI_LUA_SETUP ( MOAILayer, "U" )
 	
 	if ( self->mPartition ) {
+		
+		u32 interfaceMask = self->mPartition->GetInterfaceMask < MOAIGraphicsProp >();
+		if ( !interfaceMask ) return 0;
 		
 		float sortScale [ 4 ];
 		
@@ -125,10 +195,10 @@ int	MOAILayer::_getPropViewList ( lua_State* L ) {
 		u32 totalResults = 0;
 		
 		if ( self->mPartitionCull2D ) {
-			totalResults = self->mPartition->GatherProps ( buffer, 0, viewVolume.mAABB, MOAIProp::CAN_DRAW );
+			totalResults = self->mPartition->GatherProps ( buffer, 0, viewVolume.mAABB, interfaceMask );
 		}
 		else {
-			totalResults = self->mPartition->GatherProps ( buffer, 0, viewVolume, MOAIProp::CAN_DRAW );
+			totalResults = self->mPartition->GatherProps ( buffer, 0, viewVolume, interfaceMask );
 		}
 		
 		if ( !totalResults ) return 0;
@@ -653,16 +723,19 @@ void MOAILayer::Draw ( int subPrimID, float lod  ) {
 	
 	if ( this->mPartition ) {
 		
+		u32 interfaceMask = this->mPartition->GetInterfaceMask < MOAIGraphicsProp >();
+		if ( !interfaceMask ) return;
+		
 		MOAIPartitionResultBuffer& buffer = MOAIPartitionResultMgr::Get ().GetBuffer ();
 		const ZLFrustum& viewVolume = gfxDevice.GetViewVolume ();
 		
 		u32 totalResults = 0;
 		
 		if ( this->mPartitionCull2D ) {
-			totalResults = this->mPartition->GatherProps ( buffer, 0, viewVolume.mAABB, MOAIProp::CAN_DRAW | MOAIProp::CAN_DRAW_DEBUG );
+			totalResults = this->mPartition->GatherProps ( buffer, 0, viewVolume.mAABB, interfaceMask );
 		}
 		else {
-			totalResults = this->mPartition->GatherProps ( buffer, 0, viewVolume, MOAIProp::CAN_DRAW | MOAIProp::CAN_DRAW_DEBUG );
+			totalResults = this->mPartition->GatherProps ( buffer, 0, viewVolume, interfaceMask );
 		}
 		
 		if ( !totalResults ) return;
@@ -710,15 +783,15 @@ void MOAILayer::DrawProps ( MOAIPartitionResultBuffer& buffer, float lod ) {
 	if ( this->mLODMode == LOD_FROM_PROP_SORT_Z ) {
 		for ( u32 i = 0; i < totalResults; ++i ) {
 			MOAIPartitionResult* result = buffer.GetResultUnsafe ( i );
-			MOAIProp* prop = result->mProp;
-			prop->Draw ( result->mSubPrimID, result->mLoc.mZ * lod );
+			MOAIGraphicsProp* graphicsProp = result->mProp->AsType < MOAIGraphicsProp >();
+			graphicsProp->Draw ( result->mSubPrimID, result->mLoc.mZ * lod );
 		}
 	}
 	else {
 		for ( u32 i = 0; i < totalResults; ++i ) {
 			MOAIPartitionResult* result = buffer.GetResultUnsafe ( i );
-			MOAIProp* prop = result->mProp;
-			prop->Draw ( result->mSubPrimID, lod );
+			MOAIGraphicsProp* graphicsProp = result->mProp->AsType < MOAIGraphicsProp >();
+			graphicsProp->Draw ( result->mSubPrimID, lod );
 		}
 	}
 }
@@ -731,15 +804,15 @@ void MOAILayer::DrawPropsDebug ( MOAIPartitionResultBuffer& buffer, float lod ) 
 	if ( this->mLODMode == LOD_FROM_PROP_SORT_Z ) {
 		for ( u32 i = 0; i < totalResults; ++i ) {
 			MOAIPartitionResult* result = buffer.GetResultUnsafe ( i );
-			MOAIProp* prop = result->mProp;
-			prop->DrawDebug ( result->mSubPrimID, result->mLoc.mZ );
+			MOAIGraphicsProp* graphicsProp = result->mProp->AsType < MOAIGraphicsProp >();
+			graphicsProp->DrawDebug ( result->mSubPrimID, result->mLoc.mZ );
 		}
 	}
 	else {
 		for ( u32 i = 0; i < totalResults; ++i ) {
 			MOAIPartitionResult* result = buffer.GetResultUnsafe ( i );
-			MOAIProp* prop = result->mProp;
-			prop->DrawDebug ( result->mSubPrimID, lod );
+			MOAIGraphicsProp* graphicsProp = result->mProp->AsType < MOAIGraphicsProp >();
+			graphicsProp->DrawDebug ( result->mSubPrimID, lod );
 		}
 	}
 }
@@ -835,7 +908,7 @@ MOAILayer::MOAILayer () :
 		RTTI_EXTEND ( MOAIClearableView )
 	RTTI_END
 	
-	this->SetMask ( MOAIProp::CAN_DRAW | MOAIProp::CAN_DRAW_DEBUG );
+	//this->SetMask ( MOAIProp::CAN_DRAW | MOAIProp::CAN_DRAW_DEBUG );
 	this->SetClearFlags ( 0 );
 }
 
@@ -894,6 +967,7 @@ void MOAILayer::RegisterLuaFuncs ( MOAILuaState& state ) {
 	luaL_Reg regTable [] = {
 		{ "clear",					_clear },
 		{ "getFitting",				_getFitting },
+		{ "getFitting3D",			_getFitting3D },
 		{ "getPartition",			_getPartition },
 		{ "getPropViewList",		_getPropViewList },
 		{ "getSortMode",			_getSortMode },

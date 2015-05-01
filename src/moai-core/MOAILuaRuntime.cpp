@@ -287,8 +287,8 @@ int MOAILuaRuntime::_getHistogram ( lua_State* L ) {
 int MOAILuaRuntime::_getRef ( lua_State* L ) {
 	MOAILuaState state ( L );
 
-	bool weak = state.GetValue < bool >( 2, false );
-	state.Push ( MOAILuaRuntime::Get ().GetRef ( state, 1, weak ));
+	u32 type = state.GetValue < bool >( 2, false ) ? MOAILuaRef::MAKE_WEAK : MOAILuaRef::MAKE_STRONG;
+	state.Push ( MOAILuaRuntime::Get ().GetRef ( state, 1, type ));
 
 	return 1;
 }
@@ -467,14 +467,37 @@ void MOAILuaRuntime::BuildHistogram ( HistMap& histogram, cc8* trackingGroup ) {
 }
 
 //----------------------------------------------------------------//
-void MOAILuaRuntime::ClearRef ( int ref ) {
+void MOAILuaRuntime::CacheUserdata ( MOAILuaState& state, int idx ) {
 
-	if ( ref != LUA_NOREF ) {
-		if ( ref & WEAK_REF_BIT ) {
-			this->mWeakRefs.Unref ( ref & REF_MASK );
+	idx = state.AbsIndex ( idx );
+
+	if ( this->mUserdataCache ) {
+		if ( !this->mUserdataCache.PushRef ( state )) {
+			state.Pop ();
+		}
+	}
+	
+	if ( !this->mUserdataCache ) {
+		lua_newtable ( state );
+		this->mUserdataCache.SetRef ( state, -1 );
+	}
+	
+	lua_pushvalue ( state, idx );
+	lua_pushvalue ( state, idx );
+	lua_settable ( state, -3 );
+	
+	state.Pop ();
+}
+
+//----------------------------------------------------------------//
+void MOAILuaRuntime::ClearRef ( int refID ) {
+
+	if ( refID != LUA_NOREF ) {
+		if ( refID & WEAK_REF_BIT ) {
+			this->mWeakRefs.Unref ( refID & REF_MASK );
 		}
 		else {
-			this->mStrongRefs.Unref ( ref & REF_MASK );
+			this->mStrongRefs.Unref ( refID & REF_MASK );
 		}
 	}
 }
@@ -560,6 +583,19 @@ void MOAILuaRuntime::FindLuaRefs ( lua_State* L, int idx, FILE* file, STLString 
 	
 	int type = lua_type ( state, idx );
 	
+	switch ( type ) {
+		case LUA_TNIL:
+		case LUA_TBOOLEAN:
+		case LUA_TLIGHTUSERDATA:
+		case LUA_TNUMBER:
+		case LUA_TSTRING:
+			return;
+		default:
+			break;
+	}
+	
+	lua_checkstack ( state, 255 );
+	
 	if ( type == LUA_TUSERDATA ) {
 		MOAILuaObject* object = MOAILuaObject::IsMoaiUserdata ( state, idx ) ? ( MOAILuaObject* )state.GetPtrUserData ( idx ) : NULL;
 		if ( object && this->mTrackingMap.contains ( object )) {
@@ -575,13 +611,14 @@ void MOAILuaRuntime::FindLuaRefs ( lua_State* L, int idx, FILE* file, STLString 
 	// bail if we've already iterated into this item
 	const void* addr = lua_topointer ( state, idx );
 	
-	if ( traversalState.mTraversalStack.contains ( addr ) || traversalState.mIgnoreSet.contains ( addr )) return;
-	traversalState.mTraversalStack.insert ( addr );
-	
+	if ( traversalState.mIgnoreSet.contains ( addr )) return; // always ignore
+	if ( traversalState.mTraversalStack.contains ( addr )) return;
 	if ( traversalState.mIgnoreTraversed && ( traversalState.mTraversalSet.contains ( addr ))) return;
-	traversalState.mTraversalSet.insert ( addr );
 	
-	//printf ( "%s\n", path.c_str ());
+	traversalState.mTraversalStack.affirm ( addr );
+	traversalState.mTraversalSet.affirm ( addr );
+	
+	//printf ( "%d %s\n", idx, path.c_str ());
 	
 	switch ( type ) {
 	
@@ -595,13 +632,16 @@ void MOAILuaRuntime::FindLuaRefs ( lua_State* L, int idx, FILE* file, STLString 
 				
 				int keyIdx = state.AbsIndex ( -2 );
 				int valIdx = state.AbsIndex ( -1 );
-				
+
 				int keyType = lua_type ( state, keyIdx );
-				
 				cc8* keyName = lua_tostring ( state, keyIdx );
 				
 				// update the path and follow the keys (if iterable)
 				switch ( keyType ) {
+					
+					case LUA_TLIGHTUSERDATA:
+						keyPath.write ( "[%p]", lua_topointer ( state, keyIdx ));
+						break;
 					
 					case LUA_TBOOLEAN:
 					case LUA_TNUMBER:
@@ -623,6 +663,7 @@ void MOAILuaRuntime::FindLuaRefs ( lua_State* L, int idx, FILE* file, STLString 
 						const void* keyAddr = lua_topointer ( state, keyIdx );
 					
 						switch ( keyType ) {
+						
 							case LUA_TFUNCTION:
 								keyTypeName = "function";
 								break;
@@ -630,7 +671,11 @@ void MOAILuaRuntime::FindLuaRefs ( lua_State* L, int idx, FILE* file, STLString 
 							case LUA_TTABLE:
 								keyTypeName = "table";
 								break;
-								
+							
+							case LUA_TTHREAD:
+								keyTypeName = "thread";
+								break;
+							
 							case LUA_TUSERDATA:
 								
 								if ( MOAILuaObject::IsMoaiUserdata ( state, keyIdx )) {
@@ -674,7 +719,7 @@ void MOAILuaRuntime::FindLuaRefs ( lua_State* L, int idx, FILE* file, STLString 
 			
 			lua_getfenv ( state, idx );
 			this->FindLuaRefs ( state, -1, file, STLString::build ( "%s.<env: %p>", path.c_str (), lua_topointer ( state, -1 )), trackingGroup, traversalState );
-			traversalState.mIgnoreSet.insert ( lua_topointer ( state, -1 ));
+			traversalState.mIgnoreSet.affirm ( lua_topointer ( state, -1 ));
 			state.Pop ( 1 );
 			break;
 		}
@@ -692,14 +737,16 @@ void MOAILuaRuntime::FindLuaRefs ( lua_State* L, int idx, FILE* file, STLString 
 	if (( type == LUA_TTABLE ) || ( type == LUA_TUSERDATA )) {
 	
 		MOAILuaObject* object = MOAILuaObject::IsMoaiUserdata ( state, idx ) ? ( MOAILuaObject* )state.GetPtrUserData ( idx ) : NULL;
+		
 		if ( object ) {
+			
+			// iterate the member table *first*
+			object->PushMemberTable ( state );
+			this->FindLuaRefs ( state, -1, file, STLString::build ( "%s.<member>", path.c_str ()), trackingGroup, traversalState );
+			state.Pop ( 1 );
 			
 			object->PushRefTable ( state );
 			this->FindLuaRefs ( state, -1, file, STLString::build ( "%s.<ref>", path.c_str ()), trackingGroup, traversalState );
-			state.Pop ( 1 );
-			
-			object->PushMemberTable ( state );
-			this->FindLuaRefs ( state, -1, file, STLString::build ( "%s.<member>", path.c_str ()), trackingGroup, traversalState );
 			state.Pop ( 1 );
 		}
 		else {
@@ -750,15 +797,21 @@ size_t MOAILuaRuntime::GetMemoryUsage() {
 }
 
 //----------------------------------------------------------------//
+bool MOAILuaRuntime::IsMainThread ( lua_State* L ) {
+
+	return ( this->mState == L );
+}
+
+//----------------------------------------------------------------//
 MOAILuaState& MOAILuaRuntime::GetMainState () {
 	return this->mState;
 }
 
 //----------------------------------------------------------------//
-int MOAILuaRuntime::GetRef ( MOAILuaState& state, int idx, bool isWeak ) {
+int MOAILuaRuntime::GetRef ( MOAILuaState& state, int idx, u32 type ) {
 	
 	if ( lua_isnil ( state, idx )) return LUA_NOREF;
-	return isWeak ? ( this->mWeakRefs.Ref ( state, idx ) | WEAK_REF_BIT ) : this->mStrongRefs.Ref ( state, idx );
+	return ( type == MOAILuaRef::MAKE_WEAK ) ? ( this->mWeakRefs.Ref ( state, idx ) | WEAK_REF_BIT ) : this->mStrongRefs.Ref ( state, idx );
 }
 
 //----------------------------------------------------------------//
@@ -784,8 +837,38 @@ void MOAILuaRuntime::LoadLibs () {
 }
 
 //----------------------------------------------------------------//
+int MOAILuaRuntime::MakeStrong ( int refID ) {
+
+	if ( refID == LUA_NOREF ) return LUA_NOREF;
+	if ( !( refID & WEAK_REF_BIT )) return refID;
+	
+	this->mWeakRefs.PushRef ( this->mState, refID );
+	this->mWeakRefs.Unref ( refID & REF_MASK );
+	
+	refID = this->GetRef ( this->mState, refID, false );
+	this->mState.Pop ();
+	
+	return refID;
+}
+
+//----------------------------------------------------------------//
+int MOAILuaRuntime::MakeWeak ( int refID ) {
+
+	if ( refID == LUA_NOREF ) return LUA_NOREF;
+	if ( refID & WEAK_REF_BIT ) return refID;
+	
+	this->mStrongRefs.PushRef ( this->mState, refID );
+	this->mStrongRefs.Unref ( refID & REF_MASK );
+	
+	refID = this->GetRef ( this->mState, refID, true );
+	this->mState.Pop ();
+	
+	return refID;
+}
+
+//----------------------------------------------------------------//
 MOAILuaRuntime::MOAILuaRuntime () :
-	mTrackingFlags ( false ),
+	mTrackingFlags ( 0 ),
 	mTracebackFunc ( 0 ),
 	mTotalBytes ( 0 ),
 	mObjectCount ( 0 ),
@@ -802,14 +885,6 @@ MOAILuaRuntime::~MOAILuaRuntime () {
 void MOAILuaRuntime::OnGlobalsFinalize () {
 
 	this->Close ();
-}
-
-//----------------------------------------------------------------//
-void MOAILuaRuntime::OnGlobalsRestore () {
-}
-
-//----------------------------------------------------------------//
-void MOAILuaRuntime::OnGlobalsRetire () {
 }
 
 //----------------------------------------------------------------//
@@ -836,6 +911,26 @@ MOAIScopedLuaState MOAILuaRuntime::Open () {
 }
 
 //----------------------------------------------------------------//
+void MOAILuaRuntime::PurgeUserdata ( MOAILuaState& state, int idx ) {
+
+	idx = state.AbsIndex ( idx );
+
+	if ( this->mUserdataCache.PushRef ( state )) {
+	
+		lua_pushvalue ( state, idx );
+		lua_pushnil ( state );
+		lua_settable ( state, -3 );
+	}
+	state.Pop ();
+}
+
+//----------------------------------------------------------------//
+void MOAILuaRuntime::PurgeUserdataCache () {
+
+	this->mUserdataCache.Clear ();
+}
+
+//----------------------------------------------------------------//
 void MOAILuaRuntime::PushHistogram ( MOAILuaState& state, cc8* trackingGroup  ) {
 	
 	lua_newtable ( state );
@@ -856,18 +951,18 @@ void MOAILuaRuntime::PushHistogram ( MOAILuaState& state, cc8* trackingGroup  ) 
 }
 
 //----------------------------------------------------------------//
-bool MOAILuaRuntime::PushRef ( MOAILuaState& state, int ref ) {
+bool MOAILuaRuntime::PushRef ( MOAILuaState& state, int refID ) {
 
-	if ( ref == LUA_NOREF ) {
+	if ( refID == LUA_NOREF ) {
 		lua_pushnil ( state );
 		return false;
 	}
 
-	if ( ref & WEAK_REF_BIT ) {
-		this->mWeakRefs.PushRef ( state, ref & REF_MASK );
+	if ( refID & WEAK_REF_BIT ) {
+		this->mWeakRefs.PushRef ( state, refID & REF_MASK );
 	}
 	else {
-		this->mStrongRefs.PushRef ( state, ref & REF_MASK );
+		this->mStrongRefs.PushRef ( state, refID & REF_MASK );
 	}
 	return !lua_isnil ( state, -1 );
 }

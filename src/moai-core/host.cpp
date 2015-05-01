@@ -237,18 +237,25 @@ AKUContextID AKUCreateContext () {
 	MOAILuaRuntime::Affirm ();
 	MOAITrace::Affirm ();
 	MOAILogMgr::Affirm ();
+	MOAITestMgr::Affirm ();
 	
 	MOAILuaRuntime& luaRuntime = MOAILuaRuntime::Get ();
 	luaRuntime.Open ();
 	luaRuntime.LoadLibs ();
 	
+	MOAIEnvironment::Affirm ();
+	
 	MOAILogMessages::RegisterDefaultLogMessages ();
 	
 	REGISTER_LUA_CLASS ( MOAILuaRuntime )
+	REGISTER_LUA_CLASS ( MOAIEnvironment )
 	REGISTER_LUA_CLASS ( MOAIDeserializer )
 	REGISTER_LUA_CLASS ( MOAILogMgr )
 	REGISTER_LUA_CLASS ( MOAISerializer )
 	REGISTER_LUA_CLASS ( MOAITrace )
+	REGISTER_LUA_CLASS ( MOAITestMgr )
+
+	MOAIEnvironment::Get ().DetectEnvironment ();
 
 	return sContextIDCounter;
 }

@@ -8,7 +8,6 @@
 #include <moai-sim/MOAIColor.h>
 #include <moai-sim/MOAIFrameBuffer.h>
 #include <moai-sim/MOAIImage.h>
-#include <moai-sim/MOAIVertexBuffer.h>
 
 class MOAICamera;
 class MOAIFrameBuffer;
@@ -238,10 +237,10 @@ public:
 	void					SetAmbientColor			( u32 color );
 	void					SetAmbientColor			( const ZLColorVec& colorVec );
 	void					SetAmbientColor			( float r, float g, float b, float a );
-	
+
 	void					SetBlendMode			();
 	void					SetBlendMode			( const MOAIBlendMode& blendMode );
-	void					SetBlendMode			( int srcFactor, int dstFactor );
+	void					SetBlendMode			( int srcFactor, int dstFactor, int equation = 0 );
 	
 	void					SetBufferScale			( float scale );
 	void					SetBufferSize			( u32 width, u32 height );
@@ -351,20 +350,26 @@ public:
 	//----------------------------------------------------------------//
 	inline void WriteVtx ( float x, float y ) {
 		
-		this->WriteVtx ( x, y, 0.0f );
+		this->WriteVtx ( x, y, 0.0f, 1.0f );
 	}
 	
 	//----------------------------------------------------------------//
 	inline void WriteVtx ( float x, float y, float z ) {
 		
+		this->WriteVtx ( x, y, z, 1.0f );
+	}
+	
+	//----------------------------------------------------------------//
+	inline void WriteVtx ( float x, float y, float z, float w ) {
+		
 		ZLVec4D vtx;
 		vtx.mX = x;
 		vtx.mY = y;
 		vtx.mZ = z;
-		vtx.mW = 1.0f;
+		vtx.mW = w;
 		
 		if ( this->mCpuVertexTransform ) {
-			this->mCpuVertexTransformMtx.Transform ( vtx );	
+			this->mCpuVertexTransformMtx.Transform ( vtx );
 		}
 		this->Write ( vtx );
 	}

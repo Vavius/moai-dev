@@ -20,4 +20,8 @@ add_library(jansson STATIC ${JANSSON_SOURCES} ${JANSSON_HEADERS} )
 target_include_directories(jansson PUBLIC "$<BUILD_INTERFACE:${JANSSON_INCLUDES}>")
 set_target_properties( jansson PROPERTIES FOLDER Third-Party )
 install(TARGETS jansson EXPORT libmoai ARCHIVE DESTINATION lib)
-install(DIRECTORY ${MOAI_ROOT}/3rdparty/jansson-2.6/src/ DESTINATION include/jansson FILES_MATCHING PATTERN "*.h")
+install(FILES 
+  ${CMAKE_CURRENT_SOURCE_DIR}jansson.h
+  ${CMAKE_CURRENT_SOURCE_DIR}jansson_config.h
+  DESTINATION include/jansson
+)

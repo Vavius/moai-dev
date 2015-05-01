@@ -55,6 +55,14 @@
 	#include <moai-ios-mobile-app-tracker/host.h>
 #endif
 
+#if AKU_WITH_IOS_MOTION
+	#include <moai-ios-motion/host.h>
+#endif
+
+#if AKU_WITH_IOS_MOVIE
+	#include <moai-ios-movie/host.h>
+#endif
+
 #if AKU_WITH_IOS_TAPJOY
 	#include <moai-ios-tapjoy/host.h>
 #endif

@@ -3,7 +3,7 @@
 
 #include "pch.h"
 #include <moai-sim/MOAITouchSensor.h>
-#include <moai-sim/MOAIInputQueue.h>
+#include <moai-sim/MOAIInputMgr.h>
 
 const float MOAITouchSensor::DEFAULT_TAPTIME = 0.6f;
 const float MOAITouchSensor::DEFAULT_TAPMARGIN = 50.0f;
@@ -11,6 +11,15 @@ const float MOAITouchSensor::DEFAULT_TAPMARGIN = 50.0f;
 //================================================================//
 // lua
 //================================================================//
+
+//----------------------------------------------------------------//
+// TODO: doxygen
+int MOAITouchSensor::_countTouches ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAITouchSensor, "U" )
+	
+	state.Push ( self->mTop );
+	return 1;
+}
 
 //----------------------------------------------------------------//
 /**	@lua	down
@@ -238,27 +247,29 @@ int MOAITouchSensor::_up ( lua_State* L ) {
 //================================================================//
 
 //----------------------------------------------------------------//
-void MOAITouchSensor::EnqueueTouchEvent ( MOAIInputQueue& queue, u8 deviceID, u8 sensorID, u32 touchID, bool down, float x, float y ) {
+void MOAITouchSensor::EnqueueTouchEvent ( u8 deviceID, u8 sensorID, u32 touchID, bool down, float x, float y ) {
 
-	if ( queue.WriteEventHeader < MOAITouchSensor >( deviceID, sensorID )) {
+	MOAIInputMgr& inputMgr = MOAIInputMgr::Get ();
+	if ( inputMgr.WriteEventHeader < MOAITouchSensor >( deviceID, sensorID )) {
 	
 		float time = ( float )ZLDeviceTime::GetTimeInSeconds ();
 		
 		u32 eventType = down ? TOUCH_DOWN : TOUCH_UP;
 
-		queue.Write < u32 >( eventType );
-		queue.Write < u32 >( touchID );
-		queue.Write < float >( x );
-		queue.Write < float >( y );
-		queue.Write < float >( time );
+		inputMgr.Write < u32 >( eventType );
+		inputMgr.Write < u32 >( touchID );
+		inputMgr.Write < float >( x );
+		inputMgr.Write < float >( y );
+		inputMgr.Write < float >( time );
 	}
 }
 
 //----------------------------------------------------------------//
-void MOAITouchSensor::EnqueueTouchEventCancel ( MOAIInputQueue& queue, u8 deviceID, u8 sensorID ) {
+void MOAITouchSensor::EnqueueTouchEventCancel ( u8 deviceID, u8 sensorID ) {
 
-	if ( queue.WriteEventHeader < MOAITouchSensor >( deviceID, sensorID )) {
-		queue.Write < u32 >( TOUCH_CANCEL );
+	MOAIInputMgr& inputMgr = MOAIInputMgr::Get ();
+	if ( inputMgr.WriteEventHeader < MOAITouchSensor >( deviceID, sensorID )) {
+		inputMgr.Write < u32 >( TOUCH_CANCEL );
 	}
 }
 
@@ -310,7 +321,7 @@ s32 MOAITouchSensor::CheckLingerList ( float x, float y, float time ) {
 }
 
 //----------------------------------------------------------------//
-void MOAITouchSensor::Clear () {
+void MOAITouchSensor::ClearState () {
 
 	this->mTop = 0;
 	this->mLingerTop = 0;
@@ -344,7 +355,7 @@ MOAITouchSensor::MOAITouchSensor () {
 	
 	mAcceptCancel = false;
 	
-	this->Clear ();
+	this->ClearState ();
 }
 
 //----------------------------------------------------------------//
@@ -362,7 +373,7 @@ void MOAITouchSensor::ParseEvent ( ZLStream& eventStream ) {
 	if ( eventType == TOUCH_CANCEL ) {
 		
 		// for now, TOUCH_CANCEL clobbers all touches
-		this->Clear ();
+		this->ClearState ();
 		
 		if ( this->mCallback && this->mAcceptCancel ) {
 			MOAIScopedLuaState state = this->mCallback.GetSelf ();
@@ -506,6 +517,7 @@ void MOAITouchSensor::RegisterLuaFuncs ( MOAILuaState& state ) {
 	MOAISensor::RegisterLuaFuncs ( state );
 
 	luaL_Reg regTable [] = {
+		{ "countTouches",		_countTouches },
 		{ "down",				_down },
 		{ "getActiveTouches",	_getActiveTouches },
 		{ "getCenterLoc",		_getCenterLoc },
@@ -524,7 +536,7 @@ void MOAITouchSensor::RegisterLuaFuncs ( MOAILuaState& state ) {
 }
 
 //----------------------------------------------------------------//
-void MOAITouchSensor::Reset () {
+void MOAITouchSensor::ResetState () {
 
 	u32 top = this->mTop;
 	u32 j = 0;
@@ -565,6 +577,6 @@ void MOAITouchSensor::Reset () {
 	}
 
 	if ( this->mTop == 0 && this->mLingerTop == 0 ) {
-		this->Clear ();
+		this->ClearState ();
 	}
 }

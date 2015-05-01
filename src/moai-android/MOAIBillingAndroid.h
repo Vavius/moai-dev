@@ -4,8 +4,6 @@
 #ifndef	MOAIBILLINGANDROID_H
 #define	MOAIBILLINGANDROID_H
 
-#ifndef DISABLE_BILLING
-
 #include <moai-core/headers.h>
 
 //================================================================//
@@ -162,14 +160,12 @@ public:
 	static int		MapGooglePurchaseStateCode		( int code );
 	static int		MapGoogleResponseCode			( int code );
 	void			NotifyBillingSupported			( bool supported );
-	void			NotifyPurchaseResponseReceived	( int code, cc8* identifier, cc8* token );
+	void			NotifyPurchaseResponseReceived	( int code, cc8* identifier );
 	void			NotifyPurchaseStateChanged		( int code, cc8* identifier, cc8* order, cc8* user, cc8* notification, cc8* payload );
 	void			NotifyRestoreResponseReceived	( int code, bool more, cc8* offset );
 	void			NotifyUserIdDetermined			( int code, cc8* user );
 	void 			NotifyFortumoPurchaseStateChanged( int, const cc8*, const cc8*, const cc8*, const cc8*, const cc8*, const cc8*, const cc8*, const cc8*, const cc8*);
 	void			RegisterLuaClass				( MOAILuaState& state );
 };
-
-#endif  //DISABLE_BILLING
 
 #endif  //MOAIBILLING_H

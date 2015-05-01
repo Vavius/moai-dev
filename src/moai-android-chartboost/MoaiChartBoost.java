@@ -1,236 +1,164 @@
 //----------------------------------------------------------------//
-// Copyright (c) 2014 CloudTeam 
+// Copyright (c) 2010-2011 Zipline Games, Inc. 
 // All Rights Reserved. 
+// http://getmoai.com
 //----------------------------------------------------------------//
 
 package com.ziplinegames.moai;
 
 import android.app.Activity;
+import android.view.View;
 
-import com.chartboost.sdk.*;
-//import com.chartboost.sdk.Tracking.CBPostInstallTracker;
-import com.chartboost.sdk.Libraries.CBLogging.Level;
-import com.chartboost.sdk.Model.CBError.CBImpressionError;
-//import com.chartboost.sdk.Tracking.CBPostInstallTracker.CBIAPType;
+import com.chartboost.sdk.CBLocation;
+import com.chartboost.sdk.Chartboost;
+import com.chartboost.sdk.ChartboostDelegate;
 
 //================================================================//
-// MoaiChartboost
+// MoaiChartBoost
 //================================================================//
-public class MoaiChartboost {
+public class MoaiChartBoost extends ChartboostDelegate {
 
-	private static Activity 				sActivity = null;
-	private static boolean					purchaseTracking = false;
-	private static ChartboostDelegate		chartboostDelegate;
+	public enum ListenerEvent {
+		INTERSTITIAL_LOAD_FAILED,
+		INTERSTITIAL_DISMISSED,
+    }
+
+	private static Activity sActivity = null;
 	
-	protected static native void AKUNotifyChartboostInterstitialDismissed ( String location );
-	protected static native void AKUNotifyChartboostInterstitialLoadFailed ( String location );
-	protected static native void AKUNotifyChartboostInterstitialWillShow ( String location );
-	protected static native void AKUNotifyChartboostVideoDismissed ( String location );
-	protected static native void AKUNotifyChartboostVideoReward ( String location, int reward );
-	protected static native void AKUNotifyChartboostVideoWillShow ( String location );
-	protected static native void AKUNotifyChartboostReportPurchase ( Object purcase, String id );
+	protected static native void AKUInvokeListener ( int eventID );
+	
+	//----------------------------------------------------------------//
+	public static void onBackPressed ( Activity activity ) {
+		
+        MoaiLog.i ( "MoaiChartBoost: onBackPressed" );
 
+		if ( Chartboost.onBackPressed ()) {
+        	return;
+		}
+    	else {
+        	activity.onBackPressed ();
+    	}
+    }
+	
 	//----------------------------------------------------------------//
 	public static void onCreate ( Activity activity ) {
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost onCreate:  -------------------------------------------------------- " );
+	
+		MoaiLog.i ( "MoaiChartBoost: onCreate" );
 		sActivity = activity;
 	}
-	
+
 	//----------------------------------------------------------------//
-	public static void onResume () {
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost onResume:  -------------------------------------------------------- " );
-		if ( sActivity != null ) Chartboost.onResume ( sActivity );
+	public static void onDestroy ( Activity activity ) {
+ 
+		MoaiLog.i ( "MoaiChartBoost: onDestroy" );
+    	Chartboost.onDestroy ( sActivity );
 	}
-	
+
 	//----------------------------------------------------------------//
 	public static void onPause () {
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost onPause:  -------------------------------------------------------- " );
-		if ( sActivity != null ) Chartboost.onPause ( sActivity );
+ 
+		MoaiLog.i ( "MoaiChartBoost: onPause" );
+    	Chartboost.onPause ( sActivity );
 	}
 
+	//----------------------------------------------------------------//
+	public static void onResume () {
+ 
+		MoaiLog.i ( "MoaiChartBoost: onResume" );
+    	Chartboost.onResume ( sActivity );
+	}
+		
 	//----------------------------------------------------------------//
 	public static void onStart () {
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost onStart:  -------------------------------------------------------- " );
-		if ( sActivity != null ) Chartboost.onStart ( sActivity ); 
+		
+		MoaiLog.i ( "MoaiChartBoost: onStart" );
+    	Chartboost.onStart ( sActivity );
 	}
-
+	
 	//----------------------------------------------------------------//
 	public static void onStop () {
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost onStop:  -------------------------------------------------------- " );
-		if ( sActivity != null ) Chartboost.onStop ( sActivity );
+
+		MoaiLog.i ( "MoaiChartBoost: onStop" );
+    	Chartboost.onStop ( sActivity );
 	}
-	
+
+	//================================================================//
+	// ChartBoost JNI callback methods
+	//================================================================//
+
 	//----------------------------------------------------------------//
-	public static void onDestroy () {
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost onDestroy:  -------------------------------------------------------- " );
-		if ( sActivity != null ) Chartboost.onDestroy ( sActivity );
+	public static void cacheInterstitial ( String location ) {
+		
+		MoaiLog.i ( "MoaiChartBoost: cacheInterstitial" );
+		
+		if ( location != null ) {
+		 	Chartboost.cacheInterstitial ( location );
+		}
+		else {
+			Chartboost.cacheInterstitial ( CBLocation.LOCATION_DEFAULT );
+		}
 	}
 
 	//----------------------------------------------------------------//
-	public static void onBackPressed () {
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost onBackPressed: chartboost.onBackPressed (); -------------------------------------------------------- " );
-		if ( sActivity != null ) Chartboost.onBackPressed ();
-	}
-	
-	//================================================================//
-	// Chartboost JNI callback methods
-	//================================================================//
-	
-	//----------------------------------------------------------------//	
-	public static void init ( String appId, String appSignature ) {
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost: init - Initializing Chartboost -------------------------------------------------------- " );
-	    Chartboost.startWithAppId ( sActivity, appId, appSignature );
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost: init start app with id -------------------------------------------------------- " );
-	    chartboostDelegate = new ChartboostDelegate () {
-			
-			//----------------------------------------------------------------//
-			public void didDismissInterstitial ( String location ) {
-				MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost didDismissInterstitial: for location - "+location+" -------------------------------------------------------- " );
-				synchronized ( Moai.sAkuLock ) {
-					AKUNotifyChartboostInterstitialDismissed ( location );
-				}
-			}
-			
-			//----------------------------------------------------------------//
-			public void didFailToLoadInterstitial ( String location, CBImpressionError error ) {
-				MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost didFailToLoadInterstitial: error - "+error.name()+" for location - "+location+" -------------------------------------------------------- " );
-				synchronized ( Moai.sAkuLock ) {
-					AKUNotifyChartboostInterstitialLoadFailed ( location );
-				}
-			}
-			
-			//----------------------------------------------------------------//
-			public void didDisplayInterstitial ( String location ) {
-				MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost didDisplayInterstitial: for location - "+location+" -------------------------------------------------------- " );
-				synchronized ( Moai.sAkuLock ) {
-					AKUNotifyChartboostInterstitialWillShow ( location );
-				}
-			}
-			
-			//----------------------------------------------------------------//
-			public void didDismissRewardedVideo ( String location ) {
-				MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost didDismissRewardedVideo: for location - "+location+" -------------------------------------------------------- " );
-				synchronized ( Moai.sAkuLock ) {
-					AKUNotifyChartboostVideoDismissed ( location );
-				}
-			}
-			
-			//----------------------------------------------------------------//
-			public void didCompleteRewardedVideo ( String location, int reward ) {
-				MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost didCompleteRewardedVideo: reward - "+reward+" for location - "+location+" -------------------------------------------------------- " );
-				synchronized ( Moai.sAkuLock ) {
-					AKUNotifyChartboostVideoReward ( location, reward );
-				}
-			}
-			
-			//----------------------------------------------------------------//
-			public void willDisplayVideo ( String location ) {
-				MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost willDisplayVideo: for location - "+location+" -------------------------------------------------------- " );
-				synchronized ( Moai.sAkuLock ) {
-					AKUNotifyChartboostVideoWillShow ( location );
-				}
-			}
-		};
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost onCreate (init):  -------------------------------------------------------- " );
-		Chartboost.onCreate ( sActivity );
-		Chartboost.setShouldRequestInterstitialsInFirstSession ( true );
-		Chartboost.setImpressionsUseActivities ( true );
-		Chartboost.setLoggingLevel ( Level.ALL );
-		Chartboost.setDelegate ( chartboostDelegate );
-	}
-	
-	//----------------------------------------------------------------//	
-	public static void loadInterstitial ( String location ) {
-		if ( location == null ) location = CBLocation.LOCATION_DEFAULT;
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost: Chaching ad for location - "+location+" -------------------------------------------------------- " );
-		try {
-			Chartboost.cacheInterstitial ( location );
-		} catch ( java.lang.IllegalStateException exception ) {
-			Chartboost.onStart ( sActivity ); 
-			Chartboost.cacheInterstitial ( location );
-		}
-	}
-    
-	//----------------------------------------------------------------//	
-	public static void cacheVideo ( String location ) {
-		if ( location == null ) location = CBLocation.LOCATION_DEFAULT;
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost: Chaching video ad for location - "+location+" -------------------------------------------------------- " );
-		try {
-			Chartboost.cacheRewardedVideo ( location );
-		} catch ( java.lang.IllegalStateException exception ) {
-			Chartboost.onStart ( sActivity ); 
-			Chartboost.cacheRewardedVideo ( location );
-		}
-	}
- 
-	//----------------------------------------------------------------//	
-	public static void showInterstitial ( String location ) {
-		if ( location == null ) location = CBLocation.LOCATION_DEFAULT;
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost: Show ad for location - "+location+" -------------------------------------------------------- " );
-		try {
-			Chartboost.showInterstitial ( location );
-		} catch ( java.lang.IllegalStateException exception ) {
-			Chartboost.onStart ( sActivity ); 
-			Chartboost.showInterstitial ( location );
-		}
-	}
-
-	//----------------------------------------------------------------//	
-	public static void showVideo ( String location ) {
-		if ( location == null ) location = CBLocation.LOCATION_DEFAULT;
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost: Show video ad for location - "+location+" -------------------------------------------------------- " );
-		try {
-			Chartboost.showRewardedVideo ( location );
-		} catch ( java.lang.IllegalStateException exception ) {
-			Chartboost.onStart ( sActivity ); 
-			Chartboost.showRewardedVideo ( location );
-		}
-	}
-	
-	//----------------------------------------------------------------//	
 	public static boolean hasCachedInterstitial ( String location ) {
-		if ( location == null ) location = CBLocation.LOCATION_DEFAULT;
-		boolean result = false;
-		try {
-			result = Chartboost.hasInterstitial ( location );
-		} catch ( java.lang.IllegalStateException exception ) {
-			Chartboost.onStart ( sActivity ); 
-			result = Chartboost.hasInterstitial ( location );
+		
+		MoaiLog.i ( "MoaiChartBoost: hasCachedInterstitial" );
+		
+		if ( location != null ) {
+		 	return Chartboost.hasInterstitial ( location );
 		}
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost: hasCachedInterstitial = "+result+" for location - "+location+" -------------------------------------------------------- " );
-		return result;
-	}
-	
-	//----------------------------------------------------------------//	
-	public static boolean hasCachedVideo ( String location ) {
-		if ( location == null ) location = CBLocation.LOCATION_DEFAULT;
-		boolean result = false;
-		try {
-			result = Chartboost.hasRewardedVideo ( location );
-		} catch ( java.lang.IllegalStateException exception ) {
-			Chartboost.onStart ( sActivity ); 
-			result = Chartboost.hasRewardedVideo ( location );
-		}
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost: hasCachedVideo = "+result+" for location - "+location+" -------------------------------------------------------- " );
-		return result;
-	}
-	
-	//----------------------------------------------------------------//	
-	public static void setPurchaseTracking ( boolean tracking ) {
-		MoaiLog.i ( " -------------------------------------------------------- MoaiChartboost: setPurchaseTracking = "+tracking+" -------------------------------------------------------- " );
-		purchaseTracking = tracking;
+		return Chartboost.hasInterstitial ( CBLocation.LOCATION_DEFAULT );
 	}
 
-	//----------------------------------------------------------------//	
-	public static void reportPurchase ( boolean tracking ) {
-//		EnumMap<CBIAPPurchaseInfo, String> map = new EnumMap<CBIAPPurchaseInfo, String>(CBIAPPurchaseInfo.class);
-//        map.put(CBIAPPurchaseInfo.PRODUCT_ID,"xxx-id");
-//        map.put(CBIAPPurchaseInfo.PRODUCT_TITLE,"xxx-title");
-//        map.put(CBIAPPurchaseInfo.PRODUCT_DESCRIPTION, "xxx-description");
-//        map.put(CBIAPPurchaseInfo.PRODUCT_PRICE, "$0.99");
-//        map.put(CBIAPPurchaseInfo.PRODUCT_CURRENCY_CODE,"USD");
-//        map.put(CBIAPPurchaseInfo.GOOGLE_PURCHASE_DATA, "xxx-data");
-//        map.put(CBIAPPurchaseInfo.GOOGLE_PURCHASE_SIGNATURE, "xxx-signature");
-//        trackInAppPurchaseEvent(map, CBIAPType.GOOGLE_PLAY);
+	//----------------------------------------------------------------//
+	public static void init ( String appId, String appSignature ) {
+		
+		MoaiLog.i ( "MoaiChartBoost: init" );
+
+		Chartboost.startWithAppId ( sActivity, appId, appSignature );
+    	Chartboost.setDelegate ( new MoaiChartBoost ());
+    	Chartboost.onCreate ( sActivity );	
+	}
+
+	//----------------------------------------------------------------//
+	public static void showInterstitial ( String location ) {
+				
+		MoaiLog.i ( "MoaiChartBoost: showInterstitial" );
+		if ( location != null ) {
+		 	Chartboost.showInterstitial ( location );
+		}
+		else {
+			Chartboost.showInterstitial ( CBLocation.LOCATION_DEFAULT );
+		}
+	}
+
+	//================================================================//
+	// ChartBoostDelegate methods
+	//================================================================//
+
+	//----------------------------------------------------------------//
+	public void didDismissInterstitial ( String location ) {
+
+		MoaiLog.i ( "MoaiChartBoost: didDismissInterstitial" );
+		AKUInvokeListener ( ListenerEvent.INTERSTITIAL_DISMISSED.ordinal ());
+	}
+
+	//----------------------------------------------------------------//
+	public void didFailToLoadInterstitial ( String location ) {
+		
+		MoaiLog.i ( "MoaiChartBoost: didFailToLoadInterstitial" );
+		AKUInvokeListener ( ListenerEvent.INTERSTITIAL_LOAD_FAILED.ordinal ());
+	}
+
+	//----------------------------------------------------------------//1
+	public boolean shouldDisplayMoreApps () {
+		
+		return false;
+	}
+	
+	//----------------------------------------------------------------//1
+	public boolean shouldRequestMoreApps () {
+		
+		return false;
 	}
 }

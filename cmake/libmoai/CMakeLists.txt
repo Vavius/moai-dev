@@ -16,6 +16,7 @@ add_subdirectory ( moai-box2d )
 add_subdirectory ( moai-untz )
 add_subdirectory ( moai-fmod-studio )
 add_subdirectory ( moai-http-client )
+add_subdirectory ( moai-http-server )
 add_subdirectory ( moai-luaext )
 add_subdirectory ( moai-audiosampler )
 add_subdirectory ( moai-spine )
@@ -29,9 +30,16 @@ if (MOAI_PLUGINS)
 endif (MOAI_PLUGINS)
 
 #platform specific libs
+if (BUILD_LINUX OR BUILD_OSX OR BUILD_WINDOWS)
+  add_subdirectory ( moai-sdl )
+endif (BUILD_LINUX OR BUILD_OSX OR BUILD_WINDOWS)
+
+if ( BUILD_OSX OR BUILD_IOS )
+  add_subdirectory ( moai-apple )
+endif ( BUILD_OSX OR BUILD_IOS )
+
 if ( BUILD_IOS )
-  add_subdirectory ( moai-iphone )
- 
+  add_subdirectory ( moai-iphone ) 
 endif ( BUILD_IOS )
 
 if ( BUILD_ANDROID )

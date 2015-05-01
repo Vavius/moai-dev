@@ -14,8 +14,7 @@ extern JavaVM* jvm;
 jobject JniUtils::BundleFromLua ( lua_State* L, int index ) {
     MOAILuaState state ( L );
 
-	jclass clazz = this->Env ()->FindClass ( "android/os/Bundle" );
-    // jclass clazz = static_cast<jclass>(this->Env ()->NewGlobalRef(gclazz));
+	jclass clazz = this->Env ()->FindClass ( "android.os.Bundle" );
     jobject bundle = this->Env ()->NewObject ( clazz, this->Env ()->GetMethodID ( clazz, "<init>", "()V" ));
     jmethodID put = this->Env ()->GetMethodID ( clazz, "putString", "(Ljava/lang/String;Ljava/lang/String;)V" );
 
@@ -29,10 +28,10 @@ jobject JniUtils::BundleFromLua ( lua_State* L, int index ) {
             cc8* value = lua_tostring( state, -1 );
             if ( value != NULL ) {
 				
-				jstring jkey = this->GetJString ( key );
-				jstring jvalue = this->GetJString ( value );
+				MOAIJString jkey = this->GetJString ( key );
+				MOAIJString jvalue = this->GetJString ( value );
 
-                this->Env ()->CallVoidMethod( bundle, put, jkey, jvalue );
+                this->Env ()->CallObjectMethod( bundle, put, ( jstring )jkey, ( jstring )jvalue );
             }
         }
         // removes 'value'; keeps 'key' for next iteration
@@ -126,7 +125,7 @@ jclass JniUtils::GetClass ( cc8* className ) {
 jclass JniUtils::GetClassViaLoader ( cc8* className ) {
 
 	/*
-	jstring jclassName = this->GetJString ( className );
+	MOAIJString jclassName = this->GetJString ( className );
 	
 	jclass contextClass = this->GetClass ( "android/content/Context" );
 	jmethodID getClassLoader = this->GetMethod ( contextClass, "getClassLoader", "()Ljava/lang/ClassLoader;" );
@@ -183,33 +182,9 @@ jmethodID JniUtils::GetMethod ( jclass clazz, cc8* methodName, cc8* methodSignat
 }
 
 //----------------------------------------------------------------//
-jfieldID JniUtils::GetStaticField ( cc8* fieldName ) {
-
-	this->GetStaticField ( this->mClass, fieldName );
-}
-
-//----------------------------------------------------------------//
-jfieldID JniUtils::GetStaticField ( jclass clazz, cc8* fieldName ) {
-	
-	if ( !clazz ) {
-		ZLLog::LogF ( ZLLog::CONSOLE, "MOAI JNI: Missing class; cannot find static java field id %d", fieldName );
-		this->ClearException ();
-		return NULL;
-    }
-	
-	jfieldID fieldId = this->Env ()->GetStaticFieldID ( clazz, fieldName, "Ljava/lang/String;" );
-	
-	if ( fieldId == NULL ) {
-		ZLLog::LogF ( ZLLog::CONSOLE, "MOAI JNI: Unable to find static java field id %s", fieldName );
-		this->ClearException ();
-	}
-	return fieldId;
-}
-
-//----------------------------------------------------------------//
 jmethodID JniUtils::GetStaticMethod ( cc8* methodName, cc8* methodSignature ) {
 
-	return this->GetStaticMethod ( this->mClass, methodName, methodSignature );
+	this->GetStaticMethod ( this->mClass, methodName, methodSignature );
 }
 
 //----------------------------------------------------------------//
@@ -231,101 +206,6 @@ jmethodID JniUtils::GetStaticMethod ( jclass clazz, cc8* methodName, cc8* method
 }
 
 //----------------------------------------------------------------//
-jstring JniUtils::GetStaticObjectField ( cc8* fieldName ) {
-
-	return this->GetStaticObjectField ( this->mClass, fieldName );
-}
-
-//----------------------------------------------------------------//
-jstring JniUtils::GetStaticObjectField ( jclass clazz, cc8* fieldName ) {
-
-	jfieldID fieldId = this->GetStaticField ( clazz, fieldName );
-	return this->GetStaticObjectField ( clazz, fieldId );
-}
-
-//----------------------------------------------------------------//
-jstring JniUtils::GetStaticObjectField ( jfieldID fieldId ) {
-
-	return this->GetStaticObjectField ( this->mClass, fieldId );
-}
-
-//----------------------------------------------------------------//
-jstring JniUtils::GetStaticObjectField ( jclass clazz, jfieldID fieldId ) {
-
-    if ( !clazz ) {
-		ZLLog::LogF ( ZLLog::CONSOLE, "MOAI JNI: Missing class; cannot find static java object field" );
-		this->ClearException ();
-		return NULL;
-    }
-	
-	jstring jfieldValue = ( jstring ) this->Env ()->GetStaticObjectField ( clazz, fieldId );
-	
-	if ( jfieldValue == NULL ) {
-		ZLLog::LogF ( ZLLog::CONSOLE, "MOAI JNI: Unable to find static java object field" );
-		this->ClearException ();
-	}
-	return jfieldValue;
-}
-
-//----------------------------------------------------------------//
-void JniUtils::JsonArrayToLua ( lua_State* L, json_t* json ) {
-	assert ( json->type == JSON_ARRAY );
-	lua_newtable ( L );
-	int size = json_array_size ( json );
-	for ( int i = 0; i < size; ++i ) {
-		json_t* value = json_array_get ( json, i );
-		if ( value ) {
-			lua_pushnumber ( L, i + 1 );
-			this->JsonToLua ( L, value );
-			lua_settable ( L, -3 );
-		}
-	}
-}
-
-//----------------------------------------------------------------//
-void JniUtils::JsonObjectToLua ( lua_State* L, json_t* json ) {
-	assert ( json->type == JSON_OBJECT );
-	lua_newtable ( L );
-	void* iter = json_object_iter ( json );
-	for ( ; iter; iter = json_object_iter_next ( json, iter )) {
-		cc8* key = json_object_iter_key ( iter );
-		json_t* value = json_object_iter_value ( iter );
-		this->JsonToLua ( L, value );
-		lua_setfield ( L, -2, key );
-	}
-}
-
-//----------------------------------------------------------------//
-void JniUtils::JsonToLua ( lua_State* L, json_t* json ) {
-	switch ( json->type ) {
-		case JSON_OBJECT:
-			this->JsonObjectToLua ( L, json );
-			break;
-		case JSON_ARRAY:
-			this->JsonArrayToLua ( L, json );
-			break;
-		case JSON_STRING:
-			lua_pushstring ( L, json_string_value ( json ));
-			break;
-		case JSON_INTEGER:
-			lua_pushnumber ( L, static_cast<lua_Number> ( static_cast<long long> ( json_integer_value ( json ) )));
-			break;
-		case JSON_REAL:
-			lua_pushnumber ( L, ( lua_Number )json_real_value ( json ));
-			break;
-		case JSON_TRUE:
-			lua_pushboolean ( L, 1 );
-			break;
-		case JSON_FALSE:
-			lua_pushboolean ( L, 0 );
-			break;
-		case JSON_NULL:
-			lua_pushlightuserdata ( L, 0 );
-			break;
-	};
-}
-
-//----------------------------------------------------------------//
 jobject JniUtils::HashMapFromLua ( lua_State* L, int index ) {
     MOAILuaState state ( L );
 
@@ -343,10 +223,10 @@ jobject JniUtils::HashMapFromLua ( lua_State* L, int index ) {
             cc8* value = lua_tostring( state, -1 );
             if ( value != NULL ) {
 				
-				jstring jkey = this->GetJString ( key );
-				jstring jvalue = this->GetJString ( value );
+				MOAIJString jkey = this->GetJString ( key );
+				MOAIJString jvalue = this->GetJString ( value );
 
-                this->Env ()->CallObjectMethod( hashMap, put, jkey, jvalue );
+                this->Env ()->CallObjectMethod( hashMap, put, ( jstring )jkey, ( jstring )jvalue );
             }
         }
         // removes 'value'; keeps 'key' for next iteration
@@ -371,33 +251,6 @@ JniUtils::~JniUtils () {
 }
 
 //----------------------------------------------------------------//
-void JniUtils::RegisterStringConstant ( lua_State* L, cc8* fieldKey, cc8* fieldName ) {
-
-	this->RegisterStringConstant ( L, this->mClass, fieldKey, fieldName );
-}
-
-//----------------------------------------------------------------//
-void JniUtils::RegisterStringConstant ( lua_State* L, jclass clazz, cc8* fieldKey, cc8* fieldName ) {
-    MOAILuaState state ( L );
-
-	if ( !clazz ) {
-		ZLLog::LogF ( ZLLog::CONSOLE, "MOAI JNI: Missing class; cannot register static java string constant %s, %s", fieldKey, fieldName );
-		this->ClearException ();
-    }
-	
-	jstring jfieldValue = this->GetStaticObjectField ( clazz, fieldName );
-	
-	if ( jfieldValue == NULL ) {
-		ZLLog::LogF ( ZLLog::CONSOLE, "MOAI JNI: Unable to find static java string constant %s", fieldName );
-		this->ClearException ();
-	}
-
-	cc8* fieldValue = this->GetCString ( jfieldValue );
-	state.SetField ( -1, fieldKey, fieldValue );
-	this->ReleaseCString ( jfieldValue, fieldValue );
-}
-
-//----------------------------------------------------------------//
 void JniUtils::ReleaseCString ( jstring jstr, cc8* cstr ) {
 	
 	if ( jstr && cstr ) {
@@ -410,7 +263,7 @@ bool JniUtils::SetClass ( cc8* className ) {
 	
 	ZLLog::LogF ( ZLLog::CONSOLE, "MOAI JNI: set class %s", className );
 	
-	this->mClass = static_cast<jclass>(this->Env ()->NewGlobalRef(this->GetClass ( className )));
+	this->mClass = ( jclass )this->Env()->NewGlobalRef ( this->GetClass ( className ));
 	return this->mClass != NULL;
 }
 
@@ -449,7 +302,7 @@ jobjectArray JniUtils::StringArrayFromLua ( lua_State* L, int index ) {
         lua_pop ( state, 1 );
 
         if ( value ) {
-            jstring jvalue = this->GetJString ( value );
+            MOAIJString jvalue = this->GetJString ( value );
             this->Env ()->SetObjectArrayElement ( array, key - 1, jvalue );
         }
         else {

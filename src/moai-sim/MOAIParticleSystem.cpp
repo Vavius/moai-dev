@@ -382,6 +382,8 @@ void MOAIParticleSystem::Draw ( int subPrimID, float lod ) {
 	this->LoadGfxState ();
 	this->LoadUVTransform ();
 
+	MOAIMaterialBatch* materials = this->mDeck->ResolveMaterialBatch ( this->mMaterialBatch );
+
 	ZLAffine3D drawingMtx;
 	ZLAffine3D spriteMtx;
 	
@@ -413,7 +415,7 @@ void MOAIParticleSystem::Draw ( int subPrimID, float lod ) {
 		
 		gfxDevice.SetVertexTransform ( MOAIGfxDevice::VTX_WORLD_TRANSFORM, drawingMtx );
 		
-		this->mDeck->Draw ( MOAIDeckRemapper::Remap ( this->mRemapper, this->mIndex + ( u32 )sprite.mGfxID ));
+		this->mDeck->Draw ( MOAIDeckRemapper::Remap ( this->mRemapper, this->mIndex + ( u32 )sprite.mGfxID ), *materials );
 	}
 }
 
@@ -476,8 +478,6 @@ MOAIParticleSystem::MOAIParticleSystem () :
 	// prop's index is *added* to particle's index;
 	// should be initialized to 0 instead of 1
 	this->mIndex = 0;
-	
-	this->SetMask ( MOAIProp::CAN_DRAW | MOAIProp::CAN_DRAW_DEBUG );
 }
 
 //----------------------------------------------------------------//

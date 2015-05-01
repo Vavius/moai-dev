@@ -25,6 +25,7 @@ layer:insertProp ( prop )
 
 -- prop:moveRot ( 360, 1.5 )
 
+
 nd1 = MOAIScriptNode.new ()
 nd1:reserveAttrs ( 1 )
 nd1:setAttrName ( 1, "something" )

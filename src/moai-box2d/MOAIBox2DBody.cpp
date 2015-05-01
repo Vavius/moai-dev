@@ -426,6 +426,41 @@ int MOAIBox2DBody::_getAngularVelocity ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/**	@lua	getContactList
+	@text	Returns list of MOAIBox2DBody that are in contact with this body
+	
+	@in		MOAIBox2DBody self
+	@in 	boolean	touching
+	@out	... bodies
+*/
+int MOAIBox2DBody::_getContactList ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIBox2DBody, "U" )
+	
+	b2Body* body = self->mBody;
+	if ( !body ) {
+		MOAILog ( state, MOAILogMessages::MOAIBox2DBody_MissingInstance );
+		return 0;
+	}
+	
+	bool touching = state.GetValue < bool >( 2, false );
+
+	u32 total = 0;
+	for ( b2ContactEdge* ce = body->GetContactList (); ce != NULL; ce = ce->next ) {
+
+		if ( !touching || ce->contact->IsTouching () ) {
+			MOAIBox2DBody* moaiBody = ( MOAIBox2DBody* )ce->other->GetUserData ();
+			if ( moaiBody ) {
+				lua_checkstack ( L, 2 );
+				total++;
+				moaiBody->PushLuaUserdata ( state );
+			}
+		}
+	}
+
+	return total;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	getInertia
 	@text   See Box2D documentation.
 
@@ -1000,6 +1035,40 @@ int MOAIBox2DBody::_setType ( lua_State* L ) {
 //================================================================//
 
 //----------------------------------------------------------------//
+bool MOAIBox2DBody::ApplyAttrOp ( u32 attrID, MOAIAttrOp& attrOp, u32 op ) {
+	// TODO: these values may need to be cached for performance reasons
+	if ( MOAITransform::MOAITransformAttr::Check ( attrID )) {
+		const b2Transform & xform = mBody->GetTransform();
+		
+		switch ( UNPACK_ATTR ( attrID )) {
+			case MOAITransform::ATTR_X_LOC: {
+				float x = attrOp.Apply ( xform.p.x, op, MOAIAttrOp::ATTR_READ_WRITE, MOAIAttrOp::ATTR_TYPE_FLOAT ) * this->GetUnitsToMeters ();
+				mBody->SetTransform ( b2Vec2( x, xform.p.y), xform.q.GetAngle() );
+				return true;
+			}
+				
+			case MOAITransform::ATTR_Y_LOC: {
+				float y = attrOp.Apply ( xform.p.y, op, MOAIAttrOp::ATTR_READ_WRITE, MOAIAttrOp::ATTR_TYPE_FLOAT ) * this->GetUnitsToMeters ();
+				mBody->SetTransform ( b2Vec2( xform.p.x, y ), xform.q.GetAngle() );
+				return true;
+			}
+				
+			case MOAITransform::ATTR_Z_ROT: {
+				float angle = attrOp.Apply ( xform.q.GetAngle(), op, MOAIAttrOp::ATTR_READ_WRITE, MOAIAttrOp::ATTR_TYPE_FLOAT );
+				mBody->SetTransform ( xform.p,  ( float )((angle * D2R) + M_PI_4 ));
+				return true;
+			}
+		}
+	}
+	return MOAITransformBase::ApplyAttrOp (attrID, attrOp, op );
+}
+
+//----------------------------------------------------------------//
+void MOAIBox2DBody::BuildLocalToWorldMtx ( ZLAffine3D& localToWorldMtx ) {
+	UNUSED ( localToWorldMtx );
+}
+
+//----------------------------------------------------------------//
 void MOAIBox2DBody::Destroy () {
 
 	b2World* world = this->mWorld->mWorld;
@@ -1071,6 +1140,7 @@ void MOAIBox2DBody::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "destroy",				_destroy },
 		{ "getAngle",				_getAngle },
 		{ "getAngularVelocity",		_getAngularVelocity },
+		{ "getContactList",			_getContactList },
 		{ "getInertia",				_getInertia },
 		{ "getGravityScale",		_getGravityScale },
 		{ "getLinearVelocity",		_getLinearVelocity },
@@ -1099,37 +1169,6 @@ void MOAIBox2DBody::RegisterLuaFuncs ( MOAILuaState& state ) {
 	};
 	
 	luaL_register ( state, 0, regTable );
-}
-
-//----------------------------------------------------------------//
-bool MOAIBox2DBody::ApplyAttrOp ( u32 attrID, MOAIAttrOp& attrOp, u32 op ) {
-	// TODO: these values may need to be cached for performance reasons
-	if ( MOAITransform::MOAITransformAttr::Check ( attrID )) {
-		const b2Transform & xform = mBody->GetTransform();
-		
-		switch ( UNPACK_ATTR ( attrID )) {
-			case MOAITransform::ATTR_X_LOC: {
-				float x = attrOp.Apply ( xform.p.x, op, MOAIAttrOp::ATTR_READ_WRITE, MOAIAttrOp::ATTR_TYPE_FLOAT ) * this->GetUnitsToMeters ();
-				mBody->SetTransform ( b2Vec2( x, xform.p.y), xform.q.GetAngle() );
-				return true;
-			}
-
-			case MOAITransform::ATTR_Y_LOC: {
-				float y = attrOp.Apply ( xform.p.y, op, MOAIAttrOp::ATTR_READ_WRITE, MOAIAttrOp::ATTR_TYPE_FLOAT ) * this->GetUnitsToMeters ();
-				mBody->SetTransform ( b2Vec2( xform.p.x, y ), xform.q.GetAngle() );
-				return true;	
-			}
-
-			case MOAITransform::ATTR_Z_ROT: {
-				float angle = attrOp.Apply ( xform.q.GetAngle(), op, MOAIAttrOp::ATTR_READ_WRITE, MOAIAttrOp::ATTR_TYPE_FLOAT );				
-				mBody->SetTransform ( xform.p,  ( float )((angle * D2R) + M_PI_4 ));
-				return true;	
-			}
-
-
-		}
-	}
-	return MOAITransformBase::ApplyAttrOp (attrID, attrOp, op );
 }
 
 //----------------------------------------------------------------//

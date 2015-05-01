@@ -169,7 +169,7 @@ int MOAIFileSystem::_getAbsoluteFilePath ( lua_State* L ) {
 	@in		string path
 	@opt	string base
 	@out	string path
--*/
+*/
 int MOAIFileSystem::_getRelativePath ( lua_State* L ) {
 	MOAILuaState state ( L );
 	
@@ -202,12 +202,12 @@ int MOAIFileSystem::_getWorkingDirectory ( lua_State* L ) {
 	@text	Lists the sub-directories contained in a directory.
  
 	@opt	string path				Path to search. Default is current directory.
-	@out	table diresctories		A table of directory names (or nil if the path is invalid)
+	@out	table directories		A table of directory names (or nil if the path is invalid)
 */
 int MOAIFileSystem::_listDirectories ( lua_State* L ) {
 	UNUSED ( L );
 	
-	STLString oldPath = ZLFileSys::GetCurrentPath();
+	STLString oldPath = ZLFileSys::GetCurrentPath ();
 	
 	//cc8* dir = NULL;
 	if ( lua_type ( L, 1 ) == LUA_TSTRING ) {
@@ -223,11 +223,6 @@ int MOAIFileSystem::_listDirectories ( lua_State* L ) {
 	int n = 0;
 	dirItr.Start ();
 	while ( dirItr.NextDirectory ()) {
-
-		if( strcmp(dirItr.Current(), "..") == 0 ||
-			strcmp(dirItr.Current(), ".") == 0 ) {	
-			continue;	
-		}
 		
 		lua_pushstring ( L, dirItr.Current ());
 		n++;
@@ -279,6 +274,36 @@ int MOAIFileSystem::_listFiles ( lua_State* L ) {
 	ZLFileSys::SetCurrentPath ( oldPath );
 	
 	return 1;
+}
+
+//----------------------------------------------------------------//
+// TODO: doxygen
+int MOAIFileSystem::_loadFile ( lua_State* L ) {
+	MOAI_LUA_SETUP_SINGLE ( MOAIFileSystem, "S" )
+
+	cc8* filename = state.GetValue < cc8* >( 1, 0 );
+
+	if ( filename && ZLFileSys::CheckFileExists ( filename )) {
+	
+		ZLFileStream stream;
+		if ( stream.OpenRead ( filename )) {
+		
+			size_t len = stream.GetLength ();
+			if ( len > 0 ) {
+			
+				void* buffer = malloc ( len );
+				stream.ReadBytes ( buffer, len );
+				lua_pushlstring ( state, ( cc8* )buffer, len );
+				free ( buffer );
+			}
+			else {
+				state.Push ( "" );
+			}
+			stream.Close ();
+			return 1;
+		}
+	}
+	return 0;
 }
 
 //----------------------------------------------------------------//
@@ -339,6 +364,26 @@ int MOAIFileSystem::_rename ( lua_State* L ) {
 	
 	lua_pushboolean ( state, result );
 	return 1;
+}
+
+//----------------------------------------------------------------//
+// TODO: doxygen
+int MOAIFileSystem::_saveFile ( lua_State* L ) {
+	MOAI_LUA_SETUP_SINGLE ( MOAIFileSystem, "S" )
+
+	cc8* filename = state.GetValue < cc8* >( 1, 0 );
+	
+	ZLFileStream stream;
+	if ( filename && stream.Open ( filename, ZLFileStream::READ_WRITE_NEW )) {
+	
+		if ( state.IsType ( 2, LUA_TSTRING )) {
+			size_t len;
+			cc8* str = lua_tolstring ( state, 2, &len );
+			stream.WriteBytes ( str, len );
+		}
+		stream.Close ();
+	}
+	return 0;
 }
 
 //----------------------------------------------------------------//
@@ -404,10 +449,12 @@ void MOAIFileSystem::RegisterLuaClass ( MOAILuaState& state ) {
 		{ "getWorkingDirectory",		_getWorkingDirectory },
 		{ "listDirectories",			_listDirectories },
 		{ "listFiles",					_listFiles },
+		{ "loadFile",					_loadFile },
 		{ "mountVirtualDirectory",		_mountVirtualDirectory },
 		{ "pathFromRef",				_pathFromRef },
 		{ "pathToRef",					_pathToRef },
 		{ "rename",						_rename },
+		{ "saveFile",					_saveFile },
 		{ "setPathRef",					_setPathRef },
 		{ "setWorkingDirectory",		_setWorkingDirectory },
 		{ "stripPKZipTimestamps",		_stripPKZipTimestamps },

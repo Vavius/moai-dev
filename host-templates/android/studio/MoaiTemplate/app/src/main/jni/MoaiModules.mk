@@ -9,6 +9,12 @@ LOCAL_SRC_FILES := $(MOAI_LIBS)/libsfmt.a
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
+LOCAL_MODULE    := pvr 
+LOCAL_SRC_FILES := $(MOAI_LIBS)/libpvr.a
+
+include $(PREBUILT_STATIC_LIBRARY)
+include $(CLEAR_VARS)
+
 LOCAL_MODULE    := moai-core 
 LOCAL_SRC_FILES := $(MOAI_LIBS)/libmoai-core.a
 
@@ -94,12 +100,6 @@ LOCAL_SRC_FILES := $(MOAI_LIBS)/libuntz.a
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
-LOCAL_MODULE    := fmod 
-LOCAL_SRC_FILES := $(MOAI_LIBS)/libfmod.so
-
-include $(PREBUILT_SHARED_LIBRARY)
-include $(CLEAR_VARS)
-
 LOCAL_MODULE    := moai-luaext 
 LOCAL_SRC_FILES := $(MOAI_LIBS)/libmoai-luaext.a
 
@@ -112,20 +112,8 @@ LOCAL_SRC_FILES := $(MOAI_LIBS)/libmoai-untz.a
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
-LOCAL_MODULE    := moai-fmod-studio 
-LOCAL_SRC_FILES := $(MOAI_LIBS)/libmoai-fmod-studio.a
-
-include $(PREBUILT_STATIC_LIBRARY)
-include $(CLEAR_VARS)
-
 LOCAL_MODULE    := moai-box2d 
 LOCAL_SRC_FILES := $(MOAI_LIBS)/libmoai-box2d.a
-
-include $(PREBUILT_STATIC_LIBRARY)
-include $(CLEAR_VARS)
-
-LOCAL_MODULE    := moai-spine 
-LOCAL_SRC_FILES := $(MOAI_LIBS)/libmoai-spine.a
 
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
@@ -205,12 +193,6 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE    := box2d 
 LOCAL_SRC_FILES := $(MOAI_LIBS)/libbox2d.a
-
-include $(PREBUILT_STATIC_LIBRARY)
-include $(CLEAR_VARS)
-
-LOCAL_MODULE    := spine 
-LOCAL_SRC_FILES := $(MOAI_LIBS)/libspine.a
 
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)

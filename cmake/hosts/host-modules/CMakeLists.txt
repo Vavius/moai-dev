@@ -38,9 +38,19 @@ if ( MOAI_FMOD_STUDIO OR LIB_PATH)
   target_link_libraries ( host-modules moai-fmod-studio )
 endif ( MOAI_FMOD_STUDIO OR LIB_PATH)
 
+#SDL
+if ( MOAI_SDL OR LIB_PATH)
+  target_link_libraries ( host-modules moai-sdl )
+endif ( MOAI_SDL OR LIB_PATH)
+
 #Http Client
 if ( MOAI_HTTP_CLIENT OR LIB_PATH)
   target_link_libraries ( host-modules moai-http-client )
+endif ( MOAI_HTTP_CLIENT OR LIB_PATH)
+
+#Http Server
+if ( MOAI_HTTP_CLIENT OR LIB_PATH)
+  target_link_libraries ( host-modules moai-http-server )
 endif ( MOAI_HTTP_CLIENT OR LIB_PATH)
 
 #LuaExt

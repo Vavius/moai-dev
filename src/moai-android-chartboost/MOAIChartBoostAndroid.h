@@ -5,53 +5,37 @@
 #define	MOAICHARTBOOSTANDROID_H
 
 #include <moai-core/headers.h>
-
-#include <jni.h>
+#include <moai-android/JniUtils.h>
 
 //================================================================//
-// MOAIChartboostAndroid
+// MOAIChartBoostAndroid
 //================================================================//
-class MOAIChartboostAndroid :
-	public MOAIGlobalClass < MOAIChartboostAndroid, MOAILuaObject > {
+class MOAIChartBoostAndroid :
+	public MOAIGlobalClass < MOAIChartBoostAndroid, MOAIGlobalEventSource >,
+	public JniUtils {
 private:
-	//----------------------------------------------------------------//
-    static int  _cacheVideo             ( lua_State* L );
-	static int	_hasCachedInterstitial 	( lua_State* L );
-    static int  _hasCachedVideo         ( lua_State* L );
-	static int	_init 					( lua_State* L );
-	static int	_loadInterstitial 		( lua_State* L );
-	static int	_setListener			( lua_State* L );
-    static int	_setPurchaseTracking    ( lua_State* L );
-    static int	_showInterstitial		( lua_State* L );
-    static int  _showVideo              ( lua_State* L );
-
+	
+		//----------------------------------------------------------------//
+		static int	_cacheInterstitial		( lua_State* L );
+		static int	_hasCachedInterstitial	( lua_State* L );
+		static int	_init	 				( lua_State* L );
+		static int	_showInterstitial 		( lua_State* L );
 
 public:
 
-	DECL_LUA_SINGLETON ( MOAIChartboostAndroid );
+		DECL_LUA_SINGLETON ( MOAIChartBoostAndroid );
 
-	enum {
-		INTERSTITIAL_DISMISSED,
-		INTERSTITIAL_LOAD_FAILED,
-		INTERSTITIAL_WILL_SHOW,
-        VIDEO_DISMISSED,
-        VIDEO_WILL_SHOW,
-        VIDEO_REWARD,
-		TOTAL
-	};
+		enum {
+			INTERSTITIAL_LOAD_FAILED,
+			INTERSTITIAL_DISMISSED,
+		};
 
-	MOAILuaStrongRef		mListeners [ TOTAL ];
-
-				MOAIChartboostAndroid			();
-				~MOAIChartboostAndroid			();
-	void 		NotifyInterstitialDismissed		( cc8* location );
-	void 		NotifyInterstitialLoadFailed	( cc8* location );
-	void 		NotifyInterstitialWillShow		( cc8* location );
-    void 		NotifyVideoDismissed            ( cc8* location );
-    void 		NotifyVideoReward               ( cc8* location, int reward );
-    void 		NotifyVideoWillShow             ( cc8* location );
-	void		RegisterLuaClass				( MOAILuaState& state );
-    void        ReportPurchase                  ( jobject receipt, cc8* product );
+		//----------------------------------------------------------------//
+						MOAIChartBoostAndroid			();
+						~MOAIChartBoostAndroid			();
+		void 			NotifyInterstitialDismissed		();
+		void 			NotifyInterstitialLoadFailed	();
+		void			RegisterLuaClass				( MOAILuaState& state );
 };
 
 #endif  //MOAICHARTBOOST_H

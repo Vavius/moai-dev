@@ -44,6 +44,8 @@ writeHtmlTable				= nil
 ----------------------------------------------------------------
 parseFile = function ( src, dst )
 
+	print ( 'parsing source file:', src )
+
 	MOAIFileSystem.affirmPath ( util.getFolderFromPath ( dst ))
 
 	local module = string.match ( string.sub ( src, #SRC_PATH + 1 ), '(moai%-[^/]+)/' )
@@ -517,7 +519,7 @@ REPLACE_IN_HTML = {
 	[ '(>)_(.-[^<]*<)' ]							= concat,
 	[ '%(lua_State %*L%)' ]							= '',
 	[ 'int MOAI.-::_(.-</td>)' ]					= concat,
-	[ '(\>)lua_State[%s]*%*.-(<)' ]					= concat,
+	[ '(>)lua_State[%s]*%*.-(<)' ]					= concat,
 	[ '<em>L</em>' ]								= '',
 	[ '<td class=\'paramtype\'></td>' ]				= '',
 	[ '<td class=\'paramname\'></td>' ]				= '',
