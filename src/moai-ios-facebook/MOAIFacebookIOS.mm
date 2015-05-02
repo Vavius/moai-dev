@@ -5,8 +5,8 @@
 //----------------------------------------------------------------//
 
 #import <moai-ios-facebook/MOAIFacebookIOS.h>
-#import <moai-ios/NSDictionary+MOAILib.h>
-#import <moai-ios/NSString+MOAILib.h>
+#import <moai-apple/NSDictionary+MOAILib.h>
+#import <moai-apple/NSString+MOAILib.h>
 
 
 // Facebook SDK starting from 3.14 not showing native login dialog be default
