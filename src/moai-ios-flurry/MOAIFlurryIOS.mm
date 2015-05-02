@@ -6,11 +6,11 @@
 #include "pch.h"
 
 #import <moai-ios-flurry/MOAIFlurryIOS.h>
-#import <moai-ios/NSData+MOAILib.h>
-#import <moai-ios/NSDate+MOAILib.h>
-#import <moai-ios/NSDictionary+MOAILib.h>
-#import <moai-ios/NSError+MOAILib.h>
-#import <moai-ios/NSString+MOAILib.h>
+#import <moai-apple/NSData+MOAILib.h>
+#import <moai-apple/NSDate+MOAILib.h>
+#import <moai-apple/NSDictionary+MOAILib.h>
+#import <moai-apple/NSError+MOAILib.h>
+#import <moai-apple/NSString+MOAILib.h>
 
 #import "Flurry.h"
 

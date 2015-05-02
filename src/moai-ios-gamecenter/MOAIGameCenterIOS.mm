@@ -4,7 +4,7 @@
 #include "pch.h"
 
 #import <moai-ios-gamecenter/MOAIGameCenterIOS.h>
-#import <moai-ios/NSDate+MOAILib.h>
+#import <moai-apple/NSDate+MOAILib.h>
 
 //================================================================//
 // lua
