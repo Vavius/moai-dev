@@ -20,8 +20,8 @@ class MOAIScriptNode :
 private:
 
 	MOAILuaMemberRef mOnUpdate;
-	ZLLeanArray < float >	mAttributes;
-	ZLLeanArray < cc8* >	mAttrNames;
+	ZLLeanArray < float >		mAttributes;
+	ZLLeanArray < STLString >	mAttrNames;
 
 	//----------------------------------------------------------------//
 	static int		_reserveAttrs			( lua_State* L );

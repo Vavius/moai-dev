@@ -31,7 +31,6 @@ int MOAIScriptNode::_reserveAttrs ( lua_State* L ) {
 	self->mAttributes.Fill ( 0.0f );
 	
 	self->mAttrNames.Init ( size );
-	self->mAttrNames.Fill ( 0 );
 	
 	return 0;
 }
@@ -73,7 +72,7 @@ bool MOAIScriptNode::ApplyAttrOp ( u32 attrID, MOAIAttrOp& attrOp, u32 op ) {
 		return false;
 	}
 	
-	if ( this->mAttrNames [ attrID ] == 0 ) {
+	if ( this->mAttrNames [ attrID ].empty ()) {
 		this->mAttributes [ attrID ] = attrOp.Apply ( this->mAttributes [ attrID ], op, MOAIAttrOp::ATTR_READ_WRITE, MOAIAttrOp::ATTR_TYPE_FLOAT );
 		return true;
 	}
@@ -154,6 +153,11 @@ void MOAIScriptNode::NamedAttrGet ( u32 attrID, MOAIAttrOp &attrOp ) {
 		float value = state.GetValue < float >( -1, 0.0f );
 		attrOp.Apply ( value, MOAIAttrOp::GET, MOAIAttrOp::ATTR_WRITE, MOAIAttrOp::ATTR_TYPE_FLOAT );
 	}
+	else if ( state.IsType ( -1, LUA_TSTRING )) {
+
+		cc8* value = state.GetValue < cc8* >( -1, "" );
+		attrOp.ApplyNoAdd < cc8* >( value, MOAIAttrOp::GET, MOAIAttrOp::ATTR_WRITE, MOAIAttrOp::ATTR_TYPE_STRING );
+	}
 	else {
 		
 		MOAIMemberTableAttr value;
@@ -170,7 +174,7 @@ void MOAIScriptNode::NamedAttrSet ( u32 attrID, MOAIAttrOp &attrOp ) {
 	switch ( attrOp.GetTypeHint ()) {
 		case MOAIAttrOp::ATTR_TYPE_FLOAT: {
 
-			float value = attrOp.GetValue ( 0.0f );
+			float value = attrOp.GetValue < float >( 0.0f );
 			MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
 			this->PushMemberTable ( state );
 			state.SetField ( -1, attrName, value );
@@ -179,7 +183,16 @@ void MOAIScriptNode::NamedAttrSet ( u32 attrID, MOAIAttrOp &attrOp ) {
 		}
 		case MOAIAttrOp::ATTR_TYPE_INT: {
 			
-			int value = attrOp.GetValue ( 0 );
+			int value = attrOp.GetValue < int >( 0 );
+			MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
+			this->PushMemberTable ( state );
+			state.SetField ( -1, attrName, value );
+			
+			break;
+		}
+		case MOAIAttrOp::ATTR_TYPE_STRING: {
+			
+			cc8* value = attrOp.GetValue < cc8* >( 0 );
 			MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
 			this->PushMemberTable ( state );
 			state.SetField ( -1, attrName, value );

@@ -208,8 +208,15 @@ protected:
 public:
 	
 	DECL_LUA_FACTORY ( MOAITextLabel )
+	DECL_ATTR_HELPER ( MOAITextLabel )
+
+	enum {
+		ATTR_TEXT,
+		TOTAL_ATTR,
+	};
 	
 	//----------------------------------------------------------------//
+	bool				ApplyAttrOp				( u32 attrID, MOAIAttrOp& attrOp, u32 op );
 	void				Draw					( int subPrimID, float lod );
 	void				DrawDebug				( int subPrimID, float lod );
 	bool				IsDone					();
@@ -222,6 +229,7 @@ public:
 	void				SerializeIn				( MOAILuaState& state, MOAIDeserializer& serializer );
 	void				SerializeOut			( MOAILuaState& state, MOAISerializer& serializer );
 	void				SetText					( cc8* text );
+	bool				SetText 				( MOAIAttrOp& attrOp );
 };
 
 #endif

@@ -725,6 +725,23 @@ int MOAITextLabel::_spool ( lua_State* L ) {
 const float MOAITextLabel::DEFAULT_SPOOL_SPEED = 24.0f;
 
 //----------------------------------------------------------------//
+bool MOAITextLabel::ApplyAttrOp ( u32 attrID, MOAIAttrOp& attrOp, u32 op ) {
+
+	if ( MOAITextLabelAttr::Check ( attrID ) && UNPACK_ATTR ( attrID ) == ATTR_TEXT ) {
+		
+		if ( op == MOAIAttrOp::SET ) {
+			return this->SetText ( attrOp );
+		}
+		if ( op == MOAIAttrOp::CHECK ) {
+			attrOp.SetFlags ( MOAIAttrOp::ATTR_WRITE );
+			return true;
+		}
+	}
+	
+	return MOAIGraphicsProp::ApplyAttrOp ( attrID, attrOp, op );
+}
+
+//----------------------------------------------------------------//
 void MOAITextLabel::BuildLocalToWorldMtx ( ZLAffine3D& localToWorldMtx ) {
 
 	this->MOAITransform::BuildLocalToWorldMtx ( localToWorldMtx );
@@ -1020,6 +1037,8 @@ void MOAITextLabel::RegisterLuaClass ( MOAILuaState& state ) {
 	state.SetField ( -1, "CENTER_JUSTIFY",		( u32 )MOAITextDesigner::CENTER_JUSTIFY );
 	state.SetField ( -1, "RIGHT_JUSTIFY",		( u32 )MOAITextDesigner::RIGHT_JUSTIFY );
 	state.SetField ( -1, "TOP_JUSTIFY",			( u32 )MOAITextDesigner::TOP_JUSTIFY );
+
+	state.SetField ( -1, "ATTR_TEXT",			MOAITextLabelAttr::Pack ( ATTR_TEXT ));
 }
 
 //----------------------------------------------------------------//
@@ -1106,4 +1125,32 @@ void MOAITextLabel::SetText ( cc8* text ) {
 	this->mNextPageIdx = 0;
 	
 	this->ScheduleLayout ();
+}
+
+//----------------------------------------------------------------//
+bool MOAITextLabel::SetText ( MOAIAttrOp& attrOp ) {
+	
+	switch ( attrOp.GetTypeHint ()) {
+
+		case MOAIAttrOp::ATTR_TYPE_FLOAT: {
+
+			float value = attrOp.GetValue < float >( 0.0f );
+			this->SetText ( STLString ( value ));
+			return true;
+		}
+
+		case MOAIAttrOp::ATTR_TYPE_INT: {
+
+			int value = attrOp.GetValue < int >( 0 );
+			this->SetText ( STLString ( value ));
+			return true;
+		}
+
+		case MOAIAttrOp::ATTR_TYPE_STRING: {
+
+			this->SetText ( attrOp.GetValue < cc8* > ( "" ));
+			return true;
+		}
+	}
+	return false;
 }
