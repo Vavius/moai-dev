@@ -84,10 +84,10 @@ private:
 	float			mFrameRateBuffer [ FPS_BUFFER_SIZE ];
 	u32				mFrameRateIdx;
 	
-	float			mNodeMgrTime;
-	float			mActionTreeTime;
-	float			mLastNodeMgrTime;
-	float			mLastActionTreeTime;
+	double			mNodeMgrTime;
+	double			mActionTreeTime;
+	double			mLastNodeMgrTime;
+	double			mLastActionTreeTime;
 
 	u32				mLoopFlags;
 	double			mBoostThreshold;

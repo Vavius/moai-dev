@@ -684,10 +684,10 @@ MOAISim::MOAISim () :
 	mStepCount ( 0 ),
 	mFrameRate ( 0.0f ),
 	mFrameRateIdx ( 0 ),
-	mNodeMgrTime ( 0.0f ),
-	mActionTreeTime ( 0.0f ),
-	mLastNodeMgrTime ( 0.0f ),
-	mLastActionTreeTime ( 0.0f ),
+	mNodeMgrTime ( 0.0 ),
+	mActionTreeTime ( 0.0 ),
+	mLastNodeMgrTime ( 0.0 ),
+	mLastActionTreeTime ( 0.0 ),
 	mLoopFlags ( LOOP_FLAGS_DEFAULT ),
 	mBoostThreshold ( DEFAULT_BOOST_THRESHOLD ),
 	mLongDelayThreshold ( DEFAULT_LONG_DELAY_THRESHOLD ),
@@ -759,8 +759,9 @@ void MOAISim::OnGlobalsFinalize () {
 void MOAISim::ResetPerformanceTimers () {
 
 	this->mLastActionTreeTime = this->mActionTreeTime;
-	this->mNodeMgrTime = 0.0f;
-	this->mActionTreeTime = 0.0f;
+	this->mLastNodeMgrTime = this->mNodeMgrTime;
+	this->mNodeMgrTime = 0.0;
+	this->mActionTreeTime = 0.0;
 }
 
 //----------------------------------------------------------------//
