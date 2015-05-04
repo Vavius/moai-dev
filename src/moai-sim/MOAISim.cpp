@@ -896,7 +896,7 @@ double MOAISim::StepSim ( double step, u32 multiplier ) {
 
 		t = ZLDeviceTime::GetTimeInSeconds ();
 		MOAINodeMgr::Get ().Update ();
-		MOAINodeMgr::Get ().Reset ();
+		
 		this->mNodeMgrTime = this->mNodeMgrTime + ZLDeviceTime::GetTimeInSeconds () - t;
 
 		this->mSimTime += step;
