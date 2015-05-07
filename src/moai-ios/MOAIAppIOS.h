@@ -63,6 +63,7 @@ private:
 	static int	_getUTCTime						( lua_State* L );
 	static int	_sendMail						( lua_State* L );
 	static int	_takeCamera						( lua_State* L );
+	static int	_vibrate						( lua_State* L );
 	
 	//----------------------------------------------------------------//
 	void		RegisterNotificationListeners	();
