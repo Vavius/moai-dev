@@ -109,9 +109,9 @@ int MOAILogMgr::_log ( lua_State* L ) {
 
 	STLString log;
 	log.write ( "[%s] %s", token, msg );
-
-	ZLLog::LogF ( ZLLog::CONSOLE, log.c_str ());
-
+	
+	ZLLog::LogF ( ZLLog::CONSOLE, "%s", log.c_str ());
+	
 	return 0;
 }
 
