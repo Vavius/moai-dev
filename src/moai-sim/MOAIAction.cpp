@@ -188,6 +188,21 @@ int MOAIAction::_isPaused ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+// TODO: doxygen
+int MOAIAction::_listChildren ( lua_State *L ) {
+	MOAI_LUA_SETUP ( MOAIAction, "U" )
+	
+	u32 total = 0;
+	ChildIt childIt = self->mChildren.Head ();
+	for ( ; childIt; childIt = childIt->Next ()) {
+		lua_checkstack ( L, ++total );
+		childIt->Data ()->PushLuaUserdata ( state );
+	}
+	
+	return total;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	pause
 	@text	Leaves the action in the action tree but prevents it from
 			receiving updates. Call pause ( false ) or start () to unpause.
@@ -468,6 +483,7 @@ void MOAIAction::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "isBusy",					_isBusy },
 		{ "isDone",					_isDone },
 		{ "isPaused",				_isPaused },
+		{ "listChildren",			_listChildren },
 		{ "pause",					_pause },
 		{ "setAutoStop",			_setAutoStop },
 		{ "start",					_start },
