@@ -90,6 +90,9 @@ cmake \
 -DMOAI_BOX2D=False \
 -DMOAI_MONGOOSE=False \
 -DMOAI_AUDIO_SAMPLER=False \
+-DMOAI_TINYXML=False \
+-DMOAI_WITH_EXPAT=False \
+-DMOAI_SQLITE3=False \
 -DCMAKE_INSTALL_PREFIX="${lib_dir}" \
 -G "Xcode" \
 $moai_root/cmake
