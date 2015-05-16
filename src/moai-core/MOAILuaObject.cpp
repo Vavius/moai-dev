@@ -135,6 +135,14 @@ int MOAILuaObject::_setMembers ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+int MOAILuaObject::_printTracking ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAILuaObject, "U" )
+	
+	self->PrintTracking ();
+	return 0;
+}
+
+//----------------------------------------------------------------//
 int MOAILuaObject::_pin ( lua_State* L ) {
 	MOAI_LUA_SETUP ( MOAILuaObject, "UU" )
 
@@ -542,6 +550,7 @@ void MOAILuaObject::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "getMemberTable",			_getMemberTable },
 		{ "getRefTable",			_getRefTable },
 		{ "pin",					_pin },
+		{ "printTracking",			_printTracking },
 		{ "serializeIn",			_serializeIn },
 		{ "serializeOut",			_serializeOut },
 		{ "setFinalizer",			_setFinalizer },
