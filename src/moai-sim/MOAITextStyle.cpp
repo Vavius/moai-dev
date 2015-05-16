@@ -8,6 +8,7 @@
 #include <moai-sim/MOAIFont.h>
 #include <moai-sim/MOAIGfxDevice.h>
 #include <moai-sim/MOAINodeMgr.h>
+#include <moai-sim/MOAIShader.h>
 #include <moai-sim/MOAIShaderMgr.h>
 #include <moai-sim/MOAITextStyle.h>
 
@@ -18,6 +19,7 @@
 //----------------------------------------------------------------//
 MOAITextStyleState::MOAITextStyleState () :
 	mFont ( 0 ),
+	mShader ( 0 ),
 	mSize ( 0.0f ),
 	mScale ( 1.0f, 1.0f ),
 	mColor ( 0xffffffff ) {
@@ -147,6 +149,17 @@ int MOAITextStyle::_setFont ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+// TODO: doxygeb
+int MOAITextStyle::_setShader ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAITextStyle, "U" )
+	
+	MOAIShader* shader = MOAIShader::AffirmShader ( state, 2 );
+	self->SetShader ( shader );
+	state.Push ( shader );
+	return 1;
+}
+
+//----------------------------------------------------------------//
 // TODO: doxygen
 int MOAITextStyle::_setPadding ( lua_State* L ) {
 	MOAI_LUA_SETUP ( MOAITextStyle, "U" )
@@ -268,6 +281,7 @@ void MOAITextStyle::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "setFont",				_setFont },
 		{ "setPadding",				_setPadding },
 		{ "setScale",				_setScale },
+		{ "setShader",				_setShader },
 		{ "setSize",				_setSize },
 		{ NULL, NULL }
 	};
@@ -299,6 +313,17 @@ void MOAITextStyle::SetFont ( MOAIFont* font ) {
 		if ( font && ( this->mSize == 0.0f )) {
 			this->mSize = font->GetDefaultSize ();
 		}
+	}
+}
+
+//----------------------------------------------------------------//
+void MOAITextStyle::SetShader ( MOAIShader* shader ) {
+
+	if ( this->mShader != shader ) {
+	
+		this->LuaRetain ( shader );
+		this->LuaRelease ( this->mShader );
+		this->mShader = shader;
 	}
 }
 
