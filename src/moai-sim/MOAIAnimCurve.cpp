@@ -46,6 +46,10 @@ int MOAIAnimCurve::_getValueRange ( lua_State* L ) {
 	float min = 0.0f;
 	float max = 0.0f;
 	
+	if ( t0 > t1 ) {
+		float tmp = t0; t0 = t1; t1 = tmp;
+	}
+	
 	self->GetValueRange ( t0, t1, min, max );
 	state.Push ( min );
 	state.Push ( max );
@@ -208,7 +212,7 @@ void MOAIAnimCurve::GetValueRange ( float t0, float t1, float &min, float &max )
 	min = this->GetValue ( span0 );
 	max = this->GetValue ( span0 );
 	
-	for ( u32 id = key0; id <= key1; id++ ) {
+	for ( u32 id = key0 + 1; id <= key1; id++ ) {
 		
 		float val = this->mSamples [ id ];
 		
