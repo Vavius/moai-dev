@@ -304,11 +304,16 @@ bool MOAIImageFormatPng::WriteImage ( const MOAIImage& image, ZLStream& stream )
 	png_infop info_ptr;
 	
 	png_ptr = png_create_write_struct ( PNG_LIBPNG_VER_STRING, 0, _pngError, 0 );
-	assert ( png_ptr ); // TODO
-
+	if ( !png_ptr ) {
+		return false;
+	}
+	
 	info_ptr = png_create_info_struct ( png_ptr );
-	assert ( png_ptr ); // TODO
-
+	if ( !info_ptr ) {
+		png_destroy_write_struct ( &png_ptr, &info_ptr );
+		return false;
+	}
+	
 	png_set_write_fn ( png_ptr, &stream, _pngWrite, _pngFlush );
 
 	int bitDepth = 0;
