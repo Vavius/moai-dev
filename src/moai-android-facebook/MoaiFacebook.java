@@ -502,6 +502,24 @@ public class MoaiFacebook {
 	}
 
 	//----------------------------------------------------------------//	
+	public static void requestPublishPermissions ( String [] permissions ) {
+
+		Session mCurrentSession = null;
+		
+	    mCurrentSession = Session.getActiveSession ();
+
+		if ( isSessionValid ( mCurrentSession ) ) {
+			
+			MoaiLog.i ( " -------------------------------------------------------- MoaiFacebook: requestPublishPermissions : requesting...  -------------------------------------------------------- " );
+			
+			requestPublishPermissions ( sActivity, mCurrentSession, Arrays.asList ( permissions ), REQUEST_PUBLISH_PERMISSION );
+		} else {
+			
+			MoaiLog.i ( " -------------------------------------------------------- MoaiFacebook: requestPublishPermissions : FAIL -------------------------------------------------------- " );
+		}
+	}
+
+	//----------------------------------------------------------------//	
 	public static boolean hasGranted ( String permission ) {
 
 		Session mCurrentSession = null;

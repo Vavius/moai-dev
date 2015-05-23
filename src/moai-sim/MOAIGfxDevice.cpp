@@ -37,6 +37,20 @@ int MOAIGfxDevice::_getFrameBuffer ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/**	@lua	getMaxTextureSize
+	@text	Returns the maximum texture size for the device
+ 
+	@out	number maxTextureSize
+*/
+int MOAIGfxDevice::_getMaxTextureSize ( lua_State* L ) {
+	
+	MOAILuaState state ( L );
+	state.Push ( MOAIGfxDevice::Get().mMaxTextureSize );
+	
+	return 1;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	getMaxTextureUnits
 	@text	Returns the total number of texture units available on the device.
 
@@ -620,6 +634,7 @@ void MOAIGfxDevice::RegisterLuaClass ( MOAILuaState& state ) {
 	luaL_Reg regTable [] = {
 		{ "getFrameBuffer",				_getFrameBuffer },
 		{ "getListener",				&MOAIGlobalEventSource::_getListener < MOAIGfxDevice > },
+		{ "getMaxTextureSize",			_getMaxTextureSize },
 		{ "getMaxTextureUnits",			_getMaxTextureUnits },
 		{ "getViewSize",				_getViewSize },
 		{ "isProgrammable",				_isProgrammable },

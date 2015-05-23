@@ -134,6 +134,7 @@ private:
 
 	//----------------------------------------------------------------//
 	static int				_getFrameBuffer				( lua_State* L );
+	static int				_getMaxTextureSize			( lua_State* L );
 	static int				_getMaxTextureUnits			( lua_State* L );
 	static int				_getViewSize				( lua_State* L );
 	static int				_isProgrammable				( lua_State* L );
