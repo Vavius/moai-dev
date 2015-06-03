@@ -37,8 +37,12 @@ int MOAIFileStream::_open ( lua_State* L ) {
 	
 	cc8* filename	= state.GetValue < cc8* >( 2, "" );
 	u32 mode		= state.GetValue < u32 >( 3, ZLFileStream::READ );
+	u32 length		= state.GetValue < u32 >( 4, 0 );
 	
 	bool result = self->Open ( filename, mode );
+	if ( self->GetLength () == 0 ) {
+		self->mLength = length;
+	}
 	
 	state.Push ( result );
 	return 1;
