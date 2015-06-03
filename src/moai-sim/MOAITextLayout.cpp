@@ -283,6 +283,11 @@ void MOAITextLayout::DrawDebug () {
 		}
 	}
 	
+	if ( debugLines.Bind ( MOAIDebugLines::TEXT_BOX_GLYPH_BOUNDS )) {
+	
+		draw.DrawRectOutline ( this->mGlyphBounds );
+	}
+	
 	if ( debugLines.Bind ( MOAIDebugLines::TEXT_BOX_BASELINES )) {
 		
 		u32 totalLines = this->mLines.GetTop ();
@@ -332,7 +337,7 @@ void MOAITextLayout::FindSpriteSpan ( u32 idx, u32 size, u32& spanIdx, u32& span
 bool MOAITextLayout::GetBounds ( ZLRect& rect ) {
 
 	if ( this->mSprites.GetTop () > 0 ) {
-		rect = this->mBounds;
+		rect = this->mLayoutBounds;
 		return true;
 	}
 	return false;

@@ -615,6 +615,7 @@ MOAIFont::~MOAIFont () {
 
 	this->mReader.Set ( *this, 0 );
 	this->mCache.Set ( *this, 0 );
+	this->mShader.Set ( *this, 0 );
 }
 
 //----------------------------------------------------------------//

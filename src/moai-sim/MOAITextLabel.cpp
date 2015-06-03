@@ -855,9 +855,22 @@ ZLMatrix4x4 MOAITextLabel::GetWorldDrawingMtx () {
 
 			// For text flipping when orbiting around the map. Tilting should not affect this
 			if ( upVec.mY < 0.0f ) {
-				ZLMatrix4x4 scale;
-				scale.Scale ( -1.0f, -1.0f, 1.0f );
-				worldDrawingMtx.Prepend ( scale );
+			
+				ZLMatrix4x4 flip;
+				flip.Scale ( -1.0f, -1.0f, 1.0f );
+				
+				// if there's no x-axis constraint, flip inside the glyph rect
+				if ( !this->mDesigner.GetLimitHeight ()) {
+					float xOffset = this->mLayout.mGlyphBounds.mXMin + this->mLayout.mGlyphBounds.mXMax;
+					flip.m [ ZLMatrix4x4::C3_R0 ] = xOffset;
+				}
+				
+				// if there's no y-axis constraint, flip inside the glyph rect
+				if ( !this->mDesigner.GetLimitHeight ()) {
+					float yOffset = this->mLayout.mGlyphBounds.mYMin + this->mLayout.mGlyphBounds.mYMax;
+					flip.m [ ZLMatrix4x4::C3_R1 ] = yOffset;
+				}
+				worldDrawingMtx.Prepend ( flip );
 			}
 		}
 	}
