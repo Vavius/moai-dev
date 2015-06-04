@@ -581,6 +581,13 @@ public class Moai {
 	}
 
 	//----------------------------------------------------------------//
+	public static long getAvailableStorage () {
+		
+		return sActivity.getFilesDir ().getFreeSpace () / 1024;
+	}
+
+
+	//----------------------------------------------------------------//
 	public static String getGUID () {
 
 		return UUID.randomUUID ().toString ();

@@ -23,7 +23,7 @@
 
 //----------------------------------------------------------------//
 /**	@name	getAvailableStorage
-	@text	Get the available storage size in mb on the system
+	@text	Get the available storage size in kb on the system
  
 	@out	long size
  */
