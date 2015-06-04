@@ -125,6 +125,11 @@ void MOAIImage::LoadPng ( void* pngParam, void* pngInfoParam, u32 transform ) {
 			pngColorFormat = ZLColor::A_8;
 			break;
 		
+		case PNG_COLOR_TYPE_GRAY_ALPHA:
+			pngPixelFormat = MOAIImage::TRUECOLOR;
+			pngColorFormat = ZLColor::LA_8;
+			break;
+		
 		case PNG_COLOR_TYPE_PALETTE:
 			pngPixelFormat = ( paletteSize > 16 ) ? MOAIImage::INDEX_8 : MOAIImage::INDEX_4;
 			pngColorFormat = ( transSize ) ? ZLColor::RGBA_8888 : ZLColor::RGB_888;
