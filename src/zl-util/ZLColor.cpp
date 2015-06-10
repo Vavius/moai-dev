@@ -424,7 +424,7 @@ u32 ZLColor::ConvertFromRGBA ( u32 color, ColorFormat format ) {
 			return ( color >> 0x18 ) & 0x000000FF;
 		
 		case LA_8:
-			return ( color & 0xFF ) + (( color >> 0x18 ) & 0xFF );
+			return ( color & 0xFF ) + (( color >> 0x10 ) & 0xFF00 );
 		
 		case RGB_888:
 			return color & 0x00FFFFFF;
@@ -476,7 +476,7 @@ u32 ZLColor::ConvertToRGBA ( u32 color, ColorFormat format ) {
 		case LA_8: {
 		
 			u8 l = color & 0xFF;
-			u8 a = ( color >> 0x18 ) & 0xFF;
+			u8 a = ( color >> 0x08 ) & 0xFF;
 			
 			return	l  +
 					( l << 0x08 ) +
