@@ -22,6 +22,8 @@ private:
 	ZLLeanArray < MOAIQuadBrush >		mQuads;
 	
 	//----------------------------------------------------------------//
+	static int	_getQuad				( lua_State* L );
+	static int	_getUVQuad				( lua_State* L );
 	static int	_reserve				( lua_State* L );
 	static int	_setQuad				( lua_State* L );
 	static int	_setRect				( lua_State* L );

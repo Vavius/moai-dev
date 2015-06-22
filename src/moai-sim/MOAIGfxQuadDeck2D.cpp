@@ -14,6 +14,58 @@
 //================================================================//
 
 //----------------------------------------------------------------//
+/**	TODO
+	
+*/
+int MOAIGfxQuadDeck2D::_getQuad ( lua_State *L ) {
+	MOAI_LUA_SETUP ( MOAIGfxQuadDeck2D, "UN" )
+	
+	u32 idx = state.GetValue < int >( 2, 1 ) - 1;
+	if ( MOAILogMessages::CheckIndexPlusOne ( idx, self->mQuads.Size (), L )) {
+
+		ZLQuad& quad = self->mQuads [ idx ].mModelQuad;
+		
+		state.Push ( quad.mV [ 0 ].mX );
+		state.Push ( quad.mV [ 0 ].mY );
+		state.Push ( quad.mV [ 1 ].mX );
+		state.Push ( quad.mV [ 1 ].mY );
+		state.Push ( quad.mV [ 2 ].mX );
+		state.Push ( quad.mV [ 2 ].mY );
+		state.Push ( quad.mV [ 3 ].mX );
+		state.Push ( quad.mV [ 3 ].mY );
+		
+		return 8;
+	}
+	return 0;
+}
+
+//----------------------------------------------------------------//
+/**	TODO
+	
+*/
+int MOAIGfxQuadDeck2D::_getUVQuad ( lua_State *L ) {
+	MOAI_LUA_SETUP ( MOAIGfxQuadDeck2D, "UN" )
+	
+	u32 idx = state.GetValue < int >( 2, 1 ) - 1;
+	if ( MOAILogMessages::CheckIndexPlusOne ( idx, self->mQuads.Size (), L )) {
+		
+		ZLQuad& quad = self->mQuads [ idx ].mUVQuad;
+		
+		state.Push ( quad.mV [ 0 ].mX );
+		state.Push ( quad.mV [ 0 ].mY );
+		state.Push ( quad.mV [ 1 ].mX );
+		state.Push ( quad.mV [ 1 ].mY );
+		state.Push ( quad.mV [ 2 ].mX );
+		state.Push ( quad.mV [ 2 ].mY );
+		state.Push ( quad.mV [ 3 ].mX );
+		state.Push ( quad.mV [ 3 ].mY );
+		
+		return 8;
+	}
+	return 0;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	reserve
 	@text	Set capacity of quad deck.
 	

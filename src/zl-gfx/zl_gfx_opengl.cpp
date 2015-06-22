@@ -533,7 +533,7 @@ void zglInitialize () {
 
 	sMaxTextureUnits = ( u32 )maxTextureUnits;
 
-	int maxTextureSize;
+	int maxTextureSize = 0;
 	glGetIntegerv ( GL_MAX_TEXTURE_SIZE, &maxTextureSize );
 	sMaxTextureSize = ( u32 )maxTextureSize;
 }

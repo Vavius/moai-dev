@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 2.8.5)
 
 project(lua)
 
-set ( CMAKE_CURRENT_SOURCE_DIR "${MOAI_ROOT}/3rdparty/lua-5.1.3/src/" )
+set ( CMAKE_CURRENT_SOURCE_DIR "${MOAI_ROOT}/3rdparty/lua-5.1.5/src/" )
 
-set ( LUA_INCLUDES "${MOAI_ROOT}/3rdparty/lua-5.1.3/src/"  )
+set ( LUA_INCLUDES "${MOAI_ROOT}/3rdparty/lua-5.1.5/src/"  )
 
 
 set ( LUA_SOURCES

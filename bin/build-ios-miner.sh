@@ -90,6 +90,9 @@ cmake \
 -DMOAI_BOX2D=False \
 -DMOAI_MONGOOSE=False \
 -DMOAI_AUDIO_SAMPLER=False \
+-DMOAI_TINYXML=False \
+-DMOAI_WITH_EXPAT=False \
+-DMOAI_SQLITE3=False \
 -DCMAKE_INSTALL_PREFIX="${lib_dir}" \
 -G "Xcode" \
 $moai_root/cmake
@@ -107,7 +110,7 @@ mv -v ${lib_dir}/lib/*.a ${lib_dir}/lib-iphonesimulator
 
 rm -f ${lib_dir}/lib/*.a
 
-xcodebuild ONLY_ACTIVE_ARCH=NO ARCHS="armv7 arm64" -project moai.xcodeproj -target install -configuration Release -target install -sdk iphoneos
+xcodebuild ONLY_ACTIVE_ARCH=NO ARCHS="armv7 arm64" -project moai.xcodeproj -target install -configuration Release -target install -sdk iphoneos IPHONEOS_DEPLOYMENT_TARGET=6.0
 
 #work around cmake install bug with ios projects
 find . -iregex ".*/.*-iphoneos/[^/]*.a" | xargs -J % cp -npv % ${lib_dir}/lib

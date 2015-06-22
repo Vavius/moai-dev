@@ -285,15 +285,21 @@ int MOAISim::_getMemoryUsage ( lua_State* L ) {
 	@out	number fps		Estimated frames per second.
 	@out	number seconds	Last ActionTree update duration
 	@out	number seconds  Last NodeMgr update duration
+	@out	number seconds  Last sim duration
+	@out	number seconds  Last render duration
 */
 int MOAISim::_getPerformance ( lua_State* L ) {
 
 	MOAISim& device = MOAISim::Get ();
+	MOAIRenderMgr& renderMgr = MOAIRenderMgr::Get ();
+	
 	lua_pushnumber ( L, device.mFrameRate );
 	lua_pushnumber ( L, device.mLastActionTreeTime );
 	lua_pushnumber ( L, device.mLastNodeMgrTime );
+	lua_pushnumber ( L, device.mSimDuration );
+	lua_pushnumber ( L, renderMgr.GetRenderDuration ());
 
-	return 3;
+	return 5;
 }
 
 //----------------------------------------------------------------//

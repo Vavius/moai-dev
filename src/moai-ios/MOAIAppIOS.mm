@@ -15,6 +15,7 @@
 #import <ifaddrs.h>
 #import <arpa/inet.h>
 #import <sys/sysctl.h>
+#import <AudioToolbox/AudioServices.h>
 
 //================================================================//
 // lua
@@ -22,7 +23,7 @@
 
 //----------------------------------------------------------------//
 /**	@name	getAvailableStorage
-	@text	Get the available storage size in mb on the system
+	@text	Get the available storage size in kb on the system
  
 	@out	long size
  */
@@ -281,6 +282,14 @@ int MOAIAppIOS::_takeCamera( lua_State* L ) {
 	return 0;
 }
 
+//----------------------------------------------------------------//
+int MOAIAppIOS::_vibrate ( lua_State *L ) {
+	
+	AudioServicesPlaySystemSound ( kSystemSoundID_Vibrate );
+	return 0;
+}
+
+//----------------------------------------------------------------//
 void MOAIAppIOS::callTakeCameraLuaCallback (NSString *imagePath) {
 	MOAILuaRef& callback = MOAIAppIOS::Get ().mOnTakeCameraCallback;
 	MOAIScopedLuaState state = callback.GetSelf ();
@@ -375,6 +384,7 @@ void MOAIAppIOS::RegisterLuaClass ( MOAILuaState& state ) {
 		{ "sendMail",					_sendMail },
 		{ "setListener",				&MOAIGlobalEventSource::_setListener < MOAIAppIOS > },
 		{ "takeCamera",					_takeCamera },
+		{ "vibrate",					_vibrate },
 		{ NULL, NULL }
 	};
 

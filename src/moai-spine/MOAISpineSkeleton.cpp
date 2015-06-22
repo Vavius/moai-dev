@@ -401,6 +401,41 @@ int MOAISpineSkeleton::_setSlotsToSetupPose	( lua_State* L ) {
 	return 0;
 }
 
+//----------------------------------------------------------------//
+/**	@name	setSlotColor
+
+	@in		MOAISpineSkeleton self
+	@in		string	slotName
+	@in		number	r
+	@in		number	g
+	@in		number	b
+	@in		number	a
+	@out	nil
+*/
+int MOAISpineSkeleton::_setSlotColor ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAISpineSkeleton, "U" );
+	
+	if ( !self->mSkeleton ) {
+		MOAIPrint ( "MOAISpineSkeleton not initialized \n" );
+		return 0;
+	}
+	
+	cc8* slotName = state.GetValue < cc8* >( 2, 0 );
+	
+	spSlot* slot = spSkeleton_findSlot ( self->mSkeleton, slotName );
+	if ( !slot ) {
+		MOAIPrint ( "Slot %s not found \n", slotName );
+		return 0;
+	}
+	
+	slot->r = state.GetValue < float >( 3, 1.0f );
+	slot->g = state.GetValue < float >( 4, 1.0f );
+	slot->b = state.GetValue < float >( 5, 1.0f );
+	slot->a = state.GetValue < float >( 6, 1.0f );
+	
+	return 0;
+}
+
 
 //----------------------------------------------------------------//
 /**	@name	setTime
@@ -833,6 +868,7 @@ void MOAISpineSkeleton::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "setMix", 				_setMix },
 		{ "setSkin", 				_setSkin },
 		{ "setSlotsToSetupPose", 	_setSlotsToSetupPose },
+		{ "setSlotColor",			_setSlotColor },
 		{ "setTime",                _setTime },
 		{ "setToSetupPose", 		_setToSetupPose },
 		{ NULL, NULL }

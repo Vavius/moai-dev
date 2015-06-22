@@ -47,17 +47,35 @@ int	MOAIAppAndroid::_exitGame ( lua_State* L ) {
 
 //----------------------------------------------------------------//
 // TODO: doxygen
-int MOAIAppAndroid::_getPictureCode( lua_State* L ) {
+int MOAIAppAndroid::_getAvailableStorage ( lua_State* L ) {
 	MOAILuaState state( L );
-	MOAIAppAndroid::Get().PushPictureCode( state );
+	
+	JNI_GET_ENV ( jvm, env );
+
+	jclass t_class = env->FindClass ( "com/ziplinegames/moai/Moai" );
+	jmethodID t_getResultCode_mid = env->GetStaticMethodID ( t_class, "getAvailableStorage", "()J" );
+
+	if ( t_class != NULL && t_getResultCode_mid != NULL ) {
+		long long j_code = env->CallStaticIntMethod( t_class, t_getResultCode_mid );
+		lua_pushnumber ( L, j_code );
+		return 1;
+	}
+	return 0;
+}
+
+//----------------------------------------------------------------//
+// TODO: doxygen
+int MOAIAppAndroid::_getPictureCode ( lua_State* L ) {
+	MOAILuaState state( L );
+	MOAIAppAndroid::Get().PushPictureCode ( state );
 	return 1;
 }
 
 //----------------------------------------------------------------//
 // TODO: doxygen
-int MOAIAppAndroid::_getPicturePath( lua_State* L ) {
+int MOAIAppAndroid::_getPicturePath ( lua_State* L ) {
 	MOAILuaState state( L );
-	MOAIAppAndroid::Get().PushPicturePath( state );
+	MOAIAppAndroid::Get().PushPicturePath ( state );
 	return 1;
 }
 
@@ -352,6 +370,7 @@ void MOAIAppAndroid::RegisterLuaClass ( MOAILuaState& state ) {
 
 	luaL_Reg regTable [] = {
 		{ "exitGame",				_exitGame },
+		{ "getAvailableStorage",	_getAvailableStorage },
 		{ "getPictureCode",			_getPictureCode },
 		{ "getPicturePath",			_getPicturePath },
 		{ "getListener",			&MOAIGlobalEventSource::_getListener < MOAIAppAndroid > },
