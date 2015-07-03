@@ -3734,8 +3734,6 @@
 		CD9F76501808CE9D0001EF0C /* MOAIKeyboardIOS.mm in Sources */ = {isa = PBXBuildFile; fileRef = CD2B7C3D17FA56A100EBA2DB /* MOAIKeyboardIOS.mm */; };
 		CD9F76511808CE9D0001EF0C /* MOAINotificationsIOS.h in Headers */ = {isa = PBXBuildFile; fileRef = CD2B7C3E17FA56A100EBA2DB /* MOAINotificationsIOS.h */; };
 		CD9F76521808CE9D0001EF0C /* MOAINotificationsIOS.mm in Sources */ = {isa = PBXBuildFile; fileRef = CD2B7C3F17FA56A100EBA2DB /* MOAINotificationsIOS.mm */; };
-		CD9F76531808CE9D0001EF0C /* MOAIWebViewDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = CD2B7C4817FA56A100EBA2DB /* MOAIWebViewDelegate.h */; };
-		CD9F76541808CE9D0001EF0C /* MOAIWebViewDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = CD2B7C4917FA56A100EBA2DB /* MOAIWebViewDelegate.mm */; };
 		CD9F76551808CE9D0001EF0C /* MOAIWebViewIOS.h in Headers */ = {isa = PBXBuildFile; fileRef = CD2B7C4A17FA56A100EBA2DB /* MOAIWebViewIOS.h */; };
 		CD9F76561808CE9D0001EF0C /* MOAIWebViewIOS.mm in Sources */ = {isa = PBXBuildFile; fileRef = CD2B7C4B17FA56A100EBA2DB /* MOAIWebViewIOS.mm */; };
 		CD9F76571808CE9D0001EF0C /* NSArray+MOAILib.h in Headers */ = {isa = PBXBuildFile; fileRef = CD2B7C4C17FA56A100EBA2DB /* NSArray+MOAILib.h */; };
@@ -6643,8 +6641,6 @@
 		CD2B7C3D17FA56A100EBA2DB /* MOAIKeyboardIOS.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = MOAIKeyboardIOS.mm; path = "moai-ios/MOAIKeyboardIOS.mm"; sourceTree = "<group>"; };
 		CD2B7C3E17FA56A100EBA2DB /* MOAINotificationsIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MOAINotificationsIOS.h; path = "moai-ios/MOAINotificationsIOS.h"; sourceTree = "<group>"; };
 		CD2B7C3F17FA56A100EBA2DB /* MOAINotificationsIOS.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = MOAINotificationsIOS.mm; path = "moai-ios/MOAINotificationsIOS.mm"; sourceTree = "<group>"; };
-		CD2B7C4817FA56A100EBA2DB /* MOAIWebViewDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MOAIWebViewDelegate.h; path = "moai-ios/MOAIWebViewDelegate.h"; sourceTree = "<group>"; };
-		CD2B7C4917FA56A100EBA2DB /* MOAIWebViewDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = MOAIWebViewDelegate.mm; path = "moai-ios/MOAIWebViewDelegate.mm"; sourceTree = "<group>"; };
 		CD2B7C4A17FA56A100EBA2DB /* MOAIWebViewIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MOAIWebViewIOS.h; path = "moai-ios/MOAIWebViewIOS.h"; sourceTree = "<group>"; };
 		CD2B7C4B17FA56A100EBA2DB /* MOAIWebViewIOS.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = MOAIWebViewIOS.mm; path = "moai-ios/MOAIWebViewIOS.mm"; sourceTree = "<group>"; };
 		CD2B7C4C17FA56A100EBA2DB /* NSArray+MOAILib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSArray+MOAILib.h"; path = "moai-ios/NSArray+MOAILib.h"; sourceTree = "<group>"; };
@@ -10471,8 +10467,6 @@
 				CD2B7C5F17FA56A100EBA2DB /* MOAIReachabilityListener.mm */,
 				CD8215FA195A322D00603EA1 /* MOAITakeCameraListener.h */,
 				CD8215FB195A322D00603EA1 /* MOAITakeCameraListener.mm */,
-				CD2B7C4817FA56A100EBA2DB /* MOAIWebViewDelegate.h */,
-				CD2B7C4917FA56A100EBA2DB /* MOAIWebViewDelegate.mm */,
 				CD2B7C4A17FA56A100EBA2DB /* MOAIWebViewIOS.h */,
 				CD2B7C4B17FA56A100EBA2DB /* MOAIWebViewIOS.mm */,
 				CD2B7C4C17FA56A100EBA2DB /* NSArray+MOAILib.h */,
@@ -13622,7 +13616,6 @@
 				CD4C3E3F180A63BB00C02381 /* MOAIGlyphSet.h in Headers */,
 				CD4C3E7C180A63BB00C02381 /* MOAIParticleSystem.h in Headers */,
 				CD4C3E76180A63BB00C02381 /* MOAIParticlePlugin.h in Headers */,
-				CD9F76531808CE9D0001EF0C /* MOAIWebViewDelegate.h in Headers */,
 				CD4C3ED8180A63BB00C02381 /* MOAITileFlags.h in Headers */,
 				CD4C3EA0180A63BB00C02381 /* MOAIProfilerReportBase.h in Headers */,
 				CD9613781905ED2D00156BEF /* MOAIFontSnappingShader-vsh.h in Headers */,
@@ -17157,7 +17150,6 @@
 				CD4C3EB2180A63BB00C02381 /* MOAIScriptDeck.cpp in Sources */,
 				CD4C3E2A180A63BB00C02381 /* MOAIFreeTypeFontReader.cpp in Sources */,
 				CD4C3E01180A63BB00C02381 /* MOAIButtonSensor.cpp in Sources */,
-				CD9F76541808CE9D0001EF0C /* MOAIWebViewDelegate.mm in Sources */,
 				CD4C3E3C180A63BB00C02381 /* MOAIDynamicGlyphCachePage.cpp in Sources */,
 				CD9F76661808CE9D0001EF0C /* NSString+MOAILib.mm in Sources */,
 				CD4C3EB6180A63BB00C02381 /* MOAISensor.cpp in Sources */,

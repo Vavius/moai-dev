@@ -197,7 +197,7 @@ int MOAIFacebookIOS::_logEvent ( lua_State *L ) {
 		return 0;
 	}
 	
-	double valueToSum = state.GetValue < double >(2, 0);
+	double valueToSum = state.GetValue < double >( 2, 0.0 );
 	
 	NSMutableDictionary* paramsDict = [[ NSMutableDictionary alloc ] init ];
 	if ( state.IsType( 3, LUA_TTABLE )) {
