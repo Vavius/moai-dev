@@ -28,6 +28,8 @@ private:
 	float					mExpectedLength;
 	float					mDataReceived;
 	
+	bool					mCanceled;
+		
 	// This buffer holds data being sent *to* the server
 	ZLLeanArray < u8 >		mBody;
 	
@@ -58,8 +60,10 @@ private:
 public:
 	
 	DECL_LUA_FACTORY ( MOAIHttpTaskNSURL )
+	GET ( bool, Canceled, mCanceled )
 	
 	//----------------------------------------------------------------//
+	void				Cancel					();
 	void				DidFinishLoading		();
 	void				DidReceiveData			( const void* data, int size );
 	void				DidReceiveResponse		( int responseCode, NSDictionary* headers, int expectedLength );

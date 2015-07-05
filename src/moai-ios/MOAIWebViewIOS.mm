@@ -1,8 +1,8 @@
 // Copyright (c) 2010-2011 Zipline Games, Inc. All Rights Reserved.
 // http://getmoai.com
 
-#import <moai-apple/NSError+MOAILib.h>
-#import <moai-apple/NSString+MOAILib.h>
+#import <moai-ios/NSError+MOAILib.h>
+#import <moai-ios/NSString+MOAILib.h>
 #import <moai-ios/MOAIAppIOS.h>
 #import <moai-ios/MOAIWebViewIOS.h>
 #import <moai-ios/MOAIWebViewController.h>

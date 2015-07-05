@@ -14,6 +14,15 @@
 //================================================================//
 
 //----------------------------------------------------------------//
+int MOAIHttpTaskBase::_cancel ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIHttpTaskBase, "U" )
+	
+	self->Cancel ();
+	
+	return 0;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	getProgress
 	@text	Returns the progress of the download.
 	
@@ -313,7 +322,7 @@ int MOAIHttpTaskBase::_setBody ( lua_State* L ) {
 	@out	nil
 */
 int MOAIHttpTaskBase::_setCallback ( lua_State* L ) {
-	MOAI_LUA_SETUP ( MOAIHttpTaskBase, "UF" )
+	MOAI_LUA_SETUP ( MOAIHttpTaskBase, "U" )
 
 	self->mOnFinish.SetRef ( *self, state, 2 );
 	return 0;
@@ -615,6 +624,7 @@ void MOAIHttpTaskBase::RegisterLuaClass ( MOAILuaState& state ) {
 void MOAIHttpTaskBase::RegisterLuaFuncs ( MOAILuaState& state ) {
 
 	luaL_Reg regTable [] = {
+		{ "cancel",				_cancel },
 		{ "getProgress",		_getProgress },
 		{ "getResponseCode",	_getResponseCode },
 		{ "getResponseHeader",	_getResponseHeader },

@@ -29,10 +29,12 @@ private:
 
 	STLString			mUrl;
 	u32					mDefaultTimeout;
-	//u32					m
 	CURL*				mEasyHandle;
 	curl_slist*			mHeaderList;
 
+	// The task scheduled to be canceled
+	bool				mCanceled;
+		
 	// This buffer holds data being sent *to* the server
 	ZLLeanArray < u8 >	mBody;
 	
@@ -64,6 +66,7 @@ public:
 	DECL_LUA_FACTORY ( MOAIHttpTaskCurl )
 
 	//----------------------------------------------------------------//
+	void			Cancel					();
 					MOAIHttpTaskCurl		();
 					~MOAIHttpTaskCurl		();
 	void			PerformAsync			();
