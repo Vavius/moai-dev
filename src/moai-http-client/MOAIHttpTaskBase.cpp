@@ -273,6 +273,32 @@ int MOAIHttpTaskBase::_performSync ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/**	@lua	saveFile
+	@text	Write received data to file
+	
+	@in		MOAIHttpTaskBase self
+	@in		string		path
+	@out	boolean		success
+*/
+int MOAIHttpTaskBase::_saveFile ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIHttpTaskBase, "US" )
+	
+	cc8* filename = state.GetValue < cc8* >( 2, 0 );
+	
+	ZLFileStream stream;
+	if ( self->mData.Size () && filename && stream.Open ( filename, ZLFileStream::READ_WRITE_NEW )) {
+		stream.WriteBytes ( self->mData.Data (), self->mData.Size ());
+		stream.Close ();
+		state.Push ( true );
+	}
+	else {
+		state.Push ( false );
+	}
+	
+	return 1;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	setBody
 	@text	Sets the body for a POST or PUT.
 
@@ -636,6 +662,7 @@ void MOAIHttpTaskBase::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "parseXml",			_parseXml },
 		{ "performAsync",		_performAsync },
 		{ "performSync",		_performSync },
+		{ "saveFile",			_saveFile },
 		{ "setCallback",		_setCallback },
 		{ "setCookieDst",		_setCookieDst },
 		{ "setCookieSrc",		_setCookieSrc },
