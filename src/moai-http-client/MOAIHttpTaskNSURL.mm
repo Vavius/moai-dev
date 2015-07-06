@@ -40,6 +40,12 @@ u32 MOAIHttpTaskNSURL::_writeData ( char* data, u32 n, u32 l, void* s ) {
 //================================================================//
 
 //----------------------------------------------------------------//
+void MOAIHttpTaskNSURL::Cancel () {
+	
+	this->mCanceled = true;
+}
+
+//----------------------------------------------------------------//
 void MOAIHttpTaskNSURL::Clear () {
 	
 	this->mUrl.clear ();
@@ -100,6 +106,7 @@ MOAIHttpTaskNSURL::MOAIHttpTaskNSURL () :
 	mOpt ( 0 ),
 	mDefaultTimeout ( 10 ),
 	mDataReceived ( 0 ),
+	mCanceled ( false ),
 	mStream ( 0 ),
 	mRequest ( 0 ) {
 	
@@ -325,6 +332,9 @@ void MOAIHttpTaskNSURL::SetVerbose ( bool verbose ) {
 		UNUSED ( myConnection );
 	
 		self->mTask->DidReceiveData ( myData.bytes, myData.length );
+		if ( self->mTask->GetCanceled ()) {
+			[ myConnection cancel ];
+		}
 	}
 
 	//----------------------------------------------------------------//

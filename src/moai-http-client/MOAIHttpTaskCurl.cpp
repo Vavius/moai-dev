@@ -106,7 +106,7 @@ u32 MOAIHttpTaskCurl::_progressFunction ( void* ptr, double totalDownload, doubl
 		self->mProgress = 0.0f;
 	}
 	
-	return 0;
+	return self->mCanceled;
 }
 
 //================================================================//
@@ -159,6 +159,12 @@ void MOAIHttpTaskCurl::AffirmHandle () {
 		result = curl_easy_setopt ( this->mEasyHandle, CURLOPT_NOSIGNAL, 1 );
 		PrintError ( result );
 	#endif
+}
+
+//----------------------------------------------------------------//
+void MOAIHttpTaskCurl::Cancel () {
+	
+	this->mCanceled = true;
 }
 
 //----------------------------------------------------------------//
@@ -215,6 +221,7 @@ void MOAIHttpTaskCurl::CurlFinish () {
 MOAIHttpTaskCurl::MOAIHttpTaskCurl () :
 	mDefaultTimeout ( 10 ),
 	mEasyHandle ( 0 ),
+	mCanceled	( false ),
 	mHeaderList ( 0 ),
 	mStream ( 0 ) {
 

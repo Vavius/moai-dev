@@ -20,7 +20,7 @@
 #import <moai-ios/MOAINotificationsIOS.h>
 #import <moai-ios/MOAIReachability.h>
 #import <moai-ios/MOAIReachabilityListener.h>
-#import <moai-ios/MOAIWebViewDelegate.h>
+#import <moai-ios/MOAIWebViewController.h>
 #import <moai-ios/MOAIWebViewIOS.h>
 
 //#endif
