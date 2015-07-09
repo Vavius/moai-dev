@@ -21,6 +21,10 @@ void AKUModulesIosAppFinalize () {
 		AKUIosAdColonyAppFinalize ();
 	#endif
 
+	#if AKU_WITH_IOS_ADTOAPP
+		AKUIosAdToAppAppFinalize ();
+	#endif
+
 	#if AKU_WITH_IOS_BILLING
 		AKUIosBillingAppFinalize ();
 	#endif
@@ -85,6 +89,10 @@ void AKUModulesIosAppInitialize () {
 		AKUIosAdColonyAppInitialize ();
 	#endif
 
+	#if AKU_WITH_IOS_ADTOAPP
+		AKUIosAdToAppAppInitialize ();
+	#endif
+
 	#if AKU_WITH_IOS_BILLING
 		AKUIosBillingAppInitialize ();
 	#endif
@@ -147,6 +155,10 @@ void AKUModulesIosContextInitialize () {
 
 	#if AKU_WITH_IOS_ADCOLONY
 		AKUIosAdColonyContextInitialize ();
+	#endif
+
+	#if AKU_WITH_IOS_ADTOAPP
+		AKUIosAdToAppContextInitialize ();
 	#endif
 
 	#if AKU_WITH_IOS_BILLING

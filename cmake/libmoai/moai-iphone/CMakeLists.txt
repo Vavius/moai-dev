@@ -3,6 +3,7 @@ project ( moai-ios )
 
 # Extensions
 add_subdirectory(moai-ios-adcolony)
+add_subdirectory(moai-ios-adtoapp)
 add_subdirectory(moai-ios-billing)
 add_subdirectory(moai-ios-chartboost)
 add_subdirectory(moai-ios-crashlytics)

@@ -111,6 +111,7 @@ private:
 	u32				mMaxLength;
 
 	//----------------------------------------------------------------//
+    static int      _getInputLanguage       ( lua_State* L );
 	static int		_getText				( lua_State* L );
 	static int		_setMaxLength			( lua_State* L );
 	static int		_showKeyboard			( lua_State* L );
@@ -134,6 +135,7 @@ public:
 	void			Finish					();
 					MOAIKeyboardIOS			();
 					~MOAIKeyboardIOS		();
+    void            PushInputLanguage       ( MOAILuaState& state );
 	void			PushText				( MOAILuaState& state );
 	void			RegisterLuaClass		( MOAILuaState& state );
 	
