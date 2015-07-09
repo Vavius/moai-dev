@@ -502,6 +502,7 @@ int MOAIFacebookIOS::_requestReadPermissions( lua_State *L ) {
 	
 	@opt	string	message			The message for the request. See Facebook documentation. Default is nil.
 	@opt	table	params			Optional parameters
+	@opt	function callback		Callback function. Signature: function(bool success, string result) end
 	@out 	nil
 */
 int MOAIFacebookIOS::_sendRequest ( lua_State* L ) {
@@ -518,6 +519,13 @@ int MOAIFacebookIOS::_sendRequest ( lua_State* L ) {
 		[ params initWithLua:state stackIndex:2 ];
 	}
 	
+	MOAIFacebookLuaCallback* callback = nil;
+	if ( state.IsType ( 3, LUA_TFUNCTION )) {
+		
+		int ref  = MOAILuaRuntime::Get ().GetRef ( state, 3, false );
+		callback = [[ MOAIFacebookLuaCallback alloc ] initWithRef:ref ];
+	}
+	
     FBFrictionlessRecipientCache* cache = MOAIFacebookIOS::Get ().mFriendsCache;
     [ FBWebDialogs presentRequestsDialogModallyWithSession:nil
 		message:message
@@ -525,20 +533,32 @@ int MOAIFacebookIOS::_sendRequest ( lua_State* L ) {
 		parameters:params
 		handler:^( FBWebDialogResult result, NSURL* resultURL, NSError* error ) {
 			UNUSED ( resultURL );
-		
-			if ( error ) {
-				MOAIFacebookIOS::Get ().DialogDidNotComplete ();
-			}
-			else {
-				if (result == FBWebDialogResultDialogCompleted) {
-					MOAIFacebookIOS::Get ().DialogDidComplete ( resultURL );
-				} else {
+			
+			if ( callback == nil ) {
+				
+				if ( error ) {
 					MOAIFacebookIOS::Get ().DialogDidNotComplete ();
 				}
+				else {
+					if ( result == FBWebDialogResultDialogCompleted ) {
+						MOAIFacebookIOS::Get ().DialogDidComplete ( resultURL );
+					} else {
+						MOAIFacebookIOS::Get ().DialogDidNotComplete ();
+					}
+				}
+			}
+			else {
+				bool success = ( error == nil ) && ( result == FBWebDialogResultDialogCompleted );
+				MOAIFacebookIOS::Get ().DialogResult ( success, resultURL, [ callback ref ]);
 			}
 		}
 		friendCache:cache
 	];
+
+	if ( callback ) {
+		// block now owns this object
+		[ callback release ];
+	}
 	
 	return 0;
 }
@@ -700,6 +720,24 @@ void MOAIFacebookIOS::DialogDidComplete ( NSURL* result ) {
 }
 
 //----------------------------------------------------------------//
+void MOAIFacebookIOS::DialogResult ( bool success, NSURL *result, int callbackRef ) {
+	
+	MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
+	
+	if ( MOAILuaRuntime::Get ().PushRef ( state, callbackRef )) {
+		
+		state.Push ( success );
+		
+		if ( result ) {
+			[[ result absoluteString ] toLua:state ];
+		} else {
+			state.Push ();
+		}
+		int res = state.DebugCall ( 2, 0 );
+	}
+}
+
+//----------------------------------------------------------------//
 void MOAIFacebookIOS::HandleOpenURL ( NSURL* url, NSString* sourceApplication ) {
 	
 	[ FBAppCall handleOpenURL:url sourceApplication:sourceApplication ];
@@ -787,3 +825,29 @@ void MOAIFacebookIOS::SessionDidNotLogin () {
 	}
 }
 
+
+//================================================================//
+// MOAIFacebookLuaCallback
+//================================================================//
+@implementation MOAIFacebookLuaCallback
+
+-( id ) initWithRef: ( int )ref {
+	
+	self = [ super init ];
+	if ( self != nil ) {
+		self->mRef = ref;
+	}
+	return self;
+}
+
+-( int ) ref {
+	return self->mRef;
+}
+
+-( void ) dealloc {
+	
+	MOAILuaRuntime::Get ().ClearRef ( self->mRef );
+	[ super dealloc ];
+}
+
+@end

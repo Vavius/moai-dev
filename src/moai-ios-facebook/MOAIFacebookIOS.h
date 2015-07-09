@@ -13,9 +13,7 @@
 #import <moai-core/headers.h>
 #import <FacebookSDK/FacebookSDK.h>
 
-@class MOAIFacebookIOSDialogDelegate;
-@class MOAIFacebookIOSRequestDelegate;
-@class MOAIFacebookIOSSessionDelegate;
+@class MOAIFacebookLuaCallback;
 
 //================================================================//
 // MOAIFacebookIOS
@@ -43,6 +41,7 @@ private:
 		
 	STLString						mAppId;
 	FBFrictionlessRecipientCache* 	mFriendsCache;
+	
 		
 	//----------------------------------------------------------------//
     static int  _declinedPermissions        ( lua_State* L );
@@ -81,13 +80,14 @@ public:
 		SESSION_DID_NOT_LOGIN,
 		TOTAL_EVENTS,
 	};
-        
+	
     bool    ActiveSessionHasPermissions ( NSArray* permissions );
     		MOAIFacebookIOS			();
 			~MOAIFacebookIOS		();
 	void	DialogDidNotComplete	();
 	void	DialogDidComplete		();
 	void	DialogDidComplete		( NSURL* result );
+	void	DialogResult			( bool success, NSURL* result, int callbackRef );
 	void	HandleOpenURL			( NSURL* url, NSString* sourceApplication );
     void    Logout                  ();
 	void	PermissionsDenied		( NSString* error );
@@ -97,6 +97,24 @@ public:
 	void	SessionDidLogin			();
 	void	SessionDidNotLogin		();
 };
+
+//================================================================//
+// MOAIFacebookLuaCallback
+//================================================================//
+//
+// This class is for use with async objective-C block callbacks.
+// It should be retained by block and will ensure that Lua callback ref
+// will have the same lifetime as enclosing obj-C block.
+//
+@interface MOAIFacebookLuaCallback : NSObject {
+@private
+	int mRef;
+}
+
+//----------------------------------------------------------------//
+-( id )	initWithRef :( int )ref;
+-( int ) ref;
+@end
 
 #endif  //DISABLE_FACEBOOK
 
