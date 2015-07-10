@@ -385,6 +385,7 @@ MOAIWebViewIOS::~MOAIWebViewIOS () {
 	if ( this->mWebViewController ) {
 		[ this->mWebViewController setMoaiWebView:NULL ];
 		[ this->mWebViewController release ];
+		this->mWebViewController = nil;
 	}
 }
 
