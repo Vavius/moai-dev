@@ -45,6 +45,7 @@ private:
 	jmethodID	mJava_RequestReadPermissions;
 	jmethodID	mJava_RestoreSession;
 	jmethodID	mJava_SendRequest;
+	jmethodID	mJava_SendRequestCallback;
 	jmethodID	mJava_SessionValid;
 
 	//----------------------------------------------------------------//
@@ -94,6 +95,7 @@ public:
 	void	DialogDidNotComplete	();
 	void	DialogDidComplete		();
 	void	DialogDidComplete		( cc8* error );
+	void	DialogResult 			( bool status, cc8* result, int refId );
     void    Logout                  ();
 	void	PermissionsDenied		( cc8* error );
 	void	PermissionsGranted		();

@@ -42,8 +42,10 @@ public class MoaiFacebook {
 	private static AppEventsLogger sLogger = null;
 	private static UiLifecycleHelper sUiLifecycleHelper;
 
+	protected static native void	AKUClearRef ( int refId );
 	protected static native void	AKUDialogDidNotComplete ();
 	protected static native void	AKUDialogDidComplete ( String result );
+	protected static native void	AKUDialogResult ( boolean status, String result, int refId );
 	protected static native void	AKUPermissionsDenied ( String error );
 	protected static native void	AKUPermissionsGranted ();
 	protected static native void	AKUReceivedRequestResponse ( boolean status, String result, int callbackIdx );
@@ -158,6 +160,7 @@ public class MoaiFacebook {
 		MoaiLog.i ( " -------------------------------------------------------- MoaiFacebook onResume:  -------------------------------------------------------- " );
 		
 		sUiLifecycleHelper.onResume();
+		AppEventsLogger.activateApp(sActivity);
 	}
 	
 	//----------------------------------------------------------------//
@@ -166,6 +169,7 @@ public class MoaiFacebook {
 		MoaiLog.i ( " -------------------------------------------------------- MoaiFacebook onPause:  -------------------------------------------------------- " );
 		
 		sUiLifecycleHelper.onPause ();
+		AppEventsLogger.deactivateApp(sActivity);
 	}
 	
 	//----------------------------------------------------------------//
@@ -663,6 +667,61 @@ public class MoaiFacebook {
 
 				AKUDialogDidNotComplete ();
 			}
+	    }
+	}
+
+	//----------------------------------------------------------------//
+	public static void sendRequest ( final String message, final Bundle params, final int refId ) {
+
+		final Session mCurrentSession = Session.getActiveSession ();
+		if ( isSessionValid ( mCurrentSession ) ) {
+
+	        sActivity.runOnUiThread(new Runnable() {
+
+				public void run() {
+				params.putString ( "message", message );
+
+	    		WebDialog inviteDialog = ( new WebDialog.Builder ( sActivity, mCurrentSession, "apprequests",  params ) )
+	    		.setOnCompleteListener ( new OnCompleteListener () {
+
+	    			public void finalize () {
+
+	    				MoaiLog.i ( " ------------------------------------------ FINALIZER  ----------------------------------" );
+	    				AKUClearRef ( refId );
+	    			}
+
+	    			public void onComplete ( Bundle values, FacebookException error ) {
+
+	    				if ( error != null ) {
+
+	    					synchronized ( Moai.sAkuLock ) {
+
+	    						AKUDialogResult ( false, "", refId );
+	    					}
+
+	    					MoaiLog.i ( " -------------------------------------------------------- MoaiFacebook: Invite error 'cause : "+error.getMessage()+" -------------------------------------------------------- " );
+	    				} else {
+
+	    					synchronized ( Moai.sAkuLock ) {
+
+	    						AKUDialogResult ( true, "fbconnect://success?request="+values.getString("request")+"&to[0]="+values.getString("to[0]"), refId );
+	    					}
+
+	    					MoaiLog.i ( " -------------------------------------------------------- MoaiFacebook: Invite completed successfully: result = "+"fbconnect://success?request="+values.getString("request")+"&to[0]="+values.getString("to[0]")+" -------------------------------------------------------- " );
+	    				}
+	    			}
+
+	    		} )
+	    		.build ();
+
+	    		inviteDialog.show ();
+
+				}
+	    	});
+	    } else {
+
+	    	AKUDialogResult ( false, "", refId );
+			AKUClearRef ( refId );
 	    }
 	}
 	

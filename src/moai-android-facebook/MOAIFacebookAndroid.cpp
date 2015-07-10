@@ -282,7 +282,14 @@ int MOAIFacebookAndroid::_sendRequest ( lua_State* L ) {
     if ( state.IsType ( 2, LUA_TTABLE ) ) {
        jbundle = self->BundleFromLua( L, 2 );
     }
-	self->CallStaticVoidMethod ( self->mJava_SendRequest, jmessage, jbundle );		
+
+    if ( state.IsType ( 3, LUA_TFUNCTION ) ) {
+    	int ref  = MOAILuaRuntime::Get ().GetRef ( state, 3, false );
+		self->CallStaticVoidMethod ( self->mJava_SendRequestCallback, jmessage, jbundle, ( jint )ref );
+    }
+    else {
+		self->CallStaticVoidMethod ( self->mJava_SendRequest, jmessage, jbundle );
+    }
 	return 0;
 }
 
@@ -320,7 +327,7 @@ MOAIFacebookAndroid::MOAIFacebookAndroid () {
 
 	RTTI_SINGLE ( MOAILuaObject )
 	// RTTI_SINGLE ( MOAIGlobalEventSource )
-		
+	
 	this->SetClass ( "com/ziplinegames/moai/MoaiFacebook" );
 	
 	this->mJava_AppEventsConstants 			= this->GetClass 		( "com/facebook/AppEventsConstants" );
@@ -338,6 +345,7 @@ MOAIFacebookAndroid::MOAIFacebookAndroid () {
 	this->mJava_RequestReadPermissions		= this->GetStaticMethod ( "requestReadPermissions", "([Ljava/lang/String;)V" );
 	this->mJava_RestoreSession				= this->GetStaticMethod ( "restoreSession", "()Z" );
 	this->mJava_SendRequest					= this->GetStaticMethod ( "sendRequest", "(Ljava/lang/String;Landroid/os/Bundle;)V" );
+	this->mJava_SendRequestCallback			= this->GetStaticMethod ( "sendRequest", "(Ljava/lang/String;Landroid/os/Bundle;I)V" );
 	this->mJava_SessionValid				= this->GetStaticMethod ( "sessionValid", "()Z" );
 }
 
@@ -454,6 +462,24 @@ void MOAIFacebookAndroid::DialogDidComplete ( cc8* result ) {
 }
 
 //----------------------------------------------------------------//
+void MOAIFacebookAndroid::DialogResult ( bool status, cc8* result, int refId ) {
+	
+	MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
+	
+	if ( MOAILuaRuntime::Get ().PushRef ( state, refId )) {
+		
+		state.Push ( status );
+		
+		if ( result ) {
+			state.Push ( result );
+		} else {
+			state.Push ();
+		}
+		int res = state.DebugCall ( 2, 0 );
+	}
+}
+
+//----------------------------------------------------------------//
 void MOAIFacebookAndroid::PermissionsDenied ( cc8* error ) {
 
 	MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
@@ -532,6 +558,12 @@ void MOAIFacebookAndroid::SessionDidNotLogin () {
 //================================================================//
 
 //----------------------------------------------------------------//
+extern "C" void Java_com_ziplinegames_moai_MoaiFacebook_AKUClearRef ( JNIEnv* env, jclass obj, jint refId ) {
+
+	MOAILuaRuntime::Get ().ClearRef ( refId );
+}
+
+//----------------------------------------------------------------//
 extern "C" void Java_com_ziplinegames_moai_MoaiFacebook_AKUDialogDidNotComplete ( JNIEnv* env, jclass obj ) {
 
 	MOAIFacebookAndroid::Get ().DialogDidNotComplete ();
@@ -550,6 +582,22 @@ extern "C" void Java_com_ziplinegames_moai_MoaiFacebook_AKUDialogDidComplete ( J
 		MOAIFacebookAndroid::Get ().DialogDidComplete ( result );
 
 		JNI_RELEASE_CSTRING ( jresult, result );	
+	}
+}
+
+//----------------------------------------------------------------//
+extern "C" void Java_com_ziplinegames_moai_MoaiFacebook_AKUDialogResult ( JNIEnv* env, jclass obj, jboolean status, jstring jresult, jint refId ) {
+
+	if ( jresult == NULL ) {
+
+		MOAIFacebookAndroid::Get ().DialogResult ( status, 0, refId );
+	} else {
+
+		JNI_GET_CSTRING ( jresult, result );
+
+		MOAIFacebookAndroid::Get ().DialogResult ( status, result, refId );
+
+		JNI_RELEASE_CSTRING ( jresult, result );
 	}
 }
 
