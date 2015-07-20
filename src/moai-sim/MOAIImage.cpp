@@ -610,7 +610,8 @@ int MOAIImage::_loadAsync ( lua_State *L ) {
 		task->Init ( *buffer, *self, transform );
 	}
 	else {
-		task->Init ( state.GetValue < cc8* >( 2, "" ), *self, transform );
+		cc8* filename = state.GetValue < cc8* >( 2, "" );
+		task->Init ( filename, *self, transform );
 	}
 	task->SetCallback ( L, 4 );
 	task->Start ( *queue, MOAIMainThreadTaskSubscriber::Get ());
