@@ -592,7 +592,27 @@ int MOAIImage::_load ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
-// TODO
+/**	@lua	loadAsync
+	@text	Load an image asyncronously. This includes reading the file and decoding compressed data.
+	
+ 	@overload
+		@in		MOAIImage self
+		@in		string filename			The path to the image file
+		@in		MOAITaskQueue queue		The queue to peform operation on
+		@opt	function callback		Callback that will receive loaded image
+		@opt	number transform		One of MOAIImage.POW_TWO, MOAIImage.QUANTIZE,
+										MOAIImage.TRUECOLOR, MOAIImage.PREMULTIPLY_ALPHA
+		@out	nil
+ 
+	@overload
+		@in		MOAIImage self
+		@in		MOAIDataBuffer data		Buffer containing the image data
+		@in		MOAITaskQueue queue		The queue to peform operation on
+		@opt	function callback		Callback that will receive loaded image
+		@opt	number transform		One of MOAIImage.POW_TWO, MOAIImage.QUANTIZE,
+										MOAIImage.TRUECOLOR, MOAIImage.PREMULTIPLY_ALPHA
+		@out	nil
+*/
 int MOAIImage::_loadAsync ( lua_State *L ) {
 	MOAI_LUA_SETUP ( MOAIImage, "U" )
 	

@@ -5,9 +5,9 @@
 #define MOAIIMAGELOADTASK_H
 
 #include <moai-util/MOAITask.h>
+#include <moai-sim/MOAIImage.h>
 
 class MOAIDataBuffer;
-class MOAIImage;
 
 //================================================================//
 // MOAIImageLoadTask
@@ -15,10 +15,12 @@ class MOAIImage;
 class MOAIImageLoadTask : 
 	public MOAITask {
 private:
+	
+	MOAIImage								mImage;
 
 	STLString								mFilename;
-	MOAILuaSharedPtr < MOAIDataBuffer >		mData;
-	MOAILuaSharedPtr < MOAIImage >			mImage;
+	MOAILuaSharedPtr < MOAIDataBuffer >		mDataBuffer;
+	MOAILuaSharedPtr < MOAIImage >			mTarget;
 	MOAILuaMemberRef						mOnFinish;
 	u32										mTransform;
 

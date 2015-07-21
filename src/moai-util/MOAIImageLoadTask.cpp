@@ -14,22 +14,22 @@
 void MOAIImageLoadTask::Execute () {
 
 	if ( this->mFilename.size() ) {
-		this->mImage->Load ( this->mFilename, this->mTransform );
+		this->mImage.Load ( this->mFilename, this->mTransform );
 	}
-	else if ( this->mData ) {
+	else if ( this->mDataBuffer ) {
 
 		void* bytes = 0;
 		size_t size = 0;
 		ZLByteStream stream;
 
-		this->mData->Lock ( &bytes, &size );
+		this->mDataBuffer->Lock ( &bytes, &size );
 		
 		stream.SetBuffer ( bytes, size );
 		stream.SetLength ( size );
 
-		this->mImage->Load ( stream, this->mTransform );
+		this->mImage.Load ( stream, this->mTransform );
 
-		this->mData->Unlock();
+		this->mDataBuffer->Unlock();
 	}
 }
 
@@ -38,15 +38,15 @@ void MOAIImageLoadTask::Init ( cc8* filename, MOAIImage& target, u32 transform )
 
 	this->mFilename = filename;
 	this->mTransform = transform;
-	this->mImage.Set ( *this, &target );
+	this->mTarget.Set ( *this, &target );
 }
 
 //----------------------------------------------------------------//
 void MOAIImageLoadTask::Init ( MOAIDataBuffer& data, MOAIImage& target, u32 transform ) {
 
 	this->mTransform = transform;
-	this->mData.Set ( *this, &data);
-	this->mImage.Set ( *this, &target );
+	this->mDataBuffer.Set ( *this, &data);
+	this->mTarget.Set ( *this, &target );
 }
 
 //----------------------------------------------------------------//
@@ -58,17 +58,20 @@ MOAIImageLoadTask::MOAIImageLoadTask () {
 //----------------------------------------------------------------//
 MOAIImageLoadTask::~MOAIImageLoadTask () {
 
-	this->mData.Set ( *this, 0 );
-	this->mImage.Set ( *this, 0 );
+	this->mDataBuffer.Set ( *this, 0 );
+	this->mTarget.Set ( *this, 0 );
 }
 
 //----------------------------------------------------------------//
 void MOAIImageLoadTask::Publish () {
 
+	// This provides some degree of thread-safety
+	this->mTarget->Take ( this->mImage );
+
 	if ( this->mOnFinish ) {
 		MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
 		if ( this->mOnFinish.PushRef ( state )) {
-			this->mImage->PushLuaUserdata ( state );
+			this->mTarget->PushLuaUserdata ( state );
 			state.DebugCall ( 1, 0 );
 		}
 	}
