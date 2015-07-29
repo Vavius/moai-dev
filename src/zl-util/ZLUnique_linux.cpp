@@ -24,10 +24,12 @@ STLString ZLUnique::GetGUID () {
 		CFUUIDRef uuid = CFUUIDCreate( NULL );
 		CFStringRef guid = CFUUIDCreateString ( NULL, uuid );
 		CFRelease ( uuid );
-		STLString result = CFStringGetCStringPtr ( guid, kCFStringEncodingUTF8 );
+		const char * output = CFStringGetCStringPtr ( guid, kCFStringEncodingUTF8 );
+		if (output == NULL) {
+			output = CFStringGetCStringPtr ( guid, kCFStringEncodingMacRoman );
+		}
 		CFRelease ( guid );
-		
-		return result;
+		return STLString ( output );
 	#else
 		kashmir::system::DevRand devrandom;
 		std::stringstream buffer;
