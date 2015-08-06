@@ -174,12 +174,12 @@ void MOAISpineBone::OnDepNodeUpdate () {
 		}
 		
 		if ( mRootTransform ) {
-			if ( mBone->flipX ) {
+			if ( mBone->worldFlipX ) {
 				mLocalToWorldMtx.m [ ZLAffine3D::C0_R0 ] *= -1;
 				mLocalToWorldMtx.m [ ZLAffine3D::C0_R1 ] *= -1;
 				mLocalToWorldMtx.m [ ZLAffine3D::C0_R2 ] *= -1;
 			}
-			if ( mBone->flipY ) {
+			if ( mBone->worldFlipY ) {
 				mLocalToWorldMtx.m [ ZLAffine3D::C1_R0 ] *= -1;
 				mLocalToWorldMtx.m [ ZLAffine3D::C1_R1 ] *= -1;
 				mLocalToWorldMtx.m [ ZLAffine3D::C1_R2 ] *= -1;

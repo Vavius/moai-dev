@@ -42,6 +42,7 @@ private:
 	static int		_addAnimation			( lua_State* L );
 	static int		_clearAllTracks			( lua_State* L );
 	static int		_clearTrack				( lua_State* L );
+	static int		_getAttachmentVertices	( lua_State* L );
 	static int		_getBone				( lua_State* L );
     static int      _getDuration            ( lua_State* L );
 	static int		_getSlot				( lua_State* L );
@@ -91,7 +92,6 @@ public:
 					~MOAISpineSkeleton		();
 	
 	void			OnAnimationEvent		( int trackIndex, spEventType type, spEvent* event, int loopCount );
-
 	void			RegisterLuaClass		( MOAILuaState& state );
 	void			RegisterLuaFuncs		( MOAILuaState& state );
 	void			SetAnimation			( int trackId, cc8* name, bool loop );

@@ -84,6 +84,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		20B338031B736E5100C96715 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0324CC6913564429000ADC60 /* libmoai.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2022860F1A9F3B0E0037F51E;
+			remoteInfo = "libmoai-ios-crashlytics";
+		};
 		20D82C301A44CF57007D59BF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0324CC6913564429000ADC60 /* libmoai.xcodeproj */;
@@ -764,6 +771,7 @@
 				CD2FCFDB1832EA10000C3674 /* libmoai-ios-billing.a */,
 				CD2FCFDD1832EA10000C3674 /* libmoai-ios-box2d.a */,
 				CD2FCFDF1832EA10000C3674 /* libmoai-ios-chartboost.a */,
+				20B338041B736E5100C96715 /* libmoai-ios-crashlytics.a */,
 				CD2FCFE31832EA10000C3674 /* libmoai-ios-crittercism.a */,
 				CD2FCFE51832EA10000C3674 /* libmoai-ios-crypto.a */,
 				CD2FCFE71832EA10000C3674 /* libmoai-ios-facebook.a */,
@@ -987,6 +995,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		20B338041B736E5100C96715 /* libmoai-ios-crashlytics.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libmoai-ios-crashlytics.a";
+			remoteRef = 20B338031B736E5100C96715 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		20D82C591A44CF58007D59BF /* libmoai-osx-spine.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1486,7 +1501,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"/Users/vavius/moai/moai-new/3rdparty/fmod-studio/lib/osx",
+					"$(MOAI_SDK)/3rdparty/fmod-studio/lib/osx",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1509,7 +1524,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"/Users/vavius/moai/moai-new/3rdparty/fmod-studio/lib/osx",
+					"$(MOAI_SDK)/3rdparty/fmod-studio/lib/osx",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
