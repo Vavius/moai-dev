@@ -278,6 +278,25 @@ int MOAISim::_getMemoryUsage ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/** @lua	getMemoryUsagePlain
+	@text	Returns lua and texture memory usage measured by MOAI subsystems.
+			This function tries to avoid allocations to minimize skewing the results.
+	
+	@out	number lua memory usage in bytes
+	@out	number texture memory usage in bytes
+*/
+int MOAISim::_getMemoryUsagePlain ( lua_State *L ) {
+	
+	size_t lua = MOAILuaRuntime::Get().GetMemoryUsage ();
+	size_t tex = MOAIGfxDevice::Get ().GetTextureMemoryUsage ();
+	
+	lua_pushnumber ( L, lua );
+	lua_pushnumber ( L, tex );
+	
+	return 2;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	getPerformance
 	@text	Returns an estimated frames per second based on measurements
 			taken at every render.
@@ -815,6 +834,7 @@ void MOAISim::RegisterLuaClass ( MOAILuaState& state ) {
 		{ "getLoopFlags",				_getLoopFlags },
 		{ "getLuaObjectCount",			_getLuaObjectCount },
 		{ "getMemoryUsage",				_getMemoryUsage },
+		{ "getMemoryUsagePlain",		_getMemoryUsagePlain },
 		{ "getPerformance",				_getPerformance },
 		{ "getStep",					_getStep },
 		{ "getStepCount",				_getStepCount },

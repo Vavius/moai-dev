@@ -128,6 +128,7 @@ private:
 	static int		_getLoopFlags				( lua_State* L );
 	static int		_getLuaObjectCount			( lua_State* L );
 	static int		_getMemoryUsage				( lua_State* L );
+	static int		_getMemoryUsagePlain		( lua_State* L );
 	static int		_getNetworkStatus			( lua_State* L );
 	static int		_getPerformance				( lua_State* L );
 	static int		_getStep					( lua_State* L );
