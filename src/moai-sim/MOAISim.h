@@ -107,6 +107,9 @@ private:
 	u32					mGCStep;
 	bool				mRelaunchScheduled;
 	
+	ZLLeanArray < double >	mSmoothBuffer;
+	u32						mSmoothIdx;
+	
 	MOAILuaMemberRef	mLuaGCFunc;
 	
 	MOAILuaSharedPtr < MOAIInputQueue >		mInputMgr;
@@ -146,6 +149,7 @@ private:
 	static int		_setLuaAllocLogEnabled		( lua_State* L );
 	static int		_setStep					( lua_State* L );
 	static int		_setStepMultiplier			( lua_State* L );
+	static int		_setStepSmoothing			( lua_State* L );
 	static int		_setTimerError				( lua_State* L );
 	static int		_setTraceback				( lua_State* L );
 	static int		_showCursor					( lua_State* L );
@@ -167,6 +171,7 @@ private:
 	void			ResetPerformanceTimers		();
 	void			SendPauseEvent				();
 	void			SendResumeEvent				();
+	double			SmoothStep					( double step );
 	double			StepSim						( double step, u32 multiplier );
 
 public:
