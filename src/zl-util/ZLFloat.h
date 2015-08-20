@@ -245,6 +245,12 @@ public:
 
 		return ( lower != upper ) ? lower + ( ZLFloat::Rand () * ( upper - lower )) : lower;
 	}
+	
+	//----------------------------------------------------------------//
+	static inline float RandInt ( float lower, float upper ) {
+		
+		return ( lower != upper ) ? lower + ( rand () % ( int )( upper - lower + 1 )) : lower;
+	}
 
 	//----------------------------------------------------------------//
 	static inline float Round ( float n ) {
