@@ -28,8 +28,10 @@ STLString ZLUnique::GetGUID () {
 		if (output == NULL) {
 			output = CFStringGetCStringPtr ( guid, kCFStringEncodingMacRoman );
 		}
+		STLString result ( output );
 		CFRelease ( guid );
-		return STLString ( output );
+	
+		return result;
 	#else
 		kashmir::system::DevRand devrandom;
 		std::stringstream buffer;
