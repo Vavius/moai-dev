@@ -10,6 +10,13 @@
 #define FINALIZE_FUNC_NAME "finalize"
 #define MOAI_TAG "moai"
 
+//#ifdef ANDROID
+//	#include <moai-android-crashlytics/MOAICrashlyticsAndroid.h>
+//	#define CRSH_LOG(obj)	MOAICrashlyticsAndroid::Get ().Set ( "last_gc_obj", obj->TypeName ());
+//#else
+//	#define CRSH_LOG(obj)
+//#endif
+
 //================================================================//
 // local
 //================================================================//
@@ -18,9 +25,12 @@
 int MOAILuaObject::_gc ( lua_State* L ) {
 
 	MOAILuaState state ( L );
+
 	MOAILuaObject* self = ( MOAILuaObject* )state.GetPtrUserData ( 1 );
 	self->mCollected = true;
 	
+//	CRSH_LOG ( self )
+
 	if ( MOAILuaRuntime::IsValid ()) {
 	
 		if ( self->mFinalizer ) {
