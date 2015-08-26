@@ -56,6 +56,7 @@ do
   -DLIBRARY_OUTPUT_PATH_ROOT=./build-android-$ARCH/ \
   $moai_root/cmake
 
-  cmake --build . --target install -- -j8
+  cmake --build . --target install -- -j8 
+  # VERBOSE=1
 
 done
