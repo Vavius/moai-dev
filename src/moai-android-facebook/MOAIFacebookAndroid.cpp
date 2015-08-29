@@ -6,7 +6,6 @@
 
 #include <jni.h>
 
-#include <moai-android/moaiext-jni.h>
 #include <moai-android-facebook/MOAIFacebookAndroid.h>
 
 extern JavaVM* jvm;
@@ -284,7 +283,7 @@ int MOAIFacebookAndroid::_sendRequest ( lua_State* L ) {
     }
 
     if ( state.IsType ( 3, LUA_TFUNCTION ) ) {
-    	int ref  = MOAILuaRuntime::Get ().GetRef ( state, 3, false );
+    	int ref  = self->mRefs.Ref ( state, 3 );
 		self->CallStaticVoidMethod ( self->mJava_SendRequestCallback, jmessage, jbundle, ( jint )ref );
     }
     else {
@@ -347,6 +346,8 @@ MOAIFacebookAndroid::MOAIFacebookAndroid () {
 	this->mJava_SendRequest					= this->GetStaticMethod ( "sendRequest", "(Ljava/lang/String;Landroid/os/Bundle;)V" );
 	this->mJava_SendRequestCallback			= this->GetStaticMethod ( "sendRequest", "(Ljava/lang/String;Landroid/os/Bundle;I)V" );
 	this->mJava_SessionValid				= this->GetStaticMethod ( "sessionValid", "()Z" );
+
+	this->mRefs.InitStrong ();
 }
 
 //----------------------------------------------------------------//
@@ -423,6 +424,14 @@ void MOAIFacebookAndroid::RegisterLuaClass ( MOAILuaState& state ) {
 }
 
 //----------------------------------------------------------------//
+void MOAIFacebookAndroid::ClearCallbackRef ( int ref ) {
+	
+	if ( ref != LUA_NOREF ) {
+		this->mRefs.Unref ( ref );
+	}
+}
+
+//----------------------------------------------------------------//
 void MOAIFacebookAndroid::DialogDidNotComplete () {
 	
 	MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
@@ -464,10 +473,15 @@ void MOAIFacebookAndroid::DialogDidComplete ( cc8* result ) {
 //----------------------------------------------------------------//
 void MOAIFacebookAndroid::DialogResult ( bool status, cc8* result, int refId ) {
 	
+	if ( refId == LUA_NOREF ) {
+		return;
+	}
+	
 	MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
 	
-	if ( MOAILuaRuntime::Get ().PushRef ( state, refId )) {
-		
+	this->mRefs.PushRef ( state, refId );
+
+	if ( state.IsType ( -1, LUA_TFUNCTION )) {
 		state.Push ( status );
 		
 		if ( result ) {
@@ -475,7 +489,7 @@ void MOAIFacebookAndroid::DialogResult ( bool status, cc8* result, int refId ) {
 		} else {
 			state.Push ();
 		}
-		int res = state.DebugCall ( 2, 0 );
+		state.DebugCall ( 2, 0 );
 	}
 }
 
@@ -560,7 +574,7 @@ void MOAIFacebookAndroid::SessionDidNotLogin () {
 //----------------------------------------------------------------//
 extern "C" void Java_com_ziplinegames_moai_MoaiFacebook_AKUClearRef ( JNIEnv* env, jclass obj, jint refId ) {
 
-	MOAILuaRuntime::Get ().ClearRef ( refId );
+	MOAIFacebookAndroid::Get ().ClearCallbackRef ( refId );
 }
 
 //----------------------------------------------------------------//

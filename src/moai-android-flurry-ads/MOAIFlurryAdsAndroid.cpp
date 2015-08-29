@@ -9,7 +9,6 @@
 
 #include <jni.h>
 
-#include <moai-android/moaiext-jni.h>
 #include <moai-android-flurry-ads/MOAIFlurryAdsAndroid.h>
 
 extern JavaVM* jvm;

@@ -4,7 +4,7 @@
 #include "moai-core/pch.h"
 #include "moai-sim/pch.h"
 
-#include <moai-android/moaiext-jni.h>
+#include <moai-android/JniUtils.h>
 #include <moai-android-chartboost/MOAIChartboostAndroid.h>
 
 extern JavaVM* jvm;
@@ -30,8 +30,8 @@ int MOAIChartboostAndroid::_init ( lua_State* L ) {
 
 	JNI_GET_ENV ( jvm, env );
 	
-	JNI_GET_JSTRING ( identifier, jidentifier );
-	JNI_GET_JSTRING ( signature, jsignature );
+	MOAIJString jidentifier = JNI_GET_JSTRING ( identifier );
+	MOAIJString jsignature = JNI_GET_JSTRING ( signature );
 
 	jclass chartboost = env->FindClass ( "com/ziplinegames/moai/MoaiChartboost" );
     if ( chartboost == NULL ) {
@@ -45,7 +45,7 @@ int MOAIChartboostAndroid::_init ( lua_State* L ) {
 			ZLLog::LogF ( ZLLog::CONSOLE, "MOAIChartboostAndroid: Unable to find static java method %s", "init" );
     	} else {
 
-			env->CallStaticVoidMethod ( chartboost, init, jidentifier, jsignature );				
+			env->CallStaticVoidMethod ( chartboost, init, ( jstring ) jidentifier, ( jstring ) jsignature );				
 		}
 	}
 			
@@ -65,7 +65,7 @@ int MOAIChartboostAndroid::_hasCachedVideo ( lua_State* L ) {
 
 	JNI_GET_ENV ( jvm, env );
 
-	JNI_GET_JSTRING ( location, jlocation );
+	MOAIJString jlocation = JNI_GET_JSTRING ( location );
 	
 	jclass chartboost = env->FindClass ( "com/ziplinegames/moai/MoaiChartboost" ); 
     if ( chartboost == NULL ) {
@@ -79,7 +79,7 @@ int MOAIChartboostAndroid::_hasCachedVideo ( lua_State* L ) {
 			ZLLog::LogF ( ZLLog::CONSOLE, "MOAIChartboostAndroid: Unable to find static java method %s", "hasCachedVideo" );
     	} else {
 
-			lua_pushboolean ( state, env->CallStaticBooleanMethod( chartboost, hasCachedVideo, jlocation ) );
+			lua_pushboolean ( state, env->CallStaticBooleanMethod( chartboost, hasCachedVideo, ( jstring ) jlocation ) );
 
 			return 1;
 		}
@@ -103,7 +103,7 @@ int MOAIChartboostAndroid::_hasCachedInterstitial ( lua_State* L ) {
 
 	JNI_GET_ENV ( jvm, env );
 
-	JNI_GET_JSTRING ( location, jlocation );
+	MOAIJString jlocation = JNI_GET_JSTRING ( location );
 	
 	jclass chartboost = env->FindClass ( "com/ziplinegames/moai/MoaiChartboost" ); 
     if ( chartboost == NULL ) {
@@ -117,7 +117,7 @@ int MOAIChartboostAndroid::_hasCachedInterstitial ( lua_State* L ) {
 			ZLLog::LogF ( ZLLog::CONSOLE, "MOAIChartboostAndroid: Unable to find static java method %s", "hasCachedInterstitial" );
     	} else {
 
-			lua_pushboolean ( state, env->CallStaticBooleanMethod( chartboost, hasCachedInterstitial, jlocation ) );
+			lua_pushboolean ( state, env->CallStaticBooleanMethod( chartboost, hasCachedInterstitial, ( jstring ) jlocation ) );
 
 			return 1;
 		}
@@ -143,7 +143,7 @@ int MOAIChartboostAndroid::_cacheVideo ( lua_State* L ) {
 
 	JNI_GET_ENV ( jvm, env );
 	
-	JNI_GET_JSTRING ( location, jlocation );
+	MOAIJString jlocation = JNI_GET_JSTRING ( location );
 
 	jclass chartboost = env->FindClass ( "com/ziplinegames/moai/MoaiChartboost" );
     if ( chartboost == NULL ) {
@@ -157,7 +157,7 @@ int MOAIChartboostAndroid::_cacheVideo ( lua_State* L ) {
 			ZLLog::LogF ( ZLLog::CONSOLE, "MOAIChartboostAndroid: Unable to find static java method %s", "cacheVideo" );
     	} else {
 
-			env->CallStaticVoidMethod ( chartboost, cacheVideo, jlocation );			
+			env->CallStaticVoidMethod ( chartboost, cacheVideo, ( jstring ) jlocation );			
 		}
 	}
 			
@@ -179,7 +179,7 @@ int MOAIChartboostAndroid::_loadInterstitial ( lua_State* L ) {
 
 	JNI_GET_ENV ( jvm, env );
 	
-	JNI_GET_JSTRING ( location, jlocation );
+	MOAIJString jlocation = JNI_GET_JSTRING ( location );
 
 	jclass chartboost = env->FindClass ( "com/ziplinegames/moai/MoaiChartboost" );
     if ( chartboost == NULL ) {
@@ -193,7 +193,7 @@ int MOAIChartboostAndroid::_loadInterstitial ( lua_State* L ) {
 			ZLLog::LogF ( ZLLog::CONSOLE, "MOAIChartboostAndroid: Unable to find static java method %s", "loadInterstitial" );
     	} else {
 
-			env->CallStaticVoidMethod ( chartboost, loadInterstitial, jlocation );			
+			env->CallStaticVoidMethod ( chartboost, loadInterstitial, ( jstring ) jlocation );			
 		}
 	}
 			
@@ -264,7 +264,7 @@ int MOAIChartboostAndroid::_showVideo ( lua_State* L ) {
 
 	JNI_GET_ENV ( jvm, env );
 	
-	JNI_GET_JSTRING ( location, jlocation );
+	MOAIJString jlocation = JNI_GET_JSTRING ( location );
 
 	jclass chartboost = env->FindClass ( "com/ziplinegames/moai/MoaiChartboost" );
     if ( chartboost == NULL ) {
@@ -278,7 +278,7 @@ int MOAIChartboostAndroid::_showVideo ( lua_State* L ) {
 			ZLLog::LogF ( ZLLog::CONSOLE, "MOAIChartboostAndroid: Unable to find static java method %s", "showVideo" );
     	} else {
 
-			env->CallStaticVoidMethod ( chartboost, showVideo, jlocation );				
+			env->CallStaticVoidMethod ( chartboost, showVideo, ( jstring ) jlocation );				
 		}
 	}
 
@@ -300,7 +300,7 @@ int MOAIChartboostAndroid::_showInterstitial ( lua_State* L ) {
 
 	JNI_GET_ENV ( jvm, env );
 	
-	JNI_GET_JSTRING ( location, jlocation );
+	MOAIJString jlocation = JNI_GET_JSTRING ( location );
 
 	jclass chartboost = env->FindClass ( "com/ziplinegames/moai/MoaiChartboost" );
     if ( chartboost == NULL ) {
@@ -314,7 +314,7 @@ int MOAIChartboostAndroid::_showInterstitial ( lua_State* L ) {
 			ZLLog::LogF ( ZLLog::CONSOLE, "MOAIChartboostAndroid: Unable to find static java method %s", "showInterstitial" );
     	} else {
 
-			env->CallStaticVoidMethod ( chartboost, showInterstitial, jlocation );				
+			env->CallStaticVoidMethod ( chartboost, showInterstitial, ( jstring ) jlocation );				
 		}
 	}
 

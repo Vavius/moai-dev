@@ -522,7 +522,7 @@ int MOAIFacebookIOS::_sendRequest ( lua_State* L ) {
 	MOAIFacebookLuaCallback* callback = nil;
 	if ( state.IsType ( 3, LUA_TFUNCTION )) {
 		
-		int ref  = MOAILuaRuntime::Get ().GetRef ( state, 3, false );
+		int ref = self->mRefs.Ref ( state, 3 );
 		callback = [[ MOAIFacebookLuaCallback alloc ] initWithRef:ref ];
 	}
 	
@@ -603,6 +603,7 @@ MOAIFacebookIOS::MOAIFacebookIOS () {
 	RTTI_SINGLE ( MOAIGlobalEventSource )
 	
 	mFriendsCache = [[ FBFrictionlessRecipientCache alloc ] init ];
+	mRefs.InitStrong ();
 }
 
 //----------------------------------------------------------------//
@@ -681,6 +682,14 @@ void MOAIFacebookIOS::RegisterLuaClass ( MOAILuaState& state ) {
 }
 
 //----------------------------------------------------------------//
+void MOAIFacebookIOS::ClearCallbackRef ( int ref ) {
+	
+	if ( ref != LUA_NOREF ) {
+		this->mRefs.Unref ( ref );
+	}
+}
+
+//----------------------------------------------------------------//
 void MOAIFacebookIOS::DialogDidNotComplete ( ) {
 	
 	MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
@@ -722,10 +731,15 @@ void MOAIFacebookIOS::DialogDidComplete ( NSURL* result ) {
 //----------------------------------------------------------------//
 void MOAIFacebookIOS::DialogResult ( bool success, NSURL *result, int callbackRef ) {
 	
+	if ( callbackRef == LUA_NOREF ) {
+		return;
+	}
+	
 	MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
 	
-	if ( MOAILuaRuntime::Get ().PushRef ( state, callbackRef )) {
-		
+	this->mRefs.PushRef ( state, callbackRef );
+	
+	if ( state.IsType ( -1, LUA_TFUNCTION )) {
 		state.Push ( success );
 		
 		if ( result ) {
@@ -733,7 +747,7 @@ void MOAIFacebookIOS::DialogResult ( bool success, NSURL *result, int callbackRe
 		} else {
 			state.Push ();
 		}
-		int res = state.DebugCall ( 2, 0 );
+		state.DebugCall ( 2, 0 );
 	}
 }
 
@@ -846,7 +860,8 @@ void MOAIFacebookIOS::SessionDidNotLogin () {
 
 -( void ) dealloc {
 	
-	MOAILuaRuntime::Get ().ClearRef ( self->mRef );
+	MOAIFacebookIOS::Get ().ClearCallbackRef ( self->mRef );
+	self->mRef = LUA_NOREF;
 	[ super dealloc ];
 }
 

@@ -48,6 +48,8 @@ private:
 	jmethodID	mJava_SendRequestCallback;
 	jmethodID	mJava_SessionValid;
 
+	MOAILuaRefTable		mRefs;
+
 	//----------------------------------------------------------------//
     static int  _declinedPermissions        ( lua_State* L );
 	static int	_graphRequest				( lua_State* L );
@@ -92,6 +94,7 @@ public:
 
 			MOAIFacebookAndroid		();
 			~MOAIFacebookAndroid	();
+	void	ClearCallbackRef		( int ref );
 	void	DialogDidNotComplete	();
 	void	DialogDidComplete		();
 	void	DialogDidComplete		( cc8* error );

@@ -41,6 +41,7 @@ private:
 		
 	STLString						mAppId;
 	FBFrictionlessRecipientCache* 	mFriendsCache;
+	MOAILuaRefTable					mRefs;
 	
 		
 	//----------------------------------------------------------------//
@@ -84,6 +85,7 @@ public:
     bool    ActiveSessionHasPermissions ( NSArray* permissions );
     		MOAIFacebookIOS			();
 			~MOAIFacebookIOS		();
+	void	ClearCallbackRef		( int ref );
 	void	DialogDidNotComplete	();
 	void	DialogDidComplete		();
 	void	DialogDidComplete		( NSURL* result );

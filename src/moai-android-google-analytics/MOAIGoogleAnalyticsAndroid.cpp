@@ -8,7 +8,7 @@
 
 #include <jni.h>
 
-#include <moai-android/moaiext-jni.h>
+#include <moai-android/JniUtils.h>
 #include <moai-android-google-analytics/MOAIGoogleAnalyticsAndroid.h>
 
 extern JavaVM* jvm;
@@ -35,11 +35,11 @@ int MOAIGoogleAnalyticsAndroid::_logEvent ( lua_State* L ) {
 	
 	JNI_GET_ENV ( jvm, env );
 	
-	JNI_GET_JSTRING ( eventCategory, jeventCategory );
+	MOAIJString jeventCategory = JNI_GET_JSTRING ( eventCategory );
 
-	JNI_GET_JSTRING ( eventAction, jeventAction );
+	MOAIJString jeventAction = JNI_GET_JSTRING ( eventAction );
 
-	JNI_GET_JSTRING ( eventLabel, jeventLabel );
+	MOAIJString jeventLabel = JNI_GET_JSTRING ( eventLabel );
 
 	jclass ga = env->FindClass ( "com/ziplinegames/moai/MoaiGoogleAnalytics" );
 	if ( ga == NULL ) {
@@ -53,7 +53,7 @@ int MOAIGoogleAnalyticsAndroid::_logEvent ( lua_State* L ) {
 			ZLLog::LogF ( ZLLog::CONSOLE, "MOAIGoogleAnalyticsAndroid: Unable to find static java method %s", "logEvent" );
 		} else {
 			ZLLog::LogF ( ZLLog::CONSOLE, "MOAIGoogleAnalyticsAndroid: calling google analytics event action = %s", eventAction );
-			env->CallStaticVoidMethod ( ga, logEvent, jeventCategory, jeventAction, jeventLabel, eventValue );		
+			env->CallStaticVoidMethod ( ga, logEvent, ( jstring ) jeventCategory, ( jstring ) jeventAction, ( jstring ) jeventLabel, eventValue );
 		}
 	}
 	return 0;
