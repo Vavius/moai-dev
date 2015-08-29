@@ -14,6 +14,15 @@
 //================================================================//
 
 //----------------------------------------------------------------//
+int MOAIHttpTaskBase::_cancel ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIHttpTaskBase, "U" )
+	
+	self->Cancel ();
+	
+	return 0;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	getProgress
 	@text	Returns the progress of the download.
 	
@@ -264,6 +273,32 @@ int MOAIHttpTaskBase::_performSync ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/**	@lua	saveFile
+	@text	Write received data to file
+	
+	@in		MOAIHttpTaskBase self
+	@in		string		path
+	@out	boolean		success
+*/
+int MOAIHttpTaskBase::_saveFile ( lua_State* L ) {
+	MOAI_LUA_SETUP ( MOAIHttpTaskBase, "US" )
+	
+	cc8* filename = state.GetValue < cc8* >( 2, 0 );
+	
+	ZLFileStream stream;
+	if ( self->mData.Size () && filename && stream.Open ( filename, ZLFileStream::READ_WRITE_NEW )) {
+		stream.WriteBytes ( self->mData.Data (), self->mData.Size ());
+		stream.Close ();
+		state.Push ( true );
+	}
+	else {
+		state.Push ( false );
+	}
+	
+	return 1;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	setBody
 	@text	Sets the body for a POST or PUT.
 
@@ -313,7 +348,7 @@ int MOAIHttpTaskBase::_setBody ( lua_State* L ) {
 	@out	nil
 */
 int MOAIHttpTaskBase::_setCallback ( lua_State* L ) {
-	MOAI_LUA_SETUP ( MOAIHttpTaskBase, "UF" )
+	MOAI_LUA_SETUP ( MOAIHttpTaskBase, "U" )
 
 	self->mOnFinish.SetRef ( *self, state, 2 );
 	return 0;
@@ -615,6 +650,7 @@ void MOAIHttpTaskBase::RegisterLuaClass ( MOAILuaState& state ) {
 void MOAIHttpTaskBase::RegisterLuaFuncs ( MOAILuaState& state ) {
 
 	luaL_Reg regTable [] = {
+		{ "cancel",				_cancel },
 		{ "getProgress",		_getProgress },
 		{ "getResponseCode",	_getResponseCode },
 		{ "getResponseHeader",	_getResponseHeader },
@@ -626,6 +662,7 @@ void MOAIHttpTaskBase::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "parseXml",			_parseXml },
 		{ "performAsync",		_performAsync },
 		{ "performSync",		_performSync },
+		{ "saveFile",			_saveFile },
 		{ "setCallback",		_setCallback },
 		{ "setCookieDst",		_setCookieDst },
 		{ "setCookieSrc",		_setCookieSrc },

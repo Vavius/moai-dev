@@ -249,9 +249,11 @@ int MOAIWebViewIOS::_loadRequest ( lua_State* L ) {
 	MOAI_LUA_SETUP ( MOAIWebViewIOS, "US" );
 		
 	cc8* urlStr = lua_tostring ( state, 2 );
-	NSURL* url = [ NSURL URLWithString:[ NSString stringWithUTF8String:urlStr ]];
+
+	NSString* urlString = [[ NSString alloc ] initWithCString:urlStr encoding:[NSString defaultCStringEncoding] ];
+	NSURL* url = [ NSURL URLWithString:urlString ];
 	NSURLRequest* request = [NSURLRequest requestWithURL:url ];
-		
+	
 	[ self->mWebViewController.webView loadRequest:request ];
 	return 0;
 }
@@ -369,7 +371,12 @@ MOAIWebViewIOS::MOAIWebViewIOS () :
 	RTTI_SINGLE ( MOAIInstanceEventSource )
 	
 	this->mWebViewController = [[ MOAIWebViewController alloc ] init ];
-	[ this->mWebViewController setMoaiWebView:this ];
+	
+	// by accessing view property we force -loadView to be called
+	// in order to affirm mWebView
+	if ( this->mWebViewController.view ) {
+		[ this->mWebViewController setMoaiWebView:this ];
+	}
 }
 
 //----------------------------------------------------------------//
@@ -378,6 +385,7 @@ MOAIWebViewIOS::~MOAIWebViewIOS () {
 	if ( this->mWebViewController ) {
 		[ this->mWebViewController setMoaiWebView:NULL ];
 		[ this->mWebViewController release ];
+		this->mWebViewController = nil;
 	}
 }
 

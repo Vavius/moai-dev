@@ -110,8 +110,9 @@ public class MoaiGooglePlayServicesGames {
 
 		MoaiLog.i ( " -------------------------------------------------------- MoaiGooglePlayServicesGames: getPlayerId -------------------------------------------------------- " );
 		if ( sHelper.isSignedIn ()) {
-			return sHelper.mGamesClient.getCurrentPlayerId ();
+			return Games.Players.getCurrentPlayerId(sHelper.getApiClient());
 		}
+		return "";
 	}
 	
 	//----------------------------------------------------------------//
@@ -159,7 +160,9 @@ public class MoaiGooglePlayServicesGames {
 		
 		MoaiLog.i ( " -------------------------------------------------------- MoaiGooglePlayServicesGames: reportScore: LBID "+leaderBoardID+"; SCORE "+score+" -------------------------------------------------------- " );
 		
-		Games.Leaderboards.submitScore ( sHelper.getApiClient(), leaderBoardID, score );
+		if ( sHelper.isSignedIn ()) {
+			Games.Leaderboards.submitScore ( sHelper.getApiClient(), leaderBoardID, score );
+		}
 	}
 	
 	//----------------------------------------------------------------//	
@@ -169,15 +172,19 @@ public class MoaiGooglePlayServicesGames {
 		
 		if ( progress == 0 ) return;
 
-		Games.Achievements.setSteps ( sHelper.getApiClient(), achievementID, progress );
+		if ( sHelper.isSignedIn ()) {
+			Games.Achievements.setSteps ( sHelper.getApiClient(), achievementID, progress );
+		}
 	}
 	
 	//----------------------------------------------------------------//	
 	public static void unlockAchievement ( String achievementID ) {
 		
 		MoaiLog.i ( " -------------------------------------------------------- MoaiGooglePlayServicesGames: unlockAchievement: AID "+achievementID+" -------------------------------------------------------- " );
-		
-		Games.Achievements.unlockImmediate ( sHelper.getApiClient(), achievementID );
+	
+		if ( sHelper.isSignedIn ()) {
+			Games.Achievements.unlockImmediate ( sHelper.getApiClient(), achievementID );
+		}
 	}
 	
 	//----------------------------------------------------------------//	

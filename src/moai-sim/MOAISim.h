@@ -110,6 +110,9 @@ private:
 	u32					mGCStep;
 	bool				mRelaunchScheduled;
 	
+	ZLLeanArray < double >	mSmoothBuffer;
+	u32						mSmoothIdx;
+	
 	MOAILuaMemberRef	mLuaGCFunc;
 	
 	MOAILuaSharedPtr < MOAIActionTree >		mActionMgr; // this is a sub-tree
@@ -129,6 +132,7 @@ private:
 	static int		_getLoopFlags				( lua_State* L );
 	static int		_getLuaObjectCount			( lua_State* L );
 	static int		_getMemoryUsage				( lua_State* L );
+	static int		_getMemoryUsagePlain		( lua_State* L );
 	static int		_getNetworkStatus			( lua_State* L );
 	static int		_getPerformance				( lua_State* L );
 	static int		_getStep					( lua_State* L );
@@ -146,6 +150,7 @@ private:
 	static int		_setLuaAllocLogEnabled		( lua_State* L );
 	static int		_setStep					( lua_State* L );
 	static int		_setStepMultiplier			( lua_State* L );
+	static int		_setStepSmoothing			( lua_State* L );
 	static int		_setTimerError				( lua_State* L );
 	static int		_setTraceback				( lua_State* L );
 	static int		_setTextInputRect			( lua_State* L );
@@ -164,6 +169,9 @@ private:
 	double			MeasureFrameRate			();
 	void			OnGlobalsFinalize			();
 	void			ResetPerformanceTimers		();
+	void			SendPauseEvent				();
+	void			SendResumeEvent				();
+	double			SmoothStep					( double step );
 	double			StepSim						( double step, u32 multiplier );
 
 public:

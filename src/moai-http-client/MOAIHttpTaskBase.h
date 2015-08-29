@@ -44,6 +44,7 @@ protected:
 	MOAILuaStrongRef	mLatch;
 
 	//----------------------------------------------------------------//
+	static int		_cancel				( lua_State* L );
 	static int		_getProgress		( lua_State* L );
 	static int		_getResponseCode	( lua_State* L );
 	static int		_getResponseHeader	( lua_State* L );
@@ -55,6 +56,7 @@ protected:
 	static int		_parseXml			( lua_State* L );
 	static int		_performAsync		( lua_State* L );
 	static int		_performSync		( lua_State* L );
+	static int		_saveFile			( lua_State* L );
 	static int		_setBody			( lua_State* L );
 	static int		_setCallback		( lua_State* L );
 	static int		_setCookieSrc		( lua_State* L );
@@ -87,6 +89,7 @@ public:
 	};
 	
 	//----------------------------------------------------------------//
+	virtual void		Cancel					() = 0;
 	virtual void		GetData					( void* buffer, u32 size );
 	void				HttpGet					( cc8* url, cc8* useragent, bool verbose, bool blocking );
 	void				HttpPost				( cc8* url, cc8* useragent, const void* buffer, u32 size, bool verbose, bool blocking );

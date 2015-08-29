@@ -42,15 +42,15 @@
 
 	//----------------------------------------------------------------//
 	-( void ) dealloc {
-	
-		[ super dealloc ];
-	
+		
 		if ( mWebView ) {
 			mWebView.delegate = nil;
 			[ mWebView stopLoading ];
 			[ mWebView release ];
 			mWebView = nil;
 		}
+		
+		[ super dealloc ];
 	}
 
 	//----------------------------------------------------------------//

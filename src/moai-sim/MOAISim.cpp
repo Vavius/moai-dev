@@ -274,6 +274,25 @@ int MOAISim::_getMemoryUsage ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/** @lua	getMemoryUsagePlain
+	@text	Returns lua and texture memory usage measured by MOAI subsystems.
+			This function tries to avoid allocations to minimize skewing the results.
+	
+	@out	number lua memory usage in bytes
+	@out	number texture memory usage in bytes
+*/
+int MOAISim::_getMemoryUsagePlain ( lua_State *L ) {
+	
+	size_t lua = MOAILuaRuntime::Get().GetMemoryUsage ();
+	size_t tex = MOAIGfxDevice::Get ().GetTextureMemoryUsage ();
+	
+	lua_pushnumber ( L, lua );
+	lua_pushnumber ( L, tex );
+	
+	return 2;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	getPerformance
 	@text	Returns an estimated frames per second based on measurements
 			taken at every render.
@@ -533,6 +552,29 @@ int MOAISim::_setStepMultiplier ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/**
+	@lua	setStepSmoothing
+	@text	Average delta time over N last frames. This is useful to
+			filter out momentary single-frame spikes even in fixed step loop setup.
+
+	@in		number count		Number of frames. Default is 0 (no smoothing).
+	@out	nil
+*/
+int MOAISim::_setStepSmoothing ( lua_State *L ) {
+	MOAILuaState state ( L );
+
+	u32 size = state.GetValue < u32 >( 1, 0 );
+
+	MOAISim& device = MOAISim::Get ();
+	
+	device.mSmoothBuffer.Init ( size );
+	device.mSmoothBuffer.Fill ( device.mStep );
+	device.mSmoothIdx = 0;
+	
+	return 0;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	setTimerError
 	@text	Sets the tolerance for timer error. This is a multiplier of step.
 			Timer error tolerance is step * timerError.
@@ -703,7 +745,8 @@ MOAISim::MOAISim () :
 	mHideCursorFunc ( 0 ),
 	mGCActive ( true ),
 	mGCStep ( 0 ),
-	mRelaunchScheduled ( false ) {
+	mRelaunchScheduled ( false ),
+	mSmoothIdx ( 0 ) {
 	
 	RTTI_SINGLE ( MOAIGlobalEventSource )
 	
@@ -816,6 +859,7 @@ void MOAISim::RegisterLuaClass ( MOAILuaState& state ) {
 		{ "getLoopFlags",				_getLoopFlags },
 		{ "getLuaObjectCount",			_getLuaObjectCount },
 		{ "getMemoryUsage",				_getMemoryUsage },
+		{ "getMemoryUsagePlain",		_getMemoryUsagePlain },
 		{ "getPerformance",				_getPerformance },
 		{ "getStep",					_getStep },
 		{ "getStepCount",				_getStepCount },
@@ -833,6 +877,7 @@ void MOAISim::RegisterLuaClass ( MOAILuaState& state ) {
 		{ "setLuaAllocLogEnabled",		_setLuaAllocLogEnabled },
 		{ "setStep",					_setStep },
 		{ "setStepMultiplier",			_setStepMultiplier },
+		{ "setStepSmoothing",			_setStepSmoothing },
 		{ "setTimerError",				_setTimerError },
 		{ "setTraceback",				_setTraceback },
 		{ "setTextInputRect",			_setTextInputRect },
@@ -872,6 +917,32 @@ void MOAISim::SetStep ( double step ) {
 			this->mSetSimStepFunc ( step );
 		}
 	}
+}
+
+//----------------------------------------------------------------//
+double MOAISim::SmoothStep ( double step ) {
+	
+	if ( this->mSmoothBuffer.Size () == 0 ) {
+		return step;
+	}
+	
+	u32 size = this->mSmoothBuffer.Size ();
+	
+	this->mSmoothBuffer [ this->mSmoothIdx++ ] = step;
+	this->mSmoothIdx %= size;
+	
+	u32 count = 0;
+	double sum = 0.0;
+	for ( u32 i = 0; i < size; ++i ) {
+		double dt = this->mSmoothBuffer [ i ];
+		
+		// Ignore long delay steps
+		if (( this->mLoopFlags & SIM_LOOP_LONG_DELAY == 0 ) || ( dt < this->mStep * this->mLongDelayThreshold )) {
+			count++;
+			sum += dt;
+		}
+	}
+	return ( count > 0 ) ? sum / count : step;
 }
 
 //----------------------------------------------------------------//
@@ -951,6 +1022,8 @@ void MOAISim::Update () {
 			interval = this->mStep * ( integer + 1.0 );
 		}
 	}
+	
+	interval = this->SmoothStep ( interval );
 	
 	// actual device time elapsed since starting or restarting the sim
 	this->mRealTime += interval;

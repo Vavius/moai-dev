@@ -9,6 +9,10 @@
 		#define AKU_WITH_IOS_ADCOLONY 0
 	#endif
 
+	#ifndef AKU_WITH_IOS_ADTOAPP
+		#define AKU_WITH_IOS_ADTOAPP 1
+	#endif
+
 	#ifndef AKU_WITH_IOS_BILLING
 		#define AKU_WITH_IOS_BILLING 1
 	#endif

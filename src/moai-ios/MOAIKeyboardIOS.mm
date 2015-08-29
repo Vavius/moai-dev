@@ -94,6 +94,19 @@
 //================================================================//
 
 //----------------------------------------------------------------//
+/**	@name	getInputLanguage
+    @text	Returns the current input language (or nil if no editing).
+ 
+    @out	string lang code
+ 
+*/
+int MOAIKeyboardIOS::_getInputLanguage ( lua_State *L ) {
+	MOAILuaState state ( L );
+    MOAIKeyboardIOS::Get ().PushInputLanguage ( state );
+    return 1;
+}
+
+//----------------------------------------------------------------//
 /**	@lua	getText
 	@text	Returns the text currently being edited (or nil if no editing).
 	
@@ -216,6 +229,22 @@ void MOAIKeyboardIOS::PushText ( MOAILuaState& state ) {
 }
 
 //----------------------------------------------------------------//
+void MOAIKeyboardIOS::PushInputLanguage ( MOAILuaState& state ) {
+    
+    if ( this->mTextField ) {
+        UITextInputMode *inputMode = [ this->mTextField textInputMode ];
+        if ( inputMode ) {
+            NSString *lang = inputMode.primaryLanguage;
+            if ( lang ) {
+                state.Push ([ lang UTF8String ]);
+                return;
+            }
+        }
+    }
+    state.Push ();
+}
+
+//----------------------------------------------------------------//
 void MOAIKeyboardIOS::RegisterLuaClass ( MOAILuaState& state ) {
 
 	state.SetField ( -1, "EVENT_INPUT",					( u32 )EVENT_INPUT );
@@ -249,6 +278,7 @@ void MOAIKeyboardIOS::RegisterLuaClass ( MOAILuaState& state ) {
 	state.SetField ( -1, "RETURN_KEY_SEND",				( u32 )RETURN_KEY_SEND );
 
 	luaL_Reg regTable [] = {
+        { "getInputLanguage",   _getInputLanguage },
 		{ "getListener",		&MOAIGlobalEventSource::_getListener < MOAIKeyboardIOS > },
 		{ "getText",			_getText },
 		{ "setListener",		&MOAIGlobalEventSource::_setListener < MOAIKeyboardIOS > },

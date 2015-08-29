@@ -448,6 +448,20 @@ int MOAIParticleScript::_rand ( lua_State* L ) {
 }
 
 //----------------------------------------------------------------//
+/**	@lua	randInt
+	@text	Load a register with a random integer from a range.
+	
+	@in		MOAIParticleScript self
+	@in		number r0			Register to store result.
+	@in		number v0			Range minimum.
+	@in		number v1			Range maximum.
+	@out	nil
+ */
+int MOAIParticleScript::_randInt ( lua_State* L ) {
+	IMPL_LUA_PARTICLE_OP ( RAND_INT, "RVV" )
+}
+
+//----------------------------------------------------------------//
 /**	@lua	randVec
 	@text	Load two registers with the X and Y components of a vector
 			with randomly chosen direction and length.
@@ -767,6 +781,7 @@ void MOAIParticleScript::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "mul",				_mul },
 		{ "norm",				_norm },
 		{ "rand",				_rand },
+		{ "randInt",			_randInt },
 		{ "randVec",			_randVec },
 		{ "set",				_set },
 		{ "setLiveReg",			_setLiveReg },
@@ -990,6 +1005,17 @@ void MOAIParticleScript::Run ( MOAIParticleSystem& system, MOAIParticle& particl
 				
 				if ( r0 ) {
 					*r0 = ZLFloat::Rand ( v0, v1 );
+				}
+				break;
+				
+			case RAND_INT:
+				
+				READ_ADDR	( r0, bytecode );
+				READ_VALUE	( v0, bytecode );
+				READ_VALUE	( v1, bytecode );
+				
+				if ( r0 ) {
+					*r0 = ZLFloat::RandInt ( v0, v1 );
 				}
 				break;
 				

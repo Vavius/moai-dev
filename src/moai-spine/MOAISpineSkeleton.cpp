@@ -95,6 +95,75 @@ int MOAISpineSkeleton::_clearTrack ( lua_State *L ) {
 }
 
 //----------------------------------------------------------------//
+/**	@name	getAttachmentVertices
+	@text	Return all attachment vertices in MOAISkeleton coordinate space.
+	
+	@in		MOAISpineSkeleton self
+	@in		string	slot name
+	@in		string	attachment name
+	@out	table	vertices: {x1, y1, x2, y2, x3, y3, ...}
+*/
+int MOAISpineSkeleton::_getAttachmentVertices ( lua_State *L ) {
+	MOAI_LUA_SETUP ( MOAISpineSkeleton, "USS" );
+	
+	if ( !self->mSkeleton || !self->mAnimationState ) {
+		MOAIPrint ( "MOAISpineSkeleton not initialized \n" );
+		return 0;
+	}
+	
+	cc8* slotName	= state.GetValue < cc8* >( 2, "" );
+	cc8* attachName = state.GetValue < cc8* >( 3, "" );
+	
+	spSlot* slot = spSkeleton_findSlot ( self->mSkeleton, slotName );
+	if ( slot == 0 ) {
+		MOAIPrint ( "[getAttachmentVertices]: Slot not found - %s\n", slotName );
+		return 0;
+	}
+	
+	spAttachment* attach = spSkeleton_getAttachmentForSlotName ( self->mSkeleton, slotName, attachName );
+	if ( attach == 0 ) {
+		MOAIPrint ( "[getAttachmentVertices]: Attachment not found - %s\n", attachName );
+		return 0;
+	}
+	
+	switch ( attach->type ) {
+		case SP_ATTACHMENT_REGION:
+			self->mVertices.SetTop ( 8 );
+			spRegionAttachment_computeWorldVertices (( spRegionAttachment* ) attach, slot->bone, self->mVertices );
+			break;
+			
+		case SP_ATTACHMENT_BOUNDING_BOX: {
+			
+			spBoundingBoxAttachment* bb = ( spBoundingBoxAttachment* ) attach;
+			self->mVertices.SetTop ( bb->verticesCount );
+			spBoundingBoxAttachment_computeWorldVertices ( bb, slot->bone, self->mVertices );
+			break;
+		}
+		
+		case SP_ATTACHMENT_MESH: {
+			
+			spMeshAttachment* mesh = ( spMeshAttachment* ) attach;
+			self->mVertices.SetTop ( mesh->verticesCount );
+			spMeshAttachment_computeWorldVertices ( mesh, slot, self->mVertices );
+			break;
+		}
+
+		case SP_ATTACHMENT_SKINNED_MESH: {
+			
+			spSkinnedMeshAttachment* mesh = ( spSkinnedMeshAttachment* ) attach;
+			self->mVertices.SetTop ( mesh->uvsCount );
+			spSkinnedMeshAttachment_computeWorldVertices ( mesh, slot, self->mVertices );
+			break;
+		}
+	}
+	
+	lua_newtable ( L );
+	state.WriteArray < float >( self->mVertices.GetTop(), self->mVertices );
+	
+	return 1;
+}
+
+//----------------------------------------------------------------//
 /**	@name	getBone
 	@text	Return MOAITransform that is bound to skeleton bone. 
 			On first call it will create full hierarchy of MOAISpineBones
@@ -859,6 +928,7 @@ void MOAISpineSkeleton::RegisterLuaFuncs ( MOAILuaState& state ) {
 		{ "addAnimation", 			_addAnimation },
 		{ "clearAllTracks", 		_clearAllTracks },
 		{ "clearTrack", 			_clearTrack },
+		{ "getAttachmentVertices",	_getAttachmentVertices },
 		{ "getBone",				_getBone },
         { "getDuration",            _getDuration },
 		{ "getSlot",				_getSlot },

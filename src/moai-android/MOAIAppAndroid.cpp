@@ -16,18 +16,66 @@ extern JavaVM* jvm;
 //================================================================//
 
 //----------------------------------------------------------------//
+/**	@name	exitGame
+	@text Close app
+
+	@out	nil
+*/
+int	MOAIAppAndroid::_exitGame ( lua_State* L ) {
+	MOAILuaState state ( L );
+
+	JNI_GET_ENV ( jvm, env );
+
+	jclass moai = env->FindClass ( "com/ziplinegames/moai/Moai" );
+	if ( moai == NULL ) {
+
+		ZLLog::LogF ( ZLLog::CONSOLE, "MOAIAppAndroid: Unable to find java class %s", "com/ziplinegames/moai/Moai" );
+	} else {
+
+		jmethodID exitGame = env->GetStaticMethodID ( moai, "exitGame", "()V" );
+		if ( exitGame == NULL ) {
+
+			ZLLog::LogF ( ZLLog::CONSOLE, "MOAIAppAndroid: Unable to find static java method %s", "exitGame" );
+		} else {
+
+			env->CallStaticVoidMethod ( moai, exitGame );
+		}
+	}
+
+	return 0;
+}
+
+//----------------------------------------------------------------//
 // TODO: doxygen
-int MOAIAppAndroid::_getPictureCode( lua_State* L ) {
+int MOAIAppAndroid::_getAvailableStorage ( lua_State* L ) {
 	MOAILuaState state( L );
-	MOAIAppAndroid::Get().PushPictureCode( state );
+	
+	JNI_GET_ENV ( jvm, env );
+
+	jclass t_class = env->FindClass ( "com/ziplinegames/moai/Moai" );
+	jmethodID t_getResultCode_mid = env->GetStaticMethodID ( t_class, "getAvailableStorage", "()J" );
+
+	if ( t_class != NULL && t_getResultCode_mid != NULL ) {
+		long long j_code = env->CallStaticIntMethod( t_class, t_getResultCode_mid );
+		lua_pushnumber ( L, j_code );
+		return 1;
+	}
+	return 0;
+}
+
+//----------------------------------------------------------------//
+// TODO: doxygen
+int MOAIAppAndroid::_getPictureCode ( lua_State* L ) {
+	MOAILuaState state( L );
+	MOAIAppAndroid::Get().PushPictureCode ( state );
 	return 1;
 }
 
 //----------------------------------------------------------------//
 // TODO: doxygen
-int MOAIAppAndroid::_getPicturePath( lua_State* L ) {
+int MOAIAppAndroid::_getPicturePath ( lua_State* L ) {
 	MOAILuaState state( L );
-	MOAIAppAndroid::Get().PushPicturePath( state );
+	MOAIAppAndroid::Get().PushPicturePath ( state );
 	return 1;
 }
 
@@ -91,6 +139,42 @@ int MOAIAppAndroid::_getStatusBarHeight ( lua_State* L ) {
     	} else {
 
 			outVal = env->CallStaticIntMethod ( moai, getStatusBarHeight );
+		}
+	}
+
+	lua_pushnumber ( L, outVal );
+
+	return 1;
+}
+
+//----------------------------------------------------------------//
+/** @lua    getSystemUptime
+	@text   Returns device uptime in seconds. 
+
+	@out    number uptime
+*/
+
+int MOAIAppAndroid::_getSystemUptime ( lua_State* L ) {
+
+	MOAILuaState state ( L );
+
+	JNI_GET_ENV ( jvm, env );
+
+	long outVal = 0;
+	jclass moai = env->FindClass ( "com/ziplinegames/moai/Moai" );
+	if ( moai == NULL ) {
+
+		ZLLog::LogF ( ZLLog::CONSOLE, "MOAIAppAndroid: Unable to find java class %s", "com/ziplinegames/moai/Moai" );
+	}
+	else {
+
+		jmethodID getSystemUptime = env->GetStaticMethodID ( moai, "getSystemUptime", "()J" );
+		if ( getSystemUptime == NULL ) {
+
+			ZLLog::LogF ( ZLLog::CONSOLE, "MOAIAppAndroid: Unable to find static java method %s", "getSystemUptime" );
+		} else {
+
+			outVal = env->CallStaticLongMethod ( moai, getSystemUptime );
 		}
 	}
 
@@ -285,11 +369,14 @@ void MOAIAppAndroid::RegisterLuaClass ( MOAILuaState& state ) {
 	state.SetField ( -1, "EVENT_PICTURE_TAKEN",		( u32 )EVENT_PICTURE_TAKEN );
 
 	luaL_Reg regTable [] = {
+		{ "exitGame",				_exitGame },
+		{ "getAvailableStorage",	_getAvailableStorage },
         { "getPictureCode",			_getPictureCode },
         { "getPicturePath",			_getPicturePath },
 		{ "getListener",			&MOAIGlobalEventSource::_getListener < MOAIAppAndroid > },
 		{ "getUTCTime",				_getUTCTime },
 		{ "getStatusBarHeight",		_getStatusBarHeight },
+		{ "getSystemUptime",        _getSystemUptime },
 		{ "sendMail",				_sendMail },		
 		{ "openURL",				_openURL },
 		{ "setListener",			&MOAIGlobalEventSource::_setListener < MOAIAppAndroid > },
@@ -325,6 +412,20 @@ void MOAIAppAndroid::NotifyPictureTaken() {
 
 		}
 	}
+}
+
+//----------------------------------------------------------------//
+bool MOAIAppAndroid::NotifyBackButtonPressed() {
+
+	MOAIScopedLuaState state = MOAILuaRuntime::Get ().State ();
+	if ( MOAIAppAndroid::Get ().PushListener ( BACK_BUTTON_PRESSED, state )) {
+
+		state.DebugCall ( 0, 1 );
+
+		return lua_toboolean ( state, -1 );
+	}
+
+	return false;
 }
 
 //----------------------------------------------------------------//
@@ -390,6 +491,11 @@ extern "C" JNIEXPORT jboolean JNICALL Java_com_ziplinegames_moai_Moai_AKUAppInvo
 		return state.GetValue < bool >( -1, false );
 	}
 	return false;
+}
+
+//----------------------------------------------------------------//
+extern "C" JNIEXPORT bool JNICALL Java_com_ziplinegames_moai_Moai_AKUAppBackButtonPressed ( JNIEnv* env, jclass obj ) {
+	return MOAIAppAndroid::Get ().NotifyBackButtonPressed ();
 }
 
 //----------------------------------------------------------------//
