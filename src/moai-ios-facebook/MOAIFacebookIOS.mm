@@ -506,8 +506,7 @@ int MOAIFacebookIOS::_requestReadPermissions( lua_State *L ) {
 	@out 	nil
 */
 int MOAIFacebookIOS::_sendRequest ( lua_State* L ) {
-	
-	MOAILuaState state ( L );
+	MOAI_LUA_SETUP_SINGLE ( MOAIFacebookIOS, "" )
 	
 	NSString* message = [ NSString stringWithUTF8String:state.GetValue < cc8* >( 1, "" )];
 	

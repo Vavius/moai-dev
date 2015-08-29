@@ -24,9 +24,7 @@ file ( GLOB MOAI_APPLE_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/*.mm"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
     "${MOAI_ROOT}/3rdparty/contrib/MOAIIso8601DateFormatter.m"
-    "${MOAI_ROOT}/3rdparty/contrib/MOAIIso8601DateFormatter.h"
     "${MOAI_ROOT}/3rdparty/contrib/MOAIOpenUDID.m"
-    "${MOAI_ROOT}/3rdparty/contrib/MOAIOpenUDID.h"
 )
 
 include_directories ( ${MOAI_APPLE_INCLUDES} )
