@@ -35,7 +35,8 @@ EOF
 #clean up xcodebuild if we have xcpretty
 if hash xcpretty 2>/dev/null; then
  pretty() {
-   xcpretty -c
+  cat
+   # xcpretty -c
  }
 else
  pretty() {
@@ -46,9 +47,14 @@ fi
 #our build command
 #ARCHS, SDK
 build () {
-  xcodebuild IPHONEOS_DEPLOYMENT_TARGET="6.0"  ONLY_ACTIVE_ARCH=NO ARCHS="$1" -project moai.xcodeproj -configuration Release -target install -sdk $2 | pretty
-}
+  xcodebuild \
+  IPHONEOS_DEPLOYMENT_TARGET="6.0" \
+  ONLY_ACTIVE_ARCH=NO ARCHS="$1" \
+  -project moai.xcodeproj -configuration Release \
+  -target install -sdk $2 | pretty
 
+  # GCC_OPTIMIZATION_LEVEL=fast \
+}
 
 if [ x$1 == x ]; then
   libprefix=`dirname $0`/../lib/ios
@@ -117,18 +123,18 @@ $moai_root/cmake
 rm -f ${lib_dir}/lib/*.a
 
 
-build "i386 x86_64" iphonesimulator
-#work around cmake install bug with ios projects
-find . -iregex ".*/.*-iphonesimulator/[^/]*.a" | xargs -J % cp -npv % ${lib_dir}/lib
+# build "i386 x86_64" iphonesimulator
+# #work around cmake install bug with ios projects
+# find . -iregex ".*/.*-iphonesimulator/[^/]*.a" | xargs -J % cp -npv % ${lib_dir}/lib
 
 
-mkdir -p ${lib_dir}/lib-iphonesimulator
-mv -v ${lib_dir}/lib/*.a ${lib_dir}/lib-iphonesimulator
+# mkdir -p ${lib_dir}/lib-iphonesimulator
+# mv -v ${lib_dir}/lib/*.a ${lib_dir}/lib-iphonesimulator
 
 rm -f ${lib_dir}/lib/*.a
 
 
-build "armv7 armv7s arm64" iphoneos
+build "armv7 arm64" iphoneos
 #work around cmake install bug with ios projects
 find . -iregex ".*/.*-iphoneos/[^/]*.a" | xargs -J % cp -npv % ${lib_dir}/lib
 find . -iregex ".*/Export/cmake/[^/]*.cmake" | xargs -J % cp -pv % ${lib_dir}/cmake
@@ -141,14 +147,14 @@ echo "Build Directory : ${build_dir}"
 echo "Lib Output: ${lib_dir}"
 
 #todo create lipo and dump in release folder.
-for LIBNAME in ${lib_dir}/lib-iphoneos/*.a
-do
-    BASELIBNAME=`basename $LIBNAME`
-    (lipo -info ${lib_dir}/lib-iphoneos/$BASELIBNAME | grep i386) && continue
-    echo lip $LIBNAME
-    lipo ${lib_dir}/lib-iphoneos/$BASELIBNAME ${lib_dir}/lib-iphonesimulator/$BASELIBNAME -create -output ${lib_dir}/lib/$BASELIBNAME
-done
+# for LIBNAME in ${lib_dir}/lib-iphoneos/*.a
+# do
+#     BASELIBNAME=`basename $LIBNAME`
+#     (lipo -info ${lib_dir}/lib-iphoneos/$BASELIBNAME | grep i386) && continue
+#     echo lip $LIBNAME
+#     lipo ${lib_dir}/lib-iphoneos/$BASELIBNAME ${lib_dir}/lib-iphonesimulator/$BASELIBNAME -create -output ${lib_dir}/lib/$BASELIBNAME
+# done
 
 
-rm -rf ${lib_dir}/lib-iphoneos
-rm -rf ${lib_dir}/lib-iphonesimulator
+# rm -rf ${lib_dir}/lib-iphoneos
+# rm -rf ${lib_dir}/lib-iphonesimulator

@@ -8,6 +8,8 @@ set ( PNG_INCLUDES "${MOAI_ROOT}/3rdparty/lpng140/" )
 file ( GLOB PNG_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c" )
 file ( GLOB PNG_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h" )
 
+list ( REMOVE_ITEM PNG_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/pngtest.c" )
+list ( REMOVE_ITEM PNG_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/example.c" )
 
 include_directories (${PNG_INCLUDES})
 add_library(png STATIC ${PNG_SOURCES})

@@ -33,8 +33,8 @@ file ( GLOB MOAI_IPHONE_SRC
   "${MOAI_ROOT}/src/moai-ios/*.mm"
   "${MOAI_ROOT}/src/moai-ios/*.m"
   "${MOAI_ROOT}/src/moai-ios/*.h"
-  "${MOAI_ROOT}/src/moai-ios-camera/*.mm"
-  "${MOAI_ROOT}/src/moai-ios-camera/*.h"
+  # "${MOAI_ROOT}/src/moai-ios-camera/*.mm"
+  # "${MOAI_ROOT}/src/moai-ios-camera/*.h"
   # "${MOAI_ROOT}/3rdparty/contrib/MOAIIso8601DateFormatter.m"
   # "${MOAI_ROOT}/3rdparty/contrib/MOAIOpenUDID.m"
 )
