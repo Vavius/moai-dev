@@ -53,6 +53,8 @@ protected:
 	u32							mPrimTopVtx;
 	u32							mPrimType;
 
+	u32							mIndexBase;
+
 	MOAIVertexFormat*			mVertexFormat;
 
 	//----------------------------------------------------------------//
@@ -69,6 +71,7 @@ public:
 	//----------------------------------------------------------------//
 	void			BeginPrim						();
 	void			BeginPrim						( u32 primType, u32 primSize = 0 );
+	void			BeginPrimIndexed				( u32 primType, u32 indexCount );
 	
 	void			BindBufferedDrawing				( MOAIVertexFormat& format );
 	void			BindBufferedDrawing				( u32 preset );
@@ -124,6 +127,12 @@ public:
 	inline void WriteFinalColor4f () {
 		
 		this->mVtxBuffer.Write < ZLColorVec >( this->mFinalColor );
+	}
+
+	//----------------------------------------------------------------//
+	inline void WriteIndex ( u32 index ) {
+
+		this->mIdxBuffer.Write < u32 >( this->mIndexBase + index );
 	}
 	
 	//----------------------------------------------------------------//

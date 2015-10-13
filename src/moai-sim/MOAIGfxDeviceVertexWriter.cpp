@@ -47,6 +47,19 @@ void MOAIGfxDeviceVertexWriter::BeginPrim ( u32 primType, u32 primSize ) {
 }
 
 //----------------------------------------------------------------//
+void MOAIGfxDeviceVertexWriter::BeginPrimIndexed ( u32 primType, u32 indexCount ) {
+
+	u32 totalIndices = this->mIdxBuffer.GetLength () / INDEX_SIZE;
+	u32 currentIndices = this->mIdxBuffer.GetCursor () / INDEX_SIZE;
+
+	if ( primType != this->mPrimType || currentIndices + indexCount > totalIndices ) {
+		this->mPrimType = primType;
+		this->FlushBufferedPrims ();
+	}
+	this->mIndexBase = this->mVtxBuffer.GetCursor () / this->mVertexSize;
+}
+
+//----------------------------------------------------------------//
 void MOAIGfxDeviceVertexWriter::BindBufferedDrawing ( MOAIVertexFormat& format ) {
 	
 	this->mVertexFormat = &format;
@@ -84,8 +97,9 @@ void MOAIGfxDeviceVertexWriter::FlushBufferedPrims () {
 		size_t cursor = this->mIdxBuffer.GetCursor ();
 		if ( cursor ) {
 	
-			u32 count = this->mPrimSize ? this->mPrimCount * this->mPrimSize : ( u32 )( cursor / INDEX_SIZE );
-			
+			// u32 count = this->mPrimSize ? this->mPrimCount * this->mPrimSize : ( u32 )( cursor / INDEX_SIZE );
+			u32 count = ( u32 )( cursor / INDEX_SIZE );
+
 			if ( count > 0 ) {
 				
 				this->mVtxBuffer.ScheduleFlush ();
